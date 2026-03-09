@@ -35,6 +35,21 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // Forgot Password Method
+  void _forgotPassword() async {
+    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+      Fluttertoast.showToast(msg: "Please enter a valid email first");
+      return;
+    }
+
+    try {
+      await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
+      Fluttertoast.showToast(msg: "Password reset link sent to your email");
+    } on FirebaseAuthException catch (e) {
+      Fluttertoast.showToast(msg: e.message ?? "Error occurred");
+    }
+  }
+
   // Logic to handle the sign-in process
   void _login() async {
     // Check if the form is valid
@@ -173,9 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {
-                      // Add reset logic here
-                    },
+                    onPressed: _forgotPassword, // Added logic here
                     child: const Text('Forgot Password?'),
                   ),
                 ),
