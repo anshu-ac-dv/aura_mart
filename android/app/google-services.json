@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "176895512440",
+    "project_id": "aura-mart-4f432",
+    "storage_bucket": "aura-mart-4f432.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:176895512440:android:4ca95799a36e5b998c028d",
+        "android_client_info": {
+          "package_name": "com.auramart.aura_mart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy2J_pcqeGNj0-QXw6sOaMloTAStgCKOM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
