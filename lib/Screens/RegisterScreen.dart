@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+// Screen for new user registration
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -11,42 +12,50 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  // Global key for form validation
   final _formKey = GlobalKey<FormState>();
+  
+  // Controllers to retrieve text from input fields
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _isLoading = false;
+  
+  // UI state variables
+  bool _obscurePassword = true; // Toggle for password visibility
+  bool _isLoading = false;      // Loading indicator state
 
+  // Firebase Authentication instance
   final _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
+    // Dispose controllers to prevent memory leaks
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  // Logic to handle account creation
   void _register() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true;
+        _isLoading = true; // Show spinner
       });
       try {
-        // Create the user account
+        // Step 1: Create the user account in Firebase
         UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
         
-        // Update the display name so it appears on the Home Screen
+        // Step 2: Update the user's profile with their full name
         await userCredential.user?.updateDisplayName(_nameController.text.trim());
         
         Fluttertoast.showToast(msg: "Registration Successful");
         
         if (mounted) {
-          // Redirect to Home Screen and clear the navigation stack
+          // Step 3: Redirect to Home Screen and remove previous screens from the stack
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -54,13 +63,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
+        // Handle specific Firebase errors (e.g., email already in use)
         Fluttertoast.showToast(msg: e.message ?? "Registration failed");
       } catch (e) {
+        // Handle any other unexpected errors
         Fluttertoast.showToast(msg: "An unexpected error occurred");
       } finally {
         if (mounted) {
           setState(() {
-            _isLoading = false;
+            _isLoading = false; // Hide spinner
           });
         }
       }
@@ -73,6 +84,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        // Custom back button
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.deepPurple),
           onPressed: () => Navigator.pop(context),
@@ -99,6 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 40),
+                
+                // Name Input Field
                 TextFormField(
                   controller: _nameController,
                   keyboardType: TextInputType.name,
@@ -117,6 +131,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
+                
+                // Email Input Field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -138,6 +154,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
+                
+                // Password Input Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -169,6 +187,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 40),
+                
+                // Registration Button
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -190,6 +210,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
+                
+                // Link to Login Screen
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

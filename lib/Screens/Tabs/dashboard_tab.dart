@@ -1,16 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+// Tab for showing the main dashboard with search and featured products
 class DashboardTab extends StatelessWidget {
   const DashboardTab({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Retrieve currently logged in user from Firebase
     final user = FirebaseAuth.instance.currentUser;
+    
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header section with user welcome and search bar
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
@@ -34,6 +38,7 @@ class DashboardTab extends StatelessWidget {
                   style: TextStyle(color: Colors.white70, fontSize: 16),
                 ),
                 const SizedBox(height: 20),
+                // Main search input
                 TextField(
                   decoration: InputDecoration(
                     hintText: 'Search products...',
@@ -49,6 +54,8 @@ class DashboardTab extends StatelessWidget {
               ],
             ),
           ),
+          
+          // Horizontal Category List
           const Padding(
             padding: EdgeInsets.all(20),
             child: Text(
@@ -70,6 +77,8 @@ class DashboardTab extends StatelessWidget {
               ],
             ),
           ),
+          
+          // Featured Products Grid
           const Padding(
             padding: EdgeInsets.all(20),
             child: Text(
@@ -79,7 +88,7 @@ class DashboardTab extends StatelessWidget {
           ),
           GridView.builder(
             shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(), // Scroll handled by Parent SingleChildScrollView
             padding: const EdgeInsets.symmetric(horizontal: 20),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -98,6 +107,7 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
+  // Helper method to build a circular category icon
   Widget _buildCategoryItem(IconData icon, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -115,6 +125,7 @@ class DashboardTab extends StatelessWidget {
     );
   }
 
+  // Helper method to build a product card
   Widget _buildProductCard(String name, String price) {
     return Container(
       decoration: BoxDecoration(
@@ -131,6 +142,7 @@ class DashboardTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Product Image Placeholder
           Expanded(
             child: Container(
               decoration: BoxDecoration(
@@ -140,6 +152,7 @@ class DashboardTab extends StatelessWidget {
               child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
             ),
           ),
+          // Product Details
           Padding(
             padding: const EdgeInsets.all(10),
             child: Column(

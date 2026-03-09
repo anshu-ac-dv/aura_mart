@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+// Screen for user authentication (Login)
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,32 +13,45 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Key for the form to perform validation
   final _formKey = GlobalKey<FormState>();
+  
+  // Controllers to capture user input from text fields
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _isLoading = false;
+  
+  // State variables for UI feedback
+  bool _obscurePassword = true; // To toggle password visibility
+  bool _isLoading = false;      // To show a loading spinner during login
 
+  // Firebase Auth instance
   final _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
+    // Dispose controllers to free up memory
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  // Logic to handle the sign-in process
   void _login() async {
+    // Check if the form is valid
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true;
+        _isLoading = true; // Start loading
       });
       try {
+        // Attempt to sign in with Firebase
         await _auth.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
+        
         Fluttertoast.showToast(msg: "Login Successful");
+        
+        // Navigate to the Home Screen on success
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -45,11 +59,15 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
+        // Show error message if authentication fails
         Fluttertoast.showToast(msg: e.message ?? "Authentication failed");
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        // Stop loading regardless of success or failure
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
@@ -66,6 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Branding Icon
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -79,6 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
+                // Heading
                 const Text(
                   'Welcome Back',
                   style: TextStyle(
@@ -92,6 +112,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 40),
+                
+                // Email Input Field
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -113,6 +135,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
+                
+                // Password Input Field
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
@@ -144,16 +168,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 10),
+                
+                // Forgot Password Link
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      // Forgot password logic
+                      // Add reset logic here
                     },
                     child: const Text('Forgot Password?'),
                   ),
                 ),
                 const SizedBox(height: 20),
+                
+                // Login Button
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -175,6 +203,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
+                
+                // Navigate to Register Screen
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

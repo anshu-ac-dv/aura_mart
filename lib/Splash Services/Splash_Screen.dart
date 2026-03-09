@@ -18,6 +18,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
+    // Initialize the animation controller for the fade-in and scale effect
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -28,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       curve: Curves.easeIn,
     );
 
+    // Check if the user is already logged in or not
     _checkUserStatus();
   }
 
@@ -35,17 +37,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final auth = FirebaseAuth.instance;
     final user = auth.currentUser;
 
+    // Timer to keep the splash screen visible for a few seconds
     Timer(const Duration(seconds: 4), () {
       if (mounted) {
         if (user != null) {
-          // Extra Logic: You could also check if user.emailVerified is true here
-          // if (user.emailVerified) { ... }
-          
+          // If user is logged in, navigate to Home Screen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         } else {
+          // If no user is logged in, navigate to Login Screen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -57,6 +59,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   void dispose() {
+    // Clean up the controller when the widget is removed from the tree
     _controller.dispose();
     super.dispose();
   }
@@ -67,6 +70,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
+          // Gradient background for a modern look
           gradient: LinearGradient(
             colors: [Colors.deepPurple, Colors.purpleAccent],
             begin: Alignment.topCenter,
@@ -76,6 +80,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Animated Logo
             FadeTransition(
               opacity: _animation,
               child: ScaleTransition(
@@ -95,6 +100,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
             ),
             const SizedBox(height: 30),
+            // Animated App Name
             FadeTransition(
               opacity: _animation,
               child: const Text(
@@ -108,6 +114,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
             ),
             const SizedBox(height: 10),
+            // Tagline
             FadeTransition(
               opacity: _animation,
               child: const Text(
@@ -120,6 +127,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
             ),
             const SizedBox(height: 50),
+            // Loading indicator
             const CircularProgressIndicator(
               color: Colors.white,
             ),
