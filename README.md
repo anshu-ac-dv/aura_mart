@@ -79,4 +79,4 @@ A sophisticated 4-tier navigation system:
 Designed with ❤️ for developers who love clean UI. Feel free to fork, star, and contribute to the Aura Mart evolution!
 
 ---
-*Developed by [Anshu](https://github.com/anshu)*
+*Developed by [Anshu Kumar](https://github.com/anshu-ac-dv)*
