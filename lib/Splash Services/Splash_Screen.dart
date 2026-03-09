@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:aura_mart/Screens/HomeScreen.dart';
 import 'package:aura_mart/Screens/LoginScreen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,11 +28,30 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       curve: Curves.easeIn,
     );
 
+    _checkUserStatus();
+  }
+
+  void _checkUserStatus() {
+    final auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
+
     Timer(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      if (mounted) {
+        if (user != null) {
+          // Extra Logic: You could also check if user.emailVerified is true here
+          // if (user.emailVerified) { ... }
+          
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      }
     });
   }
 

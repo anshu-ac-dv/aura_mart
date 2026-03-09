@@ -1,3 +1,4 @@
+import 'package:aura_mart/Screens/HomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -33,24 +34,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _isLoading = true;
       });
       try {
-        await _auth.createUserWithEmailAndPassword(
+        // Create the user account
+        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
         
-        // Optional: Update display name
-        await _auth.currentUser?.updateDisplayName(_nameController.text.trim());
+        // Update the display name so it appears on the Home Screen
+        await userCredential.user?.updateDisplayName(_nameController.text.trim());
         
         Fluttertoast.showToast(msg: "Registration Successful");
+        
         if (mounted) {
-          Navigator.pop(context); // Go back to login
+          // Redirect to Home Screen and clear the navigation stack
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (route) => false,
+          );
         }
       } on FirebaseAuthException catch (e) {
         Fluttertoast.showToast(msg: e.message ?? "Registration failed");
+      } catch (e) {
+        Fluttertoast.showToast(msg: "An unexpected error occurred");
       } finally {
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }

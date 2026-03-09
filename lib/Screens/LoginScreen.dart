@@ -1,3 +1,4 @@
+import 'package:aura_mart/Screens/HomeScreen.dart';
 import 'package:aura_mart/Screens/RegisterScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -37,7 +38,12 @@ class _LoginScreenState extends State<LoginScreen> {
           password: _passwordController.text.trim(),
         );
         Fluttertoast.showToast(msg: "Login Successful");
-        // Navigate to Home Screen here
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
       } on FirebaseAuthException catch (e) {
         Fluttertoast.showToast(msg: e.message ?? "Authentication failed");
       } finally {
