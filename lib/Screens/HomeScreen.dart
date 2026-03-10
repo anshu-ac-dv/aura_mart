@@ -14,84 +14,92 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
+  final List<Widget> _widgetOptions = const [
     DashboardTab(),
     CategoryTab(),
     CartTab(),
     ProfileTab(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  final List<IconData> _navIcons = [
+    Icons.home_rounded,
+    Icons.grid_view_rounded,
+    Icons.shopping_bag_rounded,
+    Icons.person_rounded,
+  ];
+
+  final List<String> _navLabels = ['Home', 'Explore', 'Cart', 'Profile'];
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: _selectedIndex == 0
-          ? AppBar(
-              title: const Text('Aura Mart', style: TextStyle(fontWeight: FontWeight.bold)),
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_none),
-                  onPressed: () {},
-                ),
-              ],
-            )
-          : AppBar(
-              title: Text(_getAppBarTitle()),
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
+      extendBody: true, // Content flows behind the floating nav bar
+      // AppBar is now handled individually inside each tab for a unique design
+      body: _widgetOptions[_selectedIndex],
+
+      // --- UNIQUE FLOATING "BUBBLE" NAVIGATION BAR ---
+      bottomNavigationBar: Container(
+        height: 70,
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 25),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(35),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 25,
+              offset: const Offset(0, 10),
             ),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category_outlined),
-            activeIcon: Icon(Icons.category),
-            label: 'Categories',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            activeIcon: Icon(Icons.shopping_cart),
-            label: 'Cart',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(_navIcons.length, (index) {
+            bool isSelected = _selectedIndex == index;
+            return GestureDetector(
+              onTap: () => setState(() => _selectedIndex = index),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                width: isSelected ? 110 : 60,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.deepPurple : Colors.transparent,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _navIcons[index],
+                      color: isSelected ? Colors.white : Colors.grey,
+                      size: 26,
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _navLabels[index],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
       ),
     );
-  }
-
-  String _getAppBarTitle() {
-    switch (_selectedIndex) {
-      case 1:
-        return 'Categories';
-      case 2:
-        return 'My Cart';
-      case 3:
-        return 'My Profile';
-      default:
-        return 'Aura Mart';
-    }
   }
 }

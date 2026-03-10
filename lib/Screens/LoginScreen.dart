@@ -1,3 +1,4 @@
+import 'package:aura_mart/Screens/ForgotPasswordScreen.dart';
 import 'package:aura_mart/Screens/HomeScreen.dart';
 import 'package:aura_mart/Screens/RegisterScreen.dart';
 import 'package:flutter/material.dart';
@@ -33,21 +34,6 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  // Forgot Password Method
-  void _forgotPassword() async {
-    if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
-      Fluttertoast.showToast(msg: "Please enter a valid email first");
-      return;
-    }
-
-    try {
-      await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
-      Fluttertoast.showToast(msg: "Password reset link sent to your email");
-    } on FirebaseAuthException catch (e) {
-      Fluttertoast.showToast(msg: e.message ?? "Error occurred");
-    }
   }
 
   // Logic to handle the sign-in process
@@ -184,11 +170,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 10),
                 
-                // Forgot Password Link
+                // Forgot Password Link - Now navigates to a separate screen
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: _forgotPassword, // Added logic here
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
+                      );
+                    },
                     child: const Text('Forgot Password?'),
                   ),
                 ),
