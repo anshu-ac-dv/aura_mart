@@ -60,7 +60,7 @@ class _DashboardTabState extends State<DashboardTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 60,),
+                SizedBox(height: 40,),
                 Text(
                   'Aura Mart',
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
