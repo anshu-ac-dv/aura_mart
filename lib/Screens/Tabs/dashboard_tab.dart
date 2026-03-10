@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 
-// Tab for showing the main dashboard with search and featured products
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
 
@@ -11,18 +10,47 @@ class DashboardTab extends StatefulWidget {
 }
 
 class _DashboardTabState extends State<DashboardTab> {
-  // Logic: Search functionality
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  // Logic: Mock product data (Usually comes from Firebase/API)
+  // Mock data with real high-quality images from Unsplash
   final List<Map<String, String>> _allProducts = [
-    {'name': 'Wireless Headphones', 'price': '\$99', 'category': 'Electronics'},
-    {'name': 'Running Shoes', 'price': '\$75', 'category': 'Fashion'},
-    {'name': 'Smart Watch', 'price': '\$150', 'category': 'Electronics'},
-    {'name': 'Coffee Maker', 'price': '\$45', 'category': 'Home'},
-    {'name': 'Gaming Mouse', 'price': '\$30', 'category': 'Electronics'},
-    {'name': 'Designer Bag', 'price': '\$120', 'category': 'Fashion'},
+    {
+      'name': 'Wireless Headphones',
+      'price': '\$99',
+      'category': 'Electronics',
+      'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'
+    },
+    {
+      'name': 'Running Shoes',
+      'price': '\$75',
+      'category': 'Fashion',
+      'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'
+    },
+    {
+      'name': 'Smart Watch',
+      'price': '\$150',
+      'category': 'Electronics',
+      'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'
+    },
+    {
+      'name': 'Coffee Maker',
+      'price': '\$45',
+      'category': 'Home',
+      'image': 'https://images.unsplash.com/photo-1520970014086-2208d157c9e2?q=80&w=1000&auto=format&fit=crop'
+    },
+    {
+      'name': 'Gaming Mouse',
+      'price': '\$30',
+      'category': 'Electronics',
+      'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'
+    },
+    {
+      'name': 'Designer Bag',
+      'price': '\$120',
+      'category': 'Fashion',
+      'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'
+    },
   ];
 
   List<Map<String, String>> get _filteredProducts {
@@ -41,207 +69,192 @@ class _DashboardTabState extends State<DashboardTab> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header section
+          // Premium Header
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
             decoration: const BoxDecoration(
               color: Colors.deepPurple,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+                bottomLeft: Radius.circular(40),
+                bottomRight: Radius.circular(40),
               ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 40,),
-                Text(
-                  'Aura Mart',
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Aura Mart', style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500)),
+                        Text(
+                          'Hey, ${user?.displayName?.split(' ')[0] ?? 'User'}!',
+                          style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    const CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.white24,
+                      child: Icon(Icons.notifications_none, color: Colors.white),
+                    )
+                  ],
                 ),
-                Text(
-                  'Welcome, ${user?.displayName?.toUpperCase() ?? 'User'}!',
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  'What are you looking for today?',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-                const SizedBox(height: 20),
-                // Search Logic Integration
+                const SizedBox(height: 25),
                 TextField(
                   controller: _searchController,
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
+                  onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
-                    hintText: 'Search products...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _searchQuery.isNotEmpty 
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() { _searchQuery = ""; });
-                          },
-                        ) 
-                      : null,
-                    fillColor: Colors.white,
+                    hintText: 'Search premium items...',
+                    prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
+                    fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
                     filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                 ),
               ],
             ),
           ),
-          
-          // Category List
+
+          // Categories
           const Padding(
-            padding: EdgeInsets.all(20),
-            child: Text(
-              'Categories',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+            padding: EdgeInsets.fromLTRB(20, 25, 20, 15),
+            child: Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
           SizedBox(
-            height: 100,
+            height: 110,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               children: [
-                _buildCategoryItem(Icons.flash_on, 'Deals'),
-                _buildCategoryItem(Icons.laptop, 'Electronics'),
-                _buildCategoryItem(Icons.checkroom, 'Fashion'),
-                _buildCategoryItem(Icons.home, 'Home'),
-                _buildCategoryItem(Icons.toys, 'Toys'),
+                _buildCategoryItem(Icons.bolt, 'Deals', Colors.amber),
+                _buildCategoryItem(Icons.laptop_mac, 'Tech', Colors.blue),
+                _buildCategoryItem(Icons.checkroom, 'Style', Colors.pink),
+                _buildCategoryItem(Icons.home_work, 'Home', Colors.green),
+                _buildCategoryItem(Icons.toys, 'Toys', Colors.orange),
               ],
             ),
           ),
-          
-          // Products Section
+
+          // Product Section Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Products',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${_filteredProducts.length} items',
-                  style: const TextStyle(color: Colors.grey),
-                ),
+                const Text('New Arrivals', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text('${_filteredProducts.length} items', style: const TextStyle(color: Colors.grey)),
               ],
             ),
           ),
-          
-          // Logic: Display filtered results or Empty message
-          _filteredProducts.isEmpty 
-          ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(50),
-                child: Text('No products found matching your search.'),
-              ),
-            )
-          : GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: _filteredProducts.length,
-              itemBuilder: (context, index) {
-                final product = _filteredProducts[index];
-                return _buildProductCard(product['name']!, product['price']!);
-              },
+
+          // Products Grid
+          _filteredProducts.isEmpty
+              ? const Center(child: Padding(padding: EdgeInsets.all(50), child: Text('No matches found')))
+              : GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 15,
+              mainAxisSpacing: 15,
+              childAspectRatio: 0.7,
             ),
-          const SizedBox(height: 20),
+            itemCount: _filteredProducts.length,
+            itemBuilder: (context, index) {
+              final product = _filteredProducts[index];
+              return _buildProductCard(product, isDarkMode);
+            },
+          ),
+          const SizedBox(height: 120), // Bottom padding for floating nav
         ],
       ),
     );
   }
 
-  Widget _buildCategoryItem(IconData icon, String label) {
+  Widget _buildCategoryItem(IconData icon, String label, Color color) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
         children: [
-          InkWell(
-            onTap: () {
-              // Logic: Category filtering could go here
-              Fluttertoast.showToast(msg: "Filtered by $label");
-            },
-            child: CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.deepPurple.withOpacity(0.1),
-              child: Icon(icon, color: Colors.deepPurple),
-            ),
+          Container(
+            padding: const EdgeInsets.all(15),
+            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 28),
           ),
-          const SizedBox(height: 5),
-          Text(label, style: const TextStyle(fontSize: 12)),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
-  Widget _buildProductCard(String name, String price) {
+  Widget _buildProductCard(Map<String, String> product, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-          ),
-        ],
+        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-              ),
-              child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                  child: Image.network(
+                    product['image']!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                    },
+                  ),
+                ),
+                Positioned(
+                  top: 10, right: 10,
+                  child: CircleAvatar(
+                    radius: 15,
+                    backgroundColor: Colors.white.withOpacity(0.8),
+                    child: const Icon(Icons.favorite_border, size: 18, color: Colors.red),
+                  ),
+                )
+              ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name, 
-                  maxLines: 1, 
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+                Text(product['name']!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
+                Text(product['category']!, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(price, style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
-                    const Icon(Icons.add_shopping_cart, size: 18, color: Colors.deepPurple),
+                    Text(product['price']!, style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 16)),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(color: Colors.deepPurple, shape: BoxShape.circle),
+                      child: const Icon(Icons.add, color: Colors.white, size: 18),
+                    )
                   ],
                 ),
               ],
@@ -252,6 +265,3 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 }
-
-// Added missing import
-
