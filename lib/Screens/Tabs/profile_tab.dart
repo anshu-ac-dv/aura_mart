@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:aura_mart/Screens/LoginScreen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -54,13 +55,22 @@ class ProfileTab extends StatelessWidget {
                   style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 30),
-                _buildProfileOption(Icons.shopping_bag, 'My Orders', isDarkMode),
-                _buildProfileOption(Icons.favorite, 'Wishlist', isDarkMode),
-                _buildProfileOption(Icons.location_on, 'Shipping Address', isDarkMode),
-                _buildProfileOption(Icons.payment, 'Payment Methods', isDarkMode),
+                _buildProfileOption(Icons.shopping_bag, 'My Orders', isDarkMode, onTap: () {
+                  Fluttertoast.showToast(msg: "Order history coming soon!");
+                }),
+                _buildProfileOption(Icons.favorite, 'Wishlist', isDarkMode, onTap: () {
+                  Fluttertoast.showToast(msg: "Your wishlist is empty");
+                }),
+                _buildProfileOption(Icons.location_on, 'Shipping Address', isDarkMode, onTap: () {
+                  Fluttertoast.showToast(msg: "Address management coming soon!");
+                }),
+                _buildProfileOption(Icons.payment, 'Payment Methods', isDarkMode, onTap: () {
+                  Fluttertoast.showToast(msg: "Secure payments coming soon!");
+                }),
                 const Divider(),
                 _buildProfileOption(Icons.logout, 'Logout', isDarkMode, color: Colors.red, onTap: () async {
                   await FirebaseAuth.instance.signOut();
+                  Fluttertoast.showToast(msg: "Logged out successfully");
                   if (context.mounted) {
                     Navigator.pushAndRemoveUntil(
                       context,
