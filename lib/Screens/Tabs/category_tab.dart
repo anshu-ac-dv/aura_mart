@@ -1,4 +1,4 @@
-import 'package:aura_mart/Screens/CategoryProductsScreen.dart';
+import 'package:aura_mart/Screens/Products/CategoryProductsScreen.dart';
 import 'package:flutter/material.dart';
 
 class CategoryTab extends StatefulWidget {
