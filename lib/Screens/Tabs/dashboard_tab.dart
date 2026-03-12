@@ -1,3 +1,5 @@
+import 'package:aura_mart/Screens/LoginScreen.dart'; // Added for Logout redirection
+import 'package:aura_mart/Services/CartService.dart';
 import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ class _DashboardTabState extends State<DashboardTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
+  // Mock data with real high-quality images from Unsplash
   final List<Map<String, String>> _allProducts = [
     {
       'name': 'Wireless Headphones',
@@ -68,6 +71,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   @override
   Widget build(BuildContext context) {
+    // Logic: Retrieve the currently logged-in user
     final user = FirebaseAuth.instance.currentUser;
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -98,15 +102,40 @@ class _DashboardTabState extends State<DashboardTab> {
                       children: [
                         const Text('Aura Mart', style: TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.w500)),
                         Text(
-                          'Hey, ${user?.displayName?.split(' ')[0] ?? 'User'}!',
+                          'Hey, ${user?.displayName?.split(' ')[0] ?? 'Shopper'}!',
                           style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
-                    const CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Colors.white24,
-                      child: Icon(Icons.notifications_none, color: Colors.white),
+                    Row(
+                      children: [
+                        // Notification Icon
+                        const CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white24,
+                          child: Icon(Icons.notifications_none, color: Colors.white),
+                        ),
+                        const SizedBox(width: 10),
+                        // Logic: Logout Icon
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Colors.white24,
+                          child: IconButton(
+                            icon: const Icon(Icons.logout, size: 20, color: Colors.white),
+                            onPressed: () async {
+                              await FirebaseAuth.instance.signOut();
+                              Fluttertoast.showToast(msg: "Signed out safely");
+                              if (mounted) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                      (route) => false,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     )
                   ],
                 ),
@@ -202,8 +231,6 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildProductCard(Map<String, String> product, bool isDarkMode) {
-    bool isFav = WishlistService.isInWishlist(product);
-
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -233,21 +260,25 @@ class _DashboardTabState extends State<DashboardTab> {
                   child: CircleAvatar(
                     radius: 15,
                     backgroundColor: Colors.white.withOpacity(0.8),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: Icon(
-                        isFav ? Icons.favorite : Icons.favorite_border,
-                        size: 18,
-                        color: Colors.red,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          bool added = WishlistService.toggleWishlist(product);
-                          Fluttertoast.showToast(
-                            msg: added ? "Added to Wishlist" : "Removed from Wishlist",
+                    child: StreamBuilder<bool>(
+                        stream: WishlistService.isInWishlistStream(product['name']!),
+                        builder: (context, snapshot) {
+                          bool isFav = snapshot.data ?? false;
+                          return IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(
+                              isFav ? Icons.favorite : Icons.favorite_border,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            onPressed: () async {
+                              await WishlistService.toggleWishlist(product);
+                              Fluttertoast.showToast(
+                                msg: isFav ? "Removed from Wishlist" : "Added to Wishlist",
+                              );
+                            },
                           );
-                        });
-                      },
+                        }
                     ),
                   ),
                 )
@@ -267,10 +298,16 @@ class _DashboardTabState extends State<DashboardTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("\$${product['price']}", style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 16)),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(color: Colors.deepPurple, shape: BoxShape.circle),
-                      child: const Icon(Icons.add, color: Colors.white, size: 18),
+                    InkWell(
+                      onTap: () {
+                        CartService.addToCart(product);
+                        Fluttertoast.showToast(msg: "${product['name']} added to cart");
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(color: Colors.deepPurple, shape: BoxShape.circle),
+                        child: const Icon(Icons.add, color: Colors.white, size: 18),
+                      ),
                     )
                   ],
                 ),

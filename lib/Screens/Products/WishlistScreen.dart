@@ -13,7 +13,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final items = WishlistService.wishlistItems;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
@@ -23,44 +22,67 @@ class _WishlistScreenState extends State<WishlistScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: items.isEmpty
-          ? _buildEmptyState(isDarkMode)
-          : Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(25),
-                  decoration: const BoxDecoration(
-                    color: Colors.deepPurple,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40),
-                    ),
-                  ),
-                  child: Text(
-                    'You have ${items.length} items saved',
-                    style: const TextStyle(color: Colors.white70, fontSize: 16),
-                  ),
-                ),
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(20),
-                    physics: const BouncingScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 15,
-                      crossAxisSpacing: 15,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      final product = items[index];
-                      return _buildWishlistCard(context, product, isDarkMode);
-                    },
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: WishlistService.wishlistStream,
+        builder: (context, snapshot) {
+          // Check for errors
+          if (snapshot.hasError) {
+            return Center(child: Text("Error: ${snapshot.error}"));
+          }
+
+          // Show loading indicator
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: Colors.deepPurple));
+          }
+
+          final items = snapshot.data ?? [];
+
+          // Show empty state
+          if (items.isEmpty) {
+            return _buildEmptyState(isDarkMode);
+          }
+
+          return Column(
+            children: [
+              // Header Summary
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(25),
+                decoration: const BoxDecoration(
+                  color: Colors.deepPurple,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
                   ),
                 ),
-              ],
-            ),
+                child: Text(
+                  'You have ${items.length} items saved',
+                  style: const TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+              ),
+              // Wishlist Grid
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(20),
+                  physics: const BouncingScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 15,
+                    crossAxisSpacing: 15,
+                    childAspectRatio: 0.72, // Adjusted for better card fit
+                  ),
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    // Convert Map<String, dynamic> to Map<String, String> safely
+                    final product = items[index].map((key, value) => MapEntry(key, value.toString()));
+                    return _buildWishlistCard(context, product, isDarkMode);
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
@@ -80,15 +102,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Product Image with un-heart button
           Expanded(
             child: Stack(
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
                   child: Image.network(
-                    product['image']!,
+                    product['image'] ?? 'https://via.placeholder.com/150',
                     fit: BoxFit.cover,
                     width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                   ),
                 ),
                 Positioned(
@@ -100,11 +125,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.favorite, size: 18, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          WishlistService.toggleWishlist(product);
-                          Fluttertoast.showToast(msg: "Removed from Wishlist");
-                        });
+                      onPressed: () async {
+                        await WishlistService.toggleWishlist(product);
+                        Fluttertoast.showToast(msg: "Removed from Wishlist");
                       },
                     ),
                   ),
@@ -112,13 +135,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
               ],
             ),
           ),
+          // Details: Name, Price, and Cart Shortcut
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name']!,
+                  product['name'] ?? 'Product',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -132,7 +156,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "\$${product['price']}",
+                      "\$${product['price'] ?? '0'}",
                       style: const TextStyle(
                         color: Colors.deepPurple,
                         fontWeight: FontWeight.bold,

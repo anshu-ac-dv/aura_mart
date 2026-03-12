@@ -1,22 +1,43 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WishlistService {
-  // Static list to store wishlist items across the app
-  static final List<Map<String, String>> wishlistItems = [];
+  static final _db = FirebaseFirestore.instance;
+  static final _auth = FirebaseAuth.instance;
 
-  // Logic to add or remove item
-  static bool toggleWishlist(Map<String, String> product) {
-    final index = wishlistItems.indexWhere((item) => item['name'] == product['name']);
-    if (index >= 0) {
-      wishlistItems.removeAt(index);
-      return false; // Removed
+  // Reference to the user's specific wishlist collection
+  static CollectionReference<Map<String, dynamic>> get _userWishlist {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception("User not logged in");
+    return _db.collection('users').doc(uid).collection('wishlist');
+  }
+
+  // Add or Remove product from Firestore
+  static Future<void> toggleWishlist(Map<String, String> product) async {
+    final docId = product['name']!.replaceAll(' ', '_').toLowerCase();
+    final docRef = _userWishlist.doc(docId);
+
+    final doc = await docRef.get();
+    if (doc.exists) {
+      await docRef.delete(); // Remove if exists
     } else {
-      wishlistItems.add(product);
-      return true; // Added
+      await docRef.set(product); // Add if doesn't exist
     }
   }
 
-  static bool isInWishlist(Map<String, String> product) {
-    return wishlistItems.any((item) => item['name'] == product['name']);
+  // Check if a product is in wishlist (Stream for real-time UI updates)
+  static Stream<bool> isInWishlistStream(String productName) {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) return Stream.value(false);
+    
+    final docId = productName.replaceAll(' ', '_').toLowerCase();
+    return _userWishlist.doc(docId).snapshots().map((snapshot) => snapshot.exists);
+  }
+
+  // Stream of all wishlist items
+  static Stream<List<Map<String, dynamic>>> get wishlistStream {
+    return _userWishlist.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => doc.data()).toList();
+    });
   }
 }

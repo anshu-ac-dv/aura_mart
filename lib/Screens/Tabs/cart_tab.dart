@@ -1,3 +1,4 @@
+import 'package:aura_mart/Services/CartService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -9,23 +10,14 @@ class CartTab extends StatefulWidget {
 }
 
 class _CartTabState extends State<CartTab> {
-  // Mock Cart Data
-  final List<Map<String, dynamic>> _cartItems = [
-    {'name': 'Aura Pods Pro', 'price': 199.0, 'icon': Icons.headphones, 'qty': 1},
-    {'name': 'Nebula Shoes', 'price': 85.0, 'icon': Icons.directions_run, 'qty': 1},
-    {'name': 'Smart Watch', 'price': 150.0, 'icon': Icons.watch, 'qty': 1},
-  ];
-
   bool _isProcessing = false;
 
-  // Logic: Calculate total price dynamically
-  double get _totalPrice {
-    return _cartItems.fold(0, (sum, item) => sum + (item['price'] * item['qty']));
-  }
+  // Logic: Calculate total price dynamically from Service
+  double get _totalPrice => CartService.totalPrice;
 
   // Logic: Simulated Payment Gateway Process
   void _showPaymentOptions(bool isDarkMode) {
-    if (_cartItems.isEmpty) {
+    if (CartService.cartItems.isEmpty) {
       Fluttertoast.showToast(msg: "Your cart is empty!");
       return;
     }
@@ -85,9 +77,7 @@ class _CartTabState extends State<CartTab> {
       leading: Icon(icon, color: Colors.deepPurple),
       title: Text(title, style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
       trailing: const Icon(Icons.radio_button_off, size: 20),
-      onTap: () {
-        // In a real app, you'd select the method state here
-      },
+      onTap: () {},
     );
   }
 
@@ -96,13 +86,13 @@ class _CartTabState extends State<CartTab> {
       _isProcessing = true;
     });
 
-    // Simulate Network Delay for Payment Gateway
+    // Simulate Network Delay
     await Future.delayed(const Duration(seconds: 3));
 
     if (mounted) {
       setState(() {
         _isProcessing = false;
-        _cartItems.clear(); // Clear cart on success
+        CartService.clearCart(); // Clear items from service
       });
 
       // Show Success Dialog
@@ -133,6 +123,7 @@ class _CartTabState extends State<CartTab> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final items = CartService.cartItems;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
@@ -140,7 +131,7 @@ class _CartTabState extends State<CartTab> {
         children: [
           Column(
             children: [
-              // --- CUSTOM PREMIUM HEADER ---
+              // HEADER
               Container(
                 padding: const EdgeInsets.fromLTRB(25, 60, 25, 30),
                 width: double.infinity,
@@ -161,7 +152,7 @@ class _CartTabState extends State<CartTab> {
                           'My Cart',
                           style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                         ),
-                        Text('Check your items before checkout', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        Text('Manage your selected items', style: TextStyle(color: Colors.white70, fontSize: 14)),
                       ],
                     ),
                     Container(
@@ -173,25 +164,24 @@ class _CartTabState extends State<CartTab> {
                 ),
               ),
 
-              // --- CART ITEMS LIST ---
+              // CART LIST
               Expanded(
-                child: _cartItems.isEmpty
+                child: items.isEmpty
                     ? _buildEmptyState(isDarkMode)
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                         physics: const BouncingScrollPhysics(),
-                        itemCount: _cartItems.length,
-                        itemBuilder: (context, i) => _buildCartItem(_cartItems[i], i, isDarkMode),
+                        itemCount: items.length,
+                        itemBuilder: (context, i) => _buildCartItem(items[i], i, isDarkMode),
                       ),
               ),
 
-              // --- CHECKOUT SUMMARY SECTION ---
-              if (_cartItems.isNotEmpty) _buildCheckoutSection(isDarkMode),
+              // SUMMARY SECTION
+              if (items.isNotEmpty) _buildCheckoutSection(isDarkMode),
               const SizedBox(height: 100),
             ],
           ),
           
-          // Loading Overlay for Payment Processing
           if (_isProcessing)
             Container(
               color: Colors.black.withOpacity(0.5),
@@ -217,7 +207,7 @@ class _CartTabState extends State<CartTab> {
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
         setState(() {
-          _cartItems.removeAt(index);
+          CartService.removeItem(index);
         });
         Fluttertoast.showToast(msg: "${item['name']} removed");
       },
@@ -269,13 +259,13 @@ class _CartTabState extends State<CartTab> {
           IconButton(
             padding: const EdgeInsets.all(8), constraints: const BoxConstraints(),
             icon: Icon(Icons.remove, size: 18, color: isDarkMode ? Colors.white70 : Colors.black54),
-            onPressed: () => setState(() { if (_cartItems[index]['qty'] > 1) _cartItems[index]['qty']--; }),
+            onPressed: () => setState(() { CartService.decrementQty(index); }),
           ),
-          Text('${_cartItems[index]['qty']}', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
+          Text('${CartService.cartItems[index]['qty']}', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
           IconButton(
             padding: const EdgeInsets.all(8), constraints: const BoxConstraints(),
             icon: const Icon(Icons.add, size: 18, color: Colors.deepPurple),
-            onPressed: () => setState(() { _cartItems[index]['qty']++; }),
+            onPressed: () => setState(() { CartService.incrementQty(index); }),
           ),
         ],
       ),
