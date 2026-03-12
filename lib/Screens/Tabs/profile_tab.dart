@@ -1,3 +1,4 @@
+import 'package:aura_mart/Screens/Products/WishlistScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:aura_mart/Screens/LoginScreen.dart';
@@ -59,7 +60,10 @@ class ProfileTab extends StatelessWidget {
                   Fluttertoast.showToast(msg: "Order history coming soon!");
                 }),
                 _buildProfileOption(Icons.favorite, 'Wishlist', isDarkMode, onTap: () {
-                  Fluttertoast.showToast(msg: "Your wishlist is empty");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WishlistScreen()),
+                  );
                 }),
                 _buildProfileOption(Icons.location_on, 'Shipping Address', isDarkMode, onTap: () {
                   Fluttertoast.showToast(msg: "Address management coming soon!");

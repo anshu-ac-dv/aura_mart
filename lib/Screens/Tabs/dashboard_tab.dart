@@ -1,5 +1,7 @@
+import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -12,41 +14,40 @@ class _DashboardTabState extends State<DashboardTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  // Mock data with real high-quality images from Unsplash
   final List<Map<String, String>> _allProducts = [
     {
       'name': 'Wireless Headphones',
-      'price': '\$99',
+      'price': '99',
       'category': 'Electronics',
       'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'
     },
     {
       'name': 'Running Shoes',
-      'price': '\$75',
+      'price': '75',
       'category': 'Fashion',
       'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'
     },
     {
       'name': 'Smart Watch',
-      'price': '\$150',
+      'price': '150',
       'category': 'Electronics',
       'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'
     },
     {
       'name': 'Coffee Maker',
-      'price': '\$45',
+      'price': '45',
       'category': 'Home',
       'image': 'https://images.unsplash.com/photo-1520970014086-2208d157c9e2?q=80&w=1000&auto=format&fit=crop'
     },
     {
       'name': 'Gaming Mouse',
-      'price': '\$30',
+      'price': '30',
       'category': 'Electronics',
       'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'
     },
     {
       'name': 'Designer Bag',
-      'price': '\$120',
+      'price': '120',
       'category': 'Fashion',
       'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'
     },
@@ -201,6 +202,8 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildProductCard(Map<String, String> product, bool isDarkMode) {
+    bool isFav = WishlistService.isInWishlist(product);
+
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -230,7 +233,22 @@ class _DashboardTabState extends State<DashboardTab> {
                   child: CircleAvatar(
                     radius: 15,
                     backgroundColor: Colors.white.withOpacity(0.8),
-                    child: const Icon(Icons.favorite_border, size: 18, color: Colors.red),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                        size: 18,
+                        color: Colors.red,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          bool added = WishlistService.toggleWishlist(product);
+                          Fluttertoast.showToast(
+                            msg: added ? "Added to Wishlist" : "Removed from Wishlist",
+                          );
+                        });
+                      },
+                    ),
                   ),
                 )
               ],
@@ -248,7 +266,7 @@ class _DashboardTabState extends State<DashboardTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(product['price']!, style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text("\$${product['price']}", style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 16)),
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(color: Colors.deepPurple, shape: BoxShape.circle),
