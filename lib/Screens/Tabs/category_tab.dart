@@ -1,3 +1,4 @@
+import 'package:aura_mart/Screens/CategoryProductsScreen.dart';
 import 'package:flutter/material.dart';
 
 class CategoryTab extends StatefulWidget {
@@ -132,7 +133,7 @@ class _CategoryTabState extends State<CategoryTab> {
                   if (index >= filtered.length) return null;
                   
                   final cat = filtered[index];
-                  return _buildPremiumCategoryCard(cat, isDarkMode);
+                  return _buildPremiumCategoryCard(context, cat, isDarkMode);
                 },
                 childCount: _categories
                     .where((c) => c['name']
@@ -148,7 +149,7 @@ class _CategoryTabState extends State<CategoryTab> {
     );
   }
 
-  Widget _buildPremiumCategoryCard(Map<String, dynamic> cat, bool isDarkMode) {
+  Widget _buildPremiumCategoryCard(BuildContext context, Map<String, dynamic> cat, bool isDarkMode) {
     Color baseColor = cat['color'];
     
     return Container(
@@ -230,7 +231,17 @@ class _CategoryTabState extends State<CategoryTab> {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CategoryProductsScreen(
+                        categoryName: cat['name'],
+                        categoryColor: cat['color'],
+                      ),
+                    ),
+                  );
+                },
                 borderRadius: BorderRadius.circular(30),
                 splashColor: baseColor.withOpacity(0.1),
               ),
