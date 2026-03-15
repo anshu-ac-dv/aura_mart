@@ -52,6 +52,17 @@ class CartService {
     cartItems.clear();
   }
 
+  // Helper to convert cart items to a format suitable for OrderService (Firestore)
+  static List<Map<String, dynamic>> getSerializableItems() {
+    return cartItems.map((item) {
+      return {
+        'name': item['name'],
+        'price': item['price'],
+        'qty': item['qty'],
+      };
+    }).toList();
+  }
+
   // Helper to map category to icon
   static IconData _getIconForCategory(String category) {
     switch (category) {

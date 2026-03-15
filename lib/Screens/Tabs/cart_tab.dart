@@ -52,21 +52,19 @@ class _CartTabState extends State<CartTab> {
             _buildPaymentMethodTile(Icons.account_balance_wallet, "UPI / Google Pay", isDarkMode),
             _buildPaymentMethodTile(Icons.payments, "Cash on Delivery", isDarkMode),
             const SizedBox(height: 20),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _processCheckout();
-                  },
-                  child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _processCheckout();
+                },
+                child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -90,14 +88,8 @@ class _CartTabState extends State<CartTab> {
     });
 
     try {
-      // 1. Prepare items for Firestore (remove non-serializable IconData)
-      List<Map<String, dynamic>> orderItems = CartService.cartItems.map((item) {
-        return {
-          'name': item['name'],
-          'price': item['price'],
-          'qty': item['qty'],
-        };
-      }).toList();
+      // 1. Prepare items for Firestore (use the helper in CartService)
+      List<Map<String, dynamic>> orderItems = CartService.getSerializableItems();
 
       // 2. Save Order to Firestore
       await OrderService.createOrder(orderItems, _totalPrice);
@@ -136,10 +128,12 @@ class _CartTabState extends State<CartTab> {
         );
       }
     } catch (e) {
-      setState(() {
-        _isProcessing = false;
-      });
-      Fluttertoast.showToast(msg: "Order failed: $e");
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+        Fluttertoast.showToast(msg: "Order failed: $e");
+      }
     }
   }
 
