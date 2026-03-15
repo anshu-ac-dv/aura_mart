@@ -1,4 +1,5 @@
 import 'package:aura_mart/Services/CartService.dart';
+import 'package:aura_mart/Services/OrderService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -51,19 +52,21 @@ class _CartTabState extends State<CartTab> {
             _buildPaymentMethodTile(Icons.account_balance_wallet, "UPI / Google Pay", isDarkMode),
             _buildPaymentMethodTile(Icons.payments, "Cash on Delivery", isDarkMode),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _processCheckout();
+                  },
+                  child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _processCheckout();
-                },
-                child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -86,37 +89,57 @@ class _CartTabState extends State<CartTab> {
       _isProcessing = true;
     });
 
-    // Simulate Network Delay
-    await Future.delayed(const Duration(seconds: 3));
+    try {
+      // 1. Prepare items for Firestore (remove non-serializable IconData)
+      List<Map<String, dynamic>> orderItems = CartService.cartItems.map((item) {
+        return {
+          'name': item['name'],
+          'price': item['price'],
+          'qty': item['qty'],
+        };
+      }).toList();
 
-    if (mounted) {
+      // 2. Save Order to Firestore
+      await OrderService.createOrder(orderItems, _totalPrice);
+
+      // 3. Simulate Network Delay for Payment Gateway
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          CartService.clearCart(); // Clear items from service
+        });
+
+        // Show Success Dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.check_circle, color: Colors.green, size: 80),
+                const SizedBox(height: 20),
+                const Text("Payment Successful!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                const Text("Your order has been placed and saved in 'My Orders'.", textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Continue Shopping"),
+                )
+              ],
+            ),
+          ),
+        );
+      }
+    } catch (e) {
       setState(() {
         _isProcessing = false;
-        CartService.clearCart(); // Clear items from service
       });
-
-      // Show Success Dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.check_circle, color: Colors.green, size: 80),
-              const SizedBox(height: 20),
-              const Text("Payment Successful!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              const Text("Your order for Aura Mart is on the way.", textAlign: TextAlign.center),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Continue Shopping"),
-              )
-            ],
-          ),
-        ),
-      );
+      Fluttertoast.showToast(msg: "Order failed: $e");
     }
   }
 
@@ -157,7 +180,7 @@ class _CartTabState extends State<CartTab> {
                     ),
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(15)),
+                      decoration: BoxDecoration(color: Colors.white.withAlpha(51), borderRadius: BorderRadius.circular(15)),
                       child: const Icon(Icons.shopping_cart_checkout, color: Colors.white),
                     )
                   ],
@@ -184,14 +207,14 @@ class _CartTabState extends State<CartTab> {
           
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withAlpha(128),
               child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CircularProgressIndicator(color: Colors.white),
                     SizedBox(height: 20),
-                    Text("Processing Payment...", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text("Processing Order...", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -223,13 +246,13 @@ class _CartTabState extends State<CartTab> {
         decoration: BoxDecoration(
           color: isDarkMode ? Colors.grey[900] : Colors.white,
           borderRadius: BorderRadius.circular(25),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 5))],
+          boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 10, offset: const Offset(0, 5))],
         ),
         child: Row(
           children: [
             Container(
               height: 70, width: 70,
-              decoration: BoxDecoration(color: Colors.deepPurple.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: Colors.deepPurple.withAlpha(26), borderRadius: BorderRadius.circular(20)),
               child: Icon(item['icon'], color: Colors.deepPurple, size: 30),
             ),
             const SizedBox(width: 15),
@@ -279,7 +302,7 @@ class _CartTabState extends State<CartTab> {
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, -10))],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(26), blurRadius: 20, offset: const Offset(0, -10))],
       ),
       child: Column(
         children: [

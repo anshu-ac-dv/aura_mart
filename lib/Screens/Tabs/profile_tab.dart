@@ -1,3 +1,4 @@
+import 'package:aura_mart/Screens/MyOrdersScreen.dart';
 import 'package:aura_mart/Screens/Products/WishlistScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +58,10 @@ class ProfileTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 _buildProfileOption(Icons.shopping_bag, 'My Orders', isDarkMode, onTap: () {
-                  Fluttertoast.showToast(msg: "Order history coming soon!");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MyOrdersScreen()),
+                  );
                 }),
                 _buildProfileOption(Icons.favorite, 'Wishlist', isDarkMode, onTap: () {
                   Navigator.push(
