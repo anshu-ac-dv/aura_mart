@@ -1,5 +1,6 @@
 import 'package:aura_mart/Screens/LoginScreen.dart';
-import 'package:aura_mart/Services/CartService.dart';import 'package:aura_mart/Services/WishlistService.dart';
+import 'package:aura_mart/Services/CartService.dart';
+import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,8 +15,9 @@ class DashboardTab extends StatefulWidget {
 class _DashboardTabState extends State<DashboardTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
-  String _selectedCategory = "All"; // Logic: State for category filtering
+  String _selectedCategory = "All";
 
+  // Mock Products
   final List<Map<String, String>> _allProducts = [
     {'name': 'Wireless Headphones', 'price': '99', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Running Shoes', 'price': '75', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'},
@@ -25,7 +27,14 @@ class _DashboardTabState extends State<DashboardTab> {
     {'name': 'Designer Bag', 'price': '120', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'},
   ];
 
-  // Logic: Combined Filtering (Search + Category)
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.blue},
+    {'name': 'Fashion', 'icon': Icons.checkroom, 'color': Colors.pink},
+    {'name': 'Electronics', 'icon': Icons.bolt, 'color': Colors.amber},
+    {'name': 'Home', 'icon': Icons.home, 'color': Colors.orange},
+    {'name': 'Beauty', 'icon': Icons.face, 'color': Colors.purple},
+  ];
+
   List<Map<String, String>> get _filteredProducts {
     return _allProducts.where((p) {
       final matchesSearch = p['name']!.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -45,61 +54,97 @@ class _DashboardTabState extends State<DashboardTab> {
     final user = FirebaseAuth.instance.currentUser;
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(user, isDarkMode),
-          _buildCategorySection(isDarkMode),
-          _buildProductGrid(isDarkMode),
-          const SizedBox(height: 120),
-        ],
+    return Scaffold(
+      backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 1. PROJECT TITLE AND SEARCH BAR
+            _buildTopBrandingAndSearch(isDarkMode, user),
+
+            // 2. Delivery Location Bar
+            _buildLocationBar(isDarkMode),
+
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    // 3. Horizontal Category List
+                    _buildHorizontalCategories(isDarkMode),
+
+                    // 4. Promo Banner Slider
+                    _buildPromoSlider(),
+
+                    // 5. "Deals of the Day" Section
+                    _buildSectionHeader("Deals of the Day", isDarkMode),
+                    _buildHorizontalProductList(isDarkMode),
+
+                    // 6. Featured Grid Section
+                    _buildSectionHeader("Suggested for You", isDarkMode),
+                    _buildProductGrid(isDarkMode),
+
+                    const SizedBox(height: 100),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildHeader(User? user, bool isDarkMode) {
+  Widget _buildTopBrandingAndSearch(bool isDarkMode, User? user) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
-      decoration: const BoxDecoration(
-        color: Colors.deepPurple,
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
-      ),
+      color: Colors.deepPurple,
+      padding: const EdgeInsets.fromLTRB(15, 10, 15, 15),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Aura Mart', style: TextStyle(color: Colors.white70, fontSize: 16)),
-                  Text('Hey, ${user?.displayName?.split(' ')[0] ?? 'Shopper'}!',
-                      style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-                ],
+              const Text(
+                "AURA MART",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                ),
               ),
               IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
+                icon: const Icon(Icons.logout, color: Colors.white, size: 20),
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
+                  if (mounted) {
+                    Navigator.pushAndRemoveUntil(
+                      context, 
+                      MaterialPageRoute(builder: (context) => const LoginScreen()), 
+                      (r) => false
+                    );
+                  }
                 },
               )
             ],
           ),
-          const SizedBox(height: 25),
-          TextField(
-            controller: _searchController,
-            onChanged: (v) => setState(() => _searchQuery = v),
-            decoration: InputDecoration(
-              hintText: 'Search items...',
-              prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
-              fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
-              filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+          const SizedBox(height: 10),
+          Container(
+            height: 45,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (v) => setState(() => _searchQuery = v),
+              decoration: const InputDecoration(
+                hintText: 'Search for products, brands and more',
+                prefixIcon: Icon(Icons.search, color: Colors.grey),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 10),
+              ),
             ),
           ),
         ],
@@ -107,51 +152,144 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildCategorySection(bool isDarkMode) {
-    final categories = [
-      {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.blue},
-      {'name': 'Electronics', 'icon': Icons.bolt, 'color': Colors.amber},
-      {'name': 'Fashion', 'icon': Icons.checkroom, 'color': Colors.pink},
-      {'name': 'Home', 'icon': Icons.home_work, 'color': Colors.green},
-    ];
+  Widget _buildLocationBar(bool isDarkMode) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.withAlpha(200),
+      ),
+      child: const Row(
+        children: [
+          Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
+          SizedBox(width: 5),
+          Text(
+            "Deliver to Anshu - New Delhi 110001",
+            style: TextStyle(color: Colors.white, fontSize: 13),
+          ),
+          Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 18),
+        ],
+      ),
+    );
+  }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(20, 25, 20, 15),
-          child: Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ),
-        SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: categories.length,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            itemBuilder: (context, index) {
-              final cat = categories[index];
-              bool isSelected = _selectedCategory == cat['name'];
-              return GestureDetector(
-                onTap: () => setState(() => _selectedCategory = cat['name'] as String),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withOpacity(0.1),
-                        child: Icon(cat['icon'] as IconData, color: isSelected ? Colors.white : cat['color'] as Color),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(cat['name'] as String, style: TextStyle(fontSize: 12, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                    ],
+  Widget _buildHorizontalCategories(bool isDarkMode) {
+    return Container(
+      height: 95,
+      color: isDarkMode ? Colors.grey[900] : Colors.white,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _categories.length,
+        itemBuilder: (context, index) {
+          final cat = _categories[index];
+          bool isSelected = _selectedCategory == cat['name'];
+          return GestureDetector(
+            onTap: () => setState(() => _selectedCategory = cat['name']),
+            child: Container(
+              width: 80,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withAlpha(30),
+                    child: Icon(cat['icon'], color: isSelected ? Colors.white : cat['color']),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    cat['name'],
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPromoSlider() {
+    return Container(
+      height: 180,
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      child: PageView(
+        children: [
+          _buildBannerImage("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop"),
+          _buildBannerImage("https://images.unsplash.com/photo-1607083206869-4c7672df7231?q=80&w=1000&auto=format&fit=crop"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBannerImage(String url) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
+          const Text("See all", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalProductList(bool isDarkMode) {
+    final products = _filteredProducts.take(3).toList();
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return Container(
+            width: 150,
+            margin: const EdgeInsets.symmetric(horizontal: 5),
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.grey[900] : Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                    child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity),
                   ),
                 ),
-              );
-            },
-          ),
-        ),
-      ],
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(product['name']!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500)),
+                      Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -159,77 +297,100 @@ class _DashboardTabState extends State<DashboardTab> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 0.7,
+        crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.75,
       ),
       itemCount: _filteredProducts.length,
       itemBuilder: (context, index) {
-        final product = _filteredProducts[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.grey[900] : Colors.white,
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
+        return _buildAmazonProductCard(_filteredProducts[index], isDarkMode);
+      },
+    );
+  }
+
+  Widget _buildAmazonProductCard(Map<String, String> product, bool isDarkMode) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.withAlpha(30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                  child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity),
+                ),
+                Positioned(
+                  top: 5, right: 5,
+                  child: _buildWishlistButton(product),
+                )
+              ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Stack(
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(product['name']!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                const SizedBox(height: 5),
+                Row(
                   children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                      child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity),
-                    ),
-                    Positioned(
-                      top: 10, right: 10,
-                      child: CircleAvatar(
-                        radius: 15,
-                        backgroundColor: Colors.white.withOpacity(0.8),
-                        child: StreamBuilder<bool>(
-                            stream: WishlistService.isInWishlistStream(product['name']!),
-                            builder: (context, snapshot) {
-                              bool isFav = snapshot.data ?? false;
-                              return IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
-                                onPressed: () async => await WishlistService.toggleWishlist(product),
-                              );
-                            }
-                        ),
-                      ),
-                    )
+                    Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(width: 5),
+                    Text("\$${(double.tryParse(product['price']!) ?? 0) + 20}", 
+                      style: const TextStyle(fontSize: 10, color: Colors.grey, decoration: TextDecoration.lineThrough)),
                   ],
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(product['name']!, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("\$${product['price']}", style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
-                        InkWell(
-                          onTap: () {
-                            CartService.addToCart(product);
-                            Fluttertoast.showToast(msg: "${product['name']} added to cart");
-                          },
-                          child: const CircleAvatar(radius: 14, backgroundColor: Colors.deepPurple, child: Icon(Icons.add, color: Colors.white, size: 16)),
-                        )
-                      ],
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      CartService.addToCart(product);
+                      Fluttertoast.showToast(msg: "Added to cart");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber,
+                      foregroundColor: Colors.black,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      padding: const EdgeInsets.symmetric(vertical: 0),
                     ),
-                  ],
-                ),
-              ),
-            ],
+                    child: const Text("Add to Cart", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWishlistButton(Map<String, String> product) {
+    return StreamBuilder<bool>(
+      stream: WishlistService.isInWishlistStream(product['name']!),
+      builder: (context, snapshot) {
+        bool isFav = snapshot.data ?? false;
+        return CircleAvatar(
+          radius: 15,
+          backgroundColor: Colors.white.withAlpha(200),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
+            onPressed: () async {
+              await WishlistService.toggleWishlist(product);
+              Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+            },
           ),
         );
-      },
+      }
     );
   }
 }
