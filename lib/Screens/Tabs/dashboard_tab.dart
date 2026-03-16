@@ -51,70 +51,31 @@ class _DashboardTabState extends State<DashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 1. PROJECT TITLE AND SEARCH BAR
-            _buildTopBrandingAndSearch(isDarkMode, user),
-
-            // 2. Delivery Location Bar
-            _buildLocationBar(isDarkMode),
-
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    // 3. Horizontal Category List
-                    _buildHorizontalCategories(isDarkMode),
-
-                    // 4. Promo Banner Slider
-                    _buildPromoSlider(),
-
-                    // 5. "Deals of the Day" Section
-                    _buildSectionHeader("Deals of the Day", isDarkMode),
-                    _buildHorizontalProductList(isDarkMode),
-
-                    // 6. Featured Grid Section
-                    _buildSectionHeader("Suggested for You", isDarkMode),
-                    _buildProductGrid(isDarkMode),
-
-                    const SizedBox(height: 100),
-                  ],
-                ),
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // 1. BEAUTIFUL COLLAPSIBLE APPBAR
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: 140,
+            backgroundColor: Colors.deepPurple,
+            elevation: 0,
+            title: const Text(
+              "AURA MART",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopBrandingAndSearch(bool isDarkMode, User? user) {
-    return Container(
-      color: Colors.deepPurple,
-      padding: const EdgeInsets.fromLTRB(15, 10, 15, 15),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "AURA MART",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
-              ),
+            actions: [
               IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+                icon: const Icon(Icons.logout, color: Colors.white, size: 22),
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
                   if (mounted) {
@@ -127,26 +88,64 @@ class _DashboardTabState extends State<DashboardTab> {
                 },
               )
             ],
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 45,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (v) => setState(() => _searchQuery = v),
-              decoration: const InputDecoration(
-                hintText: 'Search for products, brands and more',
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(70),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                    decoration: const InputDecoration(
+                      hintText: 'Search products, brands and more...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
+
+          // 2. Location Bar
+          SliverToBoxAdapter(child: _buildLocationBar(isDarkMode)),
+
+          // 3. Horizontal Category List
+          SliverToBoxAdapter(child: _buildHorizontalCategories(isDarkMode)),
+
+          // 4. Promo Banner Slider
+          SliverToBoxAdapter(child: _buildPromoSlider()),
+
+          // 5. Section Headers and Horizontal Lists
+          SliverToBoxAdapter(child: _buildSectionHeader("Deals of the Day", isDarkMode)),
+          SliverToBoxAdapter(child: _buildHorizontalProductList(isDarkMode)),
+
+          // 6. Featured Grid Section
+          SliverToBoxAdapter(child: _buildSectionHeader("Suggested for You", isDarkMode)),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, 
+                crossAxisSpacing: 10, 
+                mainAxisSpacing: 10, 
+                childAspectRatio: 0.75,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) => _buildAmazonProductCard(_filteredProducts[index], isDarkMode),
+                childCount: _filteredProducts.length,
+              ),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
@@ -155,19 +154,17 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _buildLocationBar(bool isDarkMode) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple.withAlpha(200),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      color: Colors.deepPurple.withAlpha(20),
       child: const Row(
         children: [
-          Icon(Icons.location_on_outlined, color: Colors.white, size: 18),
+          Icon(Icons.location_on_outlined, color: Colors.deepPurple, size: 18),
           SizedBox(width: 5),
           Text(
             "Deliver to Anshu - New Delhi 110001",
-            style: TextStyle(color: Colors.white, fontSize: 13),
+            style: TextStyle(color: Colors.deepPurple, fontSize: 13, fontWeight: FontWeight.w500),
           ),
-          Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 18),
+          Icon(Icons.keyboard_arrow_down, color: Colors.deepPurple, size: 18),
         ],
       ),
     );
@@ -176,7 +173,7 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _buildHorizontalCategories(bool isDarkMode) {
     return Container(
       height: 95,
-      color: isDarkMode ? Colors.grey[900] : Colors.white,
+      margin: const EdgeInsets.only(top: 10),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _categories.length,
@@ -228,7 +225,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildBannerImage(String url) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover),
@@ -250,21 +247,21 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildHorizontalProductList(bool isDarkMode) {
-    final products = _filteredProducts.take(3).toList();
     return SizedBox(
       height: 200,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        itemCount: products.length,
+        itemCount: _filteredProducts.length,
         itemBuilder: (context, index) {
-          final product = products[index];
+          final product = _filteredProducts[index];
           return Container(
             width: 150,
             margin: const EdgeInsets.symmetric(horizontal: 5),
             decoration: BoxDecoration(
               color: isDarkMode ? Colors.grey[900] : Colors.white,
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.withAlpha(20)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,21 +290,6 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildProductGrid(bool isDarkMode) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 0.75,
-      ),
-      itemCount: _filteredProducts.length,
-      itemBuilder: (context, index) {
-        return _buildAmazonProductCard(_filteredProducts[index], isDarkMode);
-      },
-    );
-  }
-
   Widget _buildAmazonProductCard(Map<String, String> product, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
@@ -327,7 +309,24 @@ class _DashboardTabState extends State<DashboardTab> {
                 ),
                 Positioned(
                   top: 5, right: 5,
-                  child: _buildWishlistButton(product),
+                  child: StreamBuilder<bool>(
+                    stream: WishlistService.isInWishlistStream(product['name']!),
+                    builder: (context, snapshot) {
+                      bool isFav = snapshot.data ?? false;
+                      return CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Colors.white.withAlpha(200),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
+                          onPressed: () async {
+                            await WishlistService.toggleWishlist(product);
+                            Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                          },
+                        ),
+                      );
+                    }
+                  ),
                 )
               ],
             ),
@@ -370,27 +369,6 @@ class _DashboardTabState extends State<DashboardTab> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildWishlistButton(Map<String, String> product) {
-    return StreamBuilder<bool>(
-      stream: WishlistService.isInWishlistStream(product['name']!),
-      builder: (context, snapshot) {
-        bool isFav = snapshot.data ?? false;
-        return CircleAvatar(
-          radius: 15,
-          backgroundColor: Colors.white.withAlpha(200),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
-            onPressed: () async {
-              await WishlistService.toggleWishlist(product);
-              Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
-            },
-          ),
-        );
-      }
     );
   }
 }

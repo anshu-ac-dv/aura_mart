@@ -1,4 +1,6 @@
-import 'package:aura_mart/Screens/Products/CategoryProductsScreen.dart';
+import 'package:aura_mart/Screens/LoginScreen.dart';
+import 'package:aura_mart/Screens/Products/CategoryProductsScreen.dart'; // Ensure filename matches your project
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class CategoryTab extends StatefulWidget {
@@ -9,101 +11,90 @@ class CategoryTab extends StatefulWidget {
 }
 
 class _CategoryTabState extends State<CategoryTab> {
-  // Mock Category Data with refined icons and branding
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
+  // Refined Category Data
   final List<Map<String, dynamic>> _categories = [
-    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.blue, 'items': '120 Items'},
-    {'name': 'Fashion', 'icon': Icons.checkroom_rounded, 'color': Colors.pink, 'items': '450 Items'},
-    {'name': 'Home', 'icon': Icons.home_rounded, 'color': Colors.green, 'items': '80 Items'},
-    {'name': 'Toys', 'icon': Icons.smart_toy_rounded, 'color': Colors.orange, 'items': '210 Items'},
-    {'name': 'Beauty', 'icon': Icons.face_retouching_natural_rounded, 'color': Colors.purple, 'items': '150 Items'},
-    {'name': 'Sports', 'icon': Icons.sports_tennis_rounded, 'color': Colors.teal, 'items': '95 Items'},
-    {'name': 'Accessories', 'icon': Icons.watch_rounded, 'color': Colors.indigo, 'items': '180 Items'},
-    {'name': 'Books', 'icon': Icons.auto_stories_rounded, 'color': Colors.deepOrange, 'items': '320 Items'},
+    {'name': 'Fashion', 'icon': Icons.checkroom_rounded, 'color': Colors.pink},
+    {'name': 'Mobiles', 'icon': Icons.smartphone_rounded, 'color': Colors.blue},
+    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.amber},
+    {'name': 'Home', 'icon': Icons.home_rounded, 'color': Colors.green},
+    {'name': 'Beauty', 'icon': Icons.face_retouching_natural_rounded, 'color': Colors.purple},
+    {'name': 'Toys', 'icon': Icons.smart_toy_rounded, 'color': Colors.orange},
+    {'name': 'Sports', 'icon': Icons.sports_tennis_rounded, 'color': Colors.teal},
+    {'name': 'Books', 'icon': Icons.auto_stories_rounded, 'color': Colors.brown},
+    {'name': 'Appliances', 'icon': Icons.kitchen_rounded, 'color': Colors.cyan},
   ];
 
-  String _searchQuery = "";
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    final filteredCategories = _categories
+        .where((c) => c['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
+
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
+      backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // --- UNIQUE GLASSMORPHIC SLIVER HEADER ---
+          // 1. BRANDED COLLAPSIBLE APPBAR
           SliverAppBar(
-            expandedHeight: 200,
-            floating: false,
             pinned: true,
+            expandedHeight: 140,
+            backgroundColor: Colors.deepPurple,
             elevation: 0,
-            backgroundColor: Colors.transparent,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.deepPurple, Colors.purpleAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(50),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Discover',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 18,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      const Text(
-                        'Categories',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            title: const Text(
+              "AURA MART",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
               ),
             ),
-            // Floating Search Bar positioned via PreferredSize
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white, size: 22),
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (mounted) {
+                    Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            (r) => false
+                    );
+                  }
+                },
+              )
+            ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(80),
+              preferredSize: const Size.fromHeight(70),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
                 child: Container(
-                  height: 55,
+                  height: 48,
                   decoration: BoxDecoration(
-                    color: isDarkMode ? Colors.grey[900]?.withOpacity(0.9) : Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      )
-                    ],
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
                   ),
                   child: TextField(
+                    controller: _searchController,
                     onChanged: (v) => setState(() => _searchQuery = v),
-                    style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Find your vibe...',
-                      hintStyle: TextStyle(color: isDarkMode ? Colors.white38 : Colors.grey),
-                      prefixIcon: const Icon(Icons.search_rounded, color: Colors.deepPurple),
+                    decoration: const InputDecoration(
+                      hintText: 'Search all categories...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 17),
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
                 ),
@@ -111,141 +102,84 @@ class _CategoryTabState extends State<CategoryTab> {
             ),
           ),
 
-          // --- MODERN BENTO-STYLE GRID ---
+          // 2. CATEGORY GRID
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 40, 20, 120),
-            sliver: SliverGrid(
+            padding: const EdgeInsets.all(20),
+            sliver: filteredCategories.isEmpty
+                ? const SliverToBoxAdapter(
+              child: Center(child: Text("No categories found")),
+            )
+                : SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 20,
+                crossAxisCount: 3,
+                mainAxisSpacing: 25,
                 crossAxisSpacing: 20,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.8,
               ),
               delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final filtered = _categories
-                      .where((c) => c['name']
-                          .toString()
-                          .toLowerCase()
-                          .contains(_searchQuery.toLowerCase()))
-                      .toList();
-                  
-                  if (index >= filtered.length) return null;
-                  
-                  final cat = filtered[index];
-                  return _buildPremiumCategoryCard(context, cat, isDarkMode);
+                    (context, index) {
+                  final cat = filteredCategories[index];
+                  return _buildCategoryItem(cat, isDarkMode);
                 },
-                childCount: _categories
-                    .where((c) => c['name']
-                        .toString()
-                        .toLowerCase()
-                        .contains(_searchQuery.toLowerCase()))
-                    .length,
+                childCount: filteredCategories.length,
               ),
             ),
           ),
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
   }
 
-  Widget _buildPremiumCategoryCard(BuildContext context, Map<String, dynamic> cat, bool isDarkMode) {
-    Color baseColor = cat['color'];
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: baseColor.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          )
-        ],
-      ),
-      child: Stack(
+  Widget _buildCategoryItem(Map<String, dynamic> cat, bool isDarkMode) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryProductsScreen(
+              categoryName: cat['name'],
+              categoryColor: cat['color'],
+            ),
+          ),
+        );
+      },
+      child: Column(
         children: [
-          // Abstract Background Shape
-          Positioned(
-            right: -20,
-            top: -20,
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: baseColor.withOpacity(0.05),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon with Custom Glow
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [baseColor.withOpacity(0.2), baseColor.withOpacity(0.05)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    cat['icon'],
-                    size: 38,
-                    color: baseColor,
-                  ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.grey[900] : Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  cat['icon'],
+                  size: 32,
+                  color: cat['color'],
                 ),
-                const SizedBox(height: 15),
-                Text(
-                  cat['name'],
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Item Count Badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: baseColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    cat['items'],
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: baseColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Interactive Ripple Effect
-          Positioned.fill(
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CategoryProductsScreen(
-                        categoryName: cat['name'],
-                        categoryColor: cat['color'],
-                      ),
-                    ),
-                  );
-                },
-                borderRadius: BorderRadius.circular(30),
-                splashColor: baseColor.withOpacity(0.1),
               ),
             ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            cat['name'],
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
