@@ -182,8 +182,10 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                       'type': 'Home',
                     };
                     await AddressService.saveAddress(data, docId: address?['id']);
-                    Navigator.pop(context);
-                    Fluttertoast.showToast(msg: "Address saved successfully");
+                    if (mounted) {
+                      Navigator.pop(context);
+                      Fluttertoast.showToast(msg: "Address saved successfully");
+                    }
                   },
                   child: const Text("SAVE ADDRESS"),
                 ),
@@ -197,6 +199,15 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
   }
 
   Widget _buildEmptyState(bool isDarkMode) {
-    return const Center(child: Text("No addresses saved yet."));
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.location_off_outlined, size: 80, color: isDarkMode ? Colors.white24 : Colors.grey[300]),
+          const SizedBox(height: 15),
+          const Text("No addresses saved yet.", style: TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
   }
 }

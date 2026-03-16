@@ -1,19 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CartService {
-  // Static list to store cart items globally
   static final List<Map<String, dynamic>> cartItems = [];
 
-  // Logic to add product to cart
   static void addToCart(Map<String, String> product) {
-    // Check if item already exists in cart
     final index = cartItems.indexWhere((item) => item['name'] == product['name']);
     
     if (index >= 0) {
-      // Increase quantity if already exists
       cartItems[index]['qty']++;
     } else {
-      // Add new item with quantity 1
       String priceStr = product['price'] ?? '0';
       priceStr = priceStr.replaceAll('\$', '').replaceAll(',', '');
       
@@ -52,7 +47,6 @@ class CartService {
     cartItems.clear();
   }
 
-  // Helper to convert cart items to a format suitable for OrderService (Firestore)
   static List<Map<String, dynamic>> getSerializableItems() {
     return cartItems.map((item) {
       return {
@@ -63,7 +57,6 @@ class CartService {
     }).toList();
   }
 
-  // Helper to map category to icon
   static IconData _getIconForCategory(String category) {
     switch (category) {
       case 'Electronics': return Icons.bolt_rounded;
@@ -78,7 +71,6 @@ class CartService {
     }
   }
 
-  // Calculate total price
   static double get totalPrice {
     double total = 0.0;
     for (var item in cartItems) {

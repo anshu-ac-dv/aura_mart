@@ -1,6 +1,6 @@
+import 'package:aura_mart/Screens/Splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'Splash Services/Splash_Screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
