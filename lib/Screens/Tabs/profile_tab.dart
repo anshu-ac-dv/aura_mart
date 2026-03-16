@@ -1,5 +1,6 @@
 import 'package:aura_mart/Screens/MyOrdersScreen.dart';
 import 'package:aura_mart/Screens/Products/WishlistScreen.dart';
+import 'package:aura_mart/Screens/ShippingAddressScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:aura_mart/Screens/LoginScreen.dart';
@@ -70,7 +71,10 @@ class ProfileTab extends StatelessWidget {
                   );
                 }),
                 _buildProfileOption(Icons.location_on, 'Shipping Address', isDarkMode, onTap: () {
-                  Fluttertoast.showToast(msg: "Address management coming soon!");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ShippingAddressScreen()),
+                  );
                 }),
                 _buildProfileOption(Icons.payment, 'Payment Methods', isDarkMode, onTap: () {
                   Fluttertoast.showToast(msg: "Secure payments coming soon!");
