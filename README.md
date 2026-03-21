@@ -8,50 +8,74 @@ Aura Mart is a **premium digital storefront** designed with elegance, speed, and
 
 ---
 
+## 📸 Visual Flow
+
+```mermaid
+graph TD
+    Start[🚀 App Launch] --> Splash[✨ Splash Screen]
+    Splash -->|Check Session| Auth{👤 Auth Status}
+    Auth -->|Not Logged In| Login[🔐 Login / Sign Up]
+    Auth -->|Logged In| Home[🏠 Home Dashboard]
+    Login -->|Success| Home
+    Home -->|Explore| Categories[📂 Categories]
+    Home -->|Search| Products[🛍️ Product Grid]
+    Products -->|Save| Wishlist[❤️ Cloud Wishlist]
+    Products -->|Add| Cart[🛒 Shopping Cart]
+    Wishlist -->|Move to| Cart
+    Cart -->|Checkout| Checkout[💳 Payment Gateway]
+    Checkout -->|Place Order| Success[🎉 Order Success Animation]
+    Success -->|Track| Orders[📦 My Orders]
+```
+
+---
+
 ## 💎 Latest Premium Features
 
-*   **⚡ Intelligent Onboarding:** Animated splash screen that manages user sessions and auto-routes to Home or Login portals.
-*   **🛡️ Secure Auth Core:** Bulletproof Login & Registration with real-time profile syncing and a dedicated Password Recovery system.
-*   **🎨 Next-Gen UI:** Features a unique **Floating "Bubble" Navigation Bar** and a sleek, modern design language inspired by industry leaders.
-*   **🔍 Smart Discovery:** Real-time search engine and 3-column circular category filtering that updates your storefront instantly.
-*   **❤️ Cloud-Synced Wishlist:** Save your favorite items to the cloud; they stay with you even after logging out (powered by real-time Firestore streams).
+*   **⚡ Intelligent Onboarding:** Animated splash screen that manages user sessions and auto-routes.
+*   **🛡️ Secure Auth Core:** Real-time Firebase profile syncing and a dedicated Password Recovery system.
+*   **🎨 Next-Gen UI:** Features a unique **Floating "Bubble" Navigation Bar** and a sleek design language.
+*   **🔍 Smart Discovery:** Real-time search engine and 3-column circular category filtering.
+*   **❤️ Cloud-Synced Wishlist:** Save your favorite items to the cloud; they stay with you even after logging out.
 *   **🛒 Advanced Cart System:** Full quantity management, swipe-to-delete, and real-time subtotal calculations.
-*   **💳 Secure Checkout Flow:** Simulated multi-step payment gateway with a celebratory "Order Success" animation.
-*   **📍 Address Management:** Save multiple shipping addresses (Home/Work) with default address selection logic.
-*   **📦 Real-time Order Tracking:** View your entire purchase history with detailed, collapsible order cards showing status and timestamps.
-*   **🌙 Dynamic Themes:** Luxurious Deep Purple palette with optimized support for System Light and Dark modes.
+*   **💳 Secure Checkout Flow:** Simulated multi-step payment gateway with a celebratory animation.
+*   **📍 Address Management:** Save multiple shipping addresses (Home/Work) with default selection.
+*   **📦 Real-time Order Tracking:** View your entire purchase history with detailed, collapsible order cards.
+*   **🌙 Dynamic Themes:** Luxurious Deep Purple palette with support for System Light and Dark modes.
 
 ---
 
 ## 🛣️ The Journey (Workflow)
 
 ### 🟢 Phase 1: The Entrance
-*   **Immersive Splash:** A high-fidelity animation that silently validates the active Firebase session.
-*   **Identity Guard:** Welcomes known users directly or guides guests to the secure Auth Portal.
+<img src="https://images.unsplash.com/photo-1534452286302-2f5630b0600d?q=80&w=1000&auto=format&fit=crop" width="400" align="right" />
 
-### 🔵 Phase 2: Discovery (Amazon/Flipkart Style)
-*   **Branded Dashboard:** Featuring a premium top branding bar, delivery location selector, and deals slider.
-*   **Grid Explorer:** Browse products through specialized horizontal deals or a dense, high-conversion product grid.
+*   **Immersive Splash:** A high-fidelity animation validates the session.
+*   **Identity Guard:** Welcomes known users or guides guests to the Auth Portal.
+
+<br clear="right"/>
+
+### 🔵 Phase 2: Discovery
+<img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop" width="400" align="left" />
+
+*   **Branded Dashboard:** Top branding bar, delivery location, and deals slider.
+*   **Grid Explorer:** Specialized horizontal deals and a dense product grid.
+
+<br clear="left"/>
 
 ### 🟣 Phase 3: Selection & Purchase
-*   **Sync Logic:** Real-time heart icons on the dashboard sync instantly with your private Wishlist screen.
-*   **The Boutique (Cart):** Manage selections and proceed through a professional payment selection bottom sheet.
+<img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1000&auto=format&fit=crop" width="400" align="right" />
+
+*   **Sync Logic:** Real-time wishlist syncing via Firestore.
+*   **The Boutique (Cart):** Professional payment selection and subtotal tracking.
+
+<br clear="right"/>
 
 ### 🟡 Phase 4: Account & History
-*   **Persona (Profile):** Full account control including address management and a dedicated "My Orders" screen.
+<img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1000&auto=format&fit=crop" width="400" align="left" />
 
----
+*   **Persona (Profile):** Address management and a dedicated "My Orders" screen.
 
-## 🛠️ Technical Blueprint
-
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | Flutter (Material 3) |
-| **Database** | Firebase Cloud Firestore |
-| **Authentication** | Firebase Auth (Email/Pass) |
-| **State Management** | Real-time Streams & StatefulWidget |
-| **Logic Layer** | Centralized Service Architecture (Auth, Cart, Wishlist, Order, Address) |
-| **Storage** | Firebase Cloud Storage (Images) |
+<br clear="left"/>
 
 ---
 
