@@ -105,17 +105,39 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   void _processCheckout() async {
     setState(() => _isProcessing = true);
     try {
+      // 1. Prepare items for Firestore
       List<Map<String, dynamic>> orderItems = CartService.getSerializableItems();
+
+      // 2. Save Order to Firestore
       await OrderService.createOrder(orderItems, _totalPrice);
+
+      // 3. Simulate Network Delay
       await Future.delayed(const Duration(seconds: 2));
 
       if (mounted) {
         setState(() {
           _isProcessing = false;
           _showSuccessAnimation = true;
-          CartService.clearCart();
+          CartService.clearCart(); // Clear cart after order is saved
         });
+
+        // Trigger the beautiful success animation
         _successController.forward();
+
+        // --- AUTOMATIC REDIRECTION LOGIC ---
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            // Close the animation overlay and redirect
+            setState(() {
+              _showSuccessAnimation = false;
+              _successController.reset();
+            });
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MyOrdersScreen()),
+            );
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
