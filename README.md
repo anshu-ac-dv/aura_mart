@@ -1,10 +1,18 @@
-# ✨ Aura Mart — *Elevate Your Shopping Experience* ✨
+# ✨ Aura Mart — *The Future of Premium Shopping* ✨
+
+<div align="center">
 
 ![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)
 ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 
-Aura Mart is a **premium digital storefront** designed with elegance, speed, and high performance in mind. Built using **Flutter** and **Firebase**, it delivers a seamless end-to-end shopping journey from intelligent onboarding to secure order tracking.
+**Aura Mart** is a high-performance, premium e-commerce application crafted with **Flutter** and powered by **Firebase**. It offers a seamless, secure, and visually stunning shopping experience designed for the modern user.
+
+[Explore the Flow](#-visual-flow) • [Key Features](#-premium-features) • [Workflow](#-the-journey) • [Installation](#-installation--setup)
+
+</div>
 
 ---
 
@@ -13,80 +21,91 @@ Aura Mart is a **premium digital storefront** designed with elegance, speed, and
 ```mermaid
 graph TD
     Start[🚀 App Launch] --> Splash[✨ Splash Screen]
-    Splash -->|Check Session| Auth{👤 Auth Status}
-    Auth -->|Not Logged In| Login[🔐 Login / Sign Up]
-    Auth -->|Logged In| Home[🏠 Home Dashboard]
+    Splash -->|Auto Session Check| Auth{👤 Auth Status}
+    
+    Auth -->|Not Logged In| Login[🔐 Login Portal]
+    Login -->|New User?| Register[📝 Create Account]
+    Register -->|Success| Home[🏠 Home Dashboard]
     Login -->|Success| Home
-    Home -->|Explore| Categories[📂 Categories]
-    Home -->|Search| Products[🛍️ Product Grid]
-    Products -->|Save| Wishlist[❤️ Cloud Wishlist]
-    Products -->|Add| Cart[🛒 Shopping Cart]
-    Wishlist -->|Move to| Cart
-    Cart -->|Checkout| Checkout[💳 Payment Gateway]
-    Checkout -->|Place Order| Success[🎉 Order Success Animation]
-    Success -->|Track| Orders[📦 My Orders]
+    
+    Auth -->|Logged In| Home
+    
+    Home -->|Explore| Categories[📂 Category Hub]
+    Home -->|Search| Search[🔍 Smart Search]
+    
+    Categories --> Products[🛍️ Product Grid]
+    Search --> Products
+    
+    Products -->|Add| Cart[🛒 Boutique Cart]
+    Products -->|Like| Wishlist[❤️ Cloud Sync Wishlist]
+    
+    Cart -->|Checkout| Pay[💳 Multi-Step Payment]
+    Pay -->|Success| Success[🎉 Order Success Animation]
+    Success -->|Track| Orders[📦 Purchase History]
 ```
 
 ---
 
-## 💎 Latest Premium Features
+## 💎 Premium Features
 
-*   **⚡ Intelligent Onboarding:** Animated splash screen that manages user sessions and auto-routes.
-*   **🛡️ Secure Auth Core:** Real-time Firebase profile syncing and a dedicated Password Recovery system.
-*   **🎨 Next-Gen UI:** Features a unique **Floating "Bubble" Navigation Bar** and a sleek design language.
-*   **🔍 Smart Discovery:** Real-time search engine and 3-column circular category filtering.
-*   **❤️ Cloud-Synced Wishlist:** Save your favorite items to the cloud; they stay with you even after logging out.
-*   **🛒 Advanced Cart System:** Full quantity management, swipe-to-delete, and real-time subtotal calculations.
-*   **💳 Secure Checkout Flow:** Simulated multi-step payment gateway with a celebratory animation.
-*   **📍 Address Management:** Save multiple shipping addresses (Home/Work) with default selection.
-*   **📦 Real-time Order Tracking:** View your entire purchase history with detailed, collapsible order cards.
-*   **🌙 Dynamic Themes:** Luxurious Deep Purple palette with support for System Light and Dark modes.
+| Feature | Description |
+| :--- | :--- |
+| **⚡ Intelligent Onboarding** | High-fidelity animated splash with real-time session validation. |
+| **🛡️ Secure Auth Core** | Firebase-powered Login, Registration, and Password Recovery. |
+| **🎨 Next-Gen UI** | Unique **Floating Bubble Navigation** and Amazon/Flipkart style aesthetics. |
+| **🔍 Smart Discovery** | Real-time search engine with 3-column circular category filtering. |
+| **❤️ Cloud Wishlist** | Persistent favorites that stay synced across all your devices. |
+| **🛒 Advanced Cart** | Live quantity management, swipe-to-delete, and real-time subtotal tracking. |
+| **💳 Secure Checkout** | Multi-step payment selection with celebratory order success animations. |
+| **📍 Address Hub** | Manage multiple shipping profiles (Home/Office) with default settings. |
+| **📦 Order Tracking** | Detailed history with collapsible status cards and server timestamps. |
+| **🌙 Dynamic Themes** | Deep Purple branding with professional Light and Dark mode optimization. |
 
 ---
 
 ## 🛣️ The Journey (Workflow)
 
-### 🟢 Phase 1: The Entrance
-<img src="https://images.unsplash.com/photo-1534452286302-2f5630b0600d?q=80&w=1000&auto=format&fit=crop" width="400" align="right" />
+### 🟢 Phase 1: The Identity Portal
+<img src="https://images.unsplash.com/photo-1534452286302-2f5630b0600d?q=80&w=1000&auto=format&fit=crop" width="350" align="right" style="border-radius: 20px; margin-left: 20px;" />
 
-*   **Immersive Splash:** A high-fidelity animation validates the session.
-*   **Identity Guard:** Welcomes known users or guides guests to the Auth Portal.
+*   **Premium Entrance:** An immersive 4-second animation that welcomes users while the "Identity Guard" checks for an active session.
+*   **Security First:** Distraction-free authentication forms with real-time validation and profile synchronization.
 
 <br clear="right"/>
 
-### 🔵 Phase 2: Discovery
-<img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop" width="400" align="left" />
+### 🔵 Phase 2: Product Discovery
+<img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop" width="350" align="left" style="border-radius: 20px; margin-right: 20px;" />
 
-*   **Branded Dashboard:** Top branding bar, delivery location, and deals slider.
-*   **Grid Explorer:** Specialized horizontal deals and a dense product grid.
+*   **Modern Hub:** A feature-rich dashboard with top branding, delivery location tracking, and interactive deal sliders.
+*   **Scalable Architecture:** Dedicated screens for every category (Electronics, Fashion, Home) built on a unified architectural template.
 
 <br clear="left"/>
 
-### 🟣 Phase 3: Selection & Purchase
-<img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1000&auto=format&fit=crop" width="400" align="right" />
+### 🟣 Phase 3: Selection & Transaction
+<img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1000&auto=format&fit=crop" width="350" align="right" style="border-radius: 20px; margin-left: 20px;" />
 
-*   **Sync Logic:** Real-time wishlist syncing via Firestore.
-*   **The Boutique (Cart):** Professional payment selection and subtotal tracking.
+*   **Real-time Sync:** Liked items move to your cloud wishlist instantly using Firestore Streams.
+*   **Smart Cart:** Dynamic quantity controls and a professional payment gateway simulation with immediate visual confirmation.
 
 <br clear="right"/>
 
-### 🟡 Phase 4: Account & History
-<img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1000&auto=format&fit=crop" width="400" align="left" />
+### 🟡 Phase 4: Order Lifecycle
+<img src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=1000&auto=format&fit=crop" width="350" align="left" style="border-radius: 20px; margin-right: 20px;" />
 
-*   **Persona (Profile):** Address management and a dedicated "My Orders" screen.
+*   **Purchase History:** Every order is stored in the cloud with itemized details and real-time status updates.
+*   **Account Control:** Easily manage addresses and profile settings through an intuitive "Persona" tab.
 
 <br clear="left"/>
 
 ---
 
-## 📂 Folder Structure (Clean Architecture)
-```text
-lib/
-├── Core/           # Themes, Utils, Constants
-├── Screens/        # UI Layer (Auth, Products, Tabs, Splash, Orders)
-├── Services/       # Business Logic (Firebase integrations)
-└── main.dart       # Entry point
-```
+## 🛠️ Technical Blueprint
+
+*   **Frontend Framework:** Flutter 3.x (Material 3)
+*   **Backend Services:** Firebase (Auth, Firestore, Storage)
+*   **State Management:** Real-time Streams & StatefulWidget
+*   **Logic Layer:** Centralized Service Architecture
+*   **Architecture Pattern:** Clean UI/Service separation
 
 ---
 
@@ -111,7 +130,9 @@ lib/
 ---
 
 ## 🤝 Contribution
-Designed with ❤️ for the Flutter community. Feel free to fork, star, and contribute to the Aura Mart evolution!
+Designed with ❤️ for the global Flutter community. Feel free to fork, star, and contribute!
 
 ---
-*Developed by [Anshu Kumar](https://github.com/anshu-ac-dv)*
+<div align="center">
+    <b>Developed by [Anshu Kumar](https://github.com/anshu-ac-dv)</b>
+</div>
