@@ -13,7 +13,7 @@ class OrderService {
   }
 
   // Logic: Create a new order
-  static Future<void> createOrder(List<Map<String, dynamic>> items, double totalAmount) async {
+  static Future<void> createOrder(List<Map<String, dynamic>> items, double totalAmount, String paymentMethod) async {
     final orders = _userOrders;
     if (orders == null) throw Exception("User not logged in");
 
@@ -23,6 +23,7 @@ class OrderService {
       'orderId': orderId,
       'items': items,
       'totalAmount': totalAmount,
+      'paymentMethod': paymentMethod,
       'status': 'Processing',
       'orderDate': FieldValue.serverTimestamp(),
     });

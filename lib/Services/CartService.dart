@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class CartService {
   static final List<Map<String, dynamic>> cartItems = [];
+  static String? selectedPaymentMethod;
+  static String? selectedPaymentMethodId;
 
   static void addToCart(Map<String, String> product) {
     final index = cartItems.indexWhere((item) => item['name'] == product['name']);

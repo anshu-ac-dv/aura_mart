@@ -1,6 +1,7 @@
 import 'package:aura_mart/Screens/MyOrdersScreen.dart';
 import 'package:aura_mart/Services/CartService.dart';
 import 'package:aura_mart/Services/OrderService.dart';
+import 'package:aura_mart/Services/PaymentService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -14,6 +15,8 @@ class CartTab extends StatefulWidget {
 class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   bool _isProcessing = false;
   bool _showSuccessAnimation = false;
+  String? _selectedPaymentMethodId;
+  String? _selectedPaymentMethodValue;
 
   late AnimationController _successController;
   late Animation<double> _scaleAnimation;
@@ -56,78 +59,111 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40, height: 5,
-              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
-            ),
-            const SizedBox(height: 20),
-            const Text("Select Payment Method", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            _buildPaymentMethodTile(Icons.credit_card, "Credit / Debit Card", isDarkMode),
-            _buildPaymentMethodTile(Icons.account_balance_wallet, "UPI / Google Pay", isDarkMode),
-            _buildPaymentMethodTile(Icons.payments, "Cash on Delivery", isDarkMode),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _processCheckout();
-                },
-                child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40, height: 5,
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              const Text("Select Payment Method", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Flexible(
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: PaymentService.paymentMethodsStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final methods = snapshot.data ?? [];
+                    
+                    return ListView(
+                      shrinkWrap: true,
+                      children: [
+                        ...methods.map((method) {
+                          IconData icon = method['type'] == 'upi' ? Icons.account_balance_wallet : Icons.credit_card;
+                          return ListTile(
+                            leading: Icon(icon, color: Colors.deepPurple),
+                            title: Text(method['value'], style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                            subtitle: Text(method['type'].toString().toUpperCase()),
+                            trailing: Icon(
+                              _selectedPaymentMethodId == method['id'] ? Icons.radio_button_checked : Icons.radio_button_off,
+                              color: Colors.deepPurple,
+                            ),
+                            onTap: () {
+                              setModalState(() {
+                                _selectedPaymentMethodId = method['id'];
+                                _selectedPaymentMethodValue = method['value'];
+                              });
+                              setState(() {}); 
+                            },
+                          );
+                        }),
+                        ListTile(
+                          leading: const Icon(Icons.payments, color: Colors.deepPurple),
+                          title: Text("Cash on Delivery", style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                          trailing: Icon(
+                            _selectedPaymentMethodId == 'cod' ? Icons.radio_button_checked : Icons.radio_button_off,
+                            color: Colors.deepPurple,
+                          ),
+                          onTap: () {
+                            setModalState(() {
+                              _selectedPaymentMethodId = 'cod';
+                              _selectedPaymentMethodValue = "Cash on Delivery";
+                            });
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                  onPressed: _selectedPaymentMethodId == null ? null : () {
+                    Navigator.pop(context);
+                    _processCheckout();
+                  },
+                  child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPaymentMethodTile(IconData icon, String title, bool isDarkMode) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.deepPurple),
-      title: Text(title, style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-      trailing: const Icon(Icons.radio_button_off, size: 20),
-      onTap: () {},
-    );
-  }
-
   void _processCheckout() async {
+    if (_selectedPaymentMethodValue == null) return;
+    
     setState(() => _isProcessing = true);
     try {
-      // 1. Prepare items for Firestore
       List<Map<String, dynamic>> orderItems = CartService.getSerializableItems();
-
-      // 2. Save Order to Firestore
-      await OrderService.createOrder(orderItems, _totalPrice);
-
-      // 3. Simulate Network Delay
+      await OrderService.createOrder(orderItems, _totalPrice, _selectedPaymentMethodValue!);
       await Future.delayed(const Duration(seconds: 2));
 
       if (mounted) {
         setState(() {
           _isProcessing = false;
           _showSuccessAnimation = true;
-          CartService.clearCart(); // Clear cart after order is saved
+          CartService.clearCart();
         });
-
-        // Trigger the beautiful success animation
         _successController.forward();
-
-        // --- AUTOMATIC REDIRECTION LOGIC ---
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) {
-            // Close the animation overlay and redirect
             setState(() {
               _showSuccessAnimation = false;
               _successController.reset();
@@ -158,7 +194,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         children: [
           Column(
             children: [
-              // --- PREMIUM HEADER ---
               Container(
                 padding: const EdgeInsets.fromLTRB(25, 60, 25, 30),
                 width: double.infinity,
@@ -190,8 +225,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-
-              // --- CART ITEMS LIST ---
               Expanded(
                 child: items.isEmpty
                     ? _buildEmptyState(isDarkMode)
@@ -202,8 +235,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                         itemBuilder: (context, i) => _buildCartItem(items[i], i, isDarkMode),
                       ),
               ),
-
-              // --- CHECKOUT SUMMARY SECTION ---
               if (items.isNotEmpty) _buildCheckoutSection(isDarkMode),
               const SizedBox(height: 100),
             ],
@@ -316,29 +347,31 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Total Amount', style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey[600], fontSize: 16)),
-              Text('\$${_totalPrice.toStringAsFixed(2)}', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black, fontSize: 26, fontWeight: FontWeight.bold)),
+              Text('\$${_totalPrice.toStringAsFixed(2)}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 20)),
             ],
           ),
+          if (_selectedPaymentMethodValue != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Payment Method', style: TextStyle(fontSize: 14)),
+                Text(_selectedPaymentMethodValue!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.deepPurple)),
+              ],
+            ),
+          ],
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            height: 60,
+            height: 55,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
-                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 elevation: 5,
               ),
               onPressed: () => _showPaymentOptions(isDarkMode),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('PROCEED TO CHECKOUT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.1)),
-                  SizedBox(width: 10),
-                  Icon(Icons.arrow_forward_rounded),
-                ],
-              ),
+              child: const Text('PROCEED TO PAY', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -373,7 +406,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
                   onPressed: () {
                     setState(() => _showSuccessAnimation = false);
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
                   },
                   child: const Text("VIEW MY ORDERS", style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
