@@ -1,4 +1,5 @@
 import 'package:aura_mart/Screens/MyOrdersScreen.dart';
+import 'package:aura_mart/Screens/PaymentMethodsScreen.dart';
 import 'package:aura_mart/Screens/Products/WishlistScreen.dart';
 import 'package:aura_mart/Screens/ShippingAddressScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -77,7 +78,10 @@ class ProfileTab extends StatelessWidget {
                   );
                 }),
                 _buildProfileOption(Icons.payment, 'Payment Methods', isDarkMode, onTap: () {
-                  Fluttertoast.showToast(msg: "Secure payments coming soon!");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PaymentMethodsScreen()),
+                  );
                 }),
                 const Divider(),
                 _buildProfileOption(Icons.logout, 'Logout', isDarkMode, color: Colors.red, onTap: () async {
