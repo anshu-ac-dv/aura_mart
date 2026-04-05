@@ -1,4 +1,7 @@
+import 'package:aura_mart/Services/CartService.dart';
+import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CategoryProductsScreen extends StatelessWidget {
   final String categoryName;
@@ -18,23 +21,27 @@ class CategoryProductsScreen extends StatelessWidget {
     final List<Map<String, String>> products = [
       {
         'name': '$categoryName Product 1',
-        'price': '\$120',
-        'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'
+        'price': '120',
+        'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop',
+        'category': categoryName
       },
       {
         'name': '$categoryName Product 2',
-        'price': '\$85',
-        'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'
+        'price': '85',
+        'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop',
+        'category': categoryName
       },
       {
         'name': '$categoryName Product 3',
-        'price': '\$45',
-        'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'
+        'price': '45',
+        'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop',
+        'category': categoryName
       },
       {
         'name': '$categoryName Product 4',
-        'price': '\$210',
-        'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'
+        'price': '210',
+        'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop',
+        'category': categoryName
       },
     ];
 
@@ -115,13 +122,40 @@ class CategoryProductsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-              child: Image.network(
-                product['image']!,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                  child: Image.network(
+                    product['image']!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: StreamBuilder<bool>(
+                    stream: WishlistService.isInWishlistStream(product['name']!),
+                    builder: (context, snapshot) {
+                      bool isFav = snapshot.data ?? false;
+                      return CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.white.withOpacity(0.9),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
+                          onPressed: () async {
+                            await WishlistService.toggleWishlist(product);
+                            Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                          },
+                        ),
+                      );
+                    }
+                  ),
+                )
+              ],
             ),
           ),
           Padding(
@@ -144,14 +178,20 @@ class CategoryProductsScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      product['price']!,
+                      "\$${product['price']!}",
                       style: TextStyle(
                         color: categoryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    Icon(Icons.add_shopping_cart, color: categoryColor, size: 20),
+                    InkWell(
+                      onTap: () {
+                        CartService.addToCart(product);
+                        Fluttertoast.showToast(msg: "Added to cart");
+                      },
+                      child: Icon(Icons.add_shopping_cart, color: categoryColor, size: 20),
+                    ),
                   ],
                 ),
               ],

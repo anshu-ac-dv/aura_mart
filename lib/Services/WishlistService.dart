@@ -13,24 +13,29 @@ class WishlistService {
   }
 
   // Unified ID generation to prevent mismatches
-  static String generateDocId(String name) {
-    return name.toLowerCase().replaceAll(' ', '_').trim();
+  static String generateDocId(String? name) {
+    if (name == null || name.isEmpty) return "unknown_product";
+    return name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_');
   }
 
   // Logic: Add or Remove product from Firestore
-  static Future<void> toggleWishlist(Map<String, String> product) async {
+  static Future<void> toggleWishlist(Map<String, dynamic> product) async {
     try {
       final wishlist = _userWishlist;
       if (wishlist == null) throw Exception("User not logged in");
 
-      final docId = generateDocId(product['name']!);
+      final String? name = product['name']?.toString();
+      if (name == null) return;
+
+      final docId = generateDocId(name);
       final docRef = wishlist.doc(docId);
 
       final doc = await docRef.get();
       if (doc.exists) {
         await docRef.delete();
       } else {
-        await docRef.set(product);
+        // Ensure we save the product data as a dynamic map
+        await docRef.set(Map<String, dynamic>.from(product));
       }
     } catch (e) {
       print("Wishlist Error: $e");
@@ -39,7 +44,9 @@ class WishlistService {
   }
 
   // Stream for the heart icon on Dashboard (Real-time)
-  static Stream<bool> isInWishlistStream(String productName) {
+  static Stream<bool> isInWishlistStream(String? productName) {
+    if (productName == null) return Stream.value(false);
+
     final wishlist = _userWishlist;
     if (wishlist == null) return Stream.value(false);
     

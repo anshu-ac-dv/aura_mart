@@ -25,6 +25,13 @@ class _DashboardTabState extends State<DashboardTab> {
     {'name': 'Coffee Maker', 'price': '45', 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1520970014086-2208d157c9e2?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Gaming Mouse', 'price': '30', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Designer Bag', 'price': '120', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Mechanical Keyboard', 'price': '85', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Leather Wallet', 'price': '25', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Denim Jacket', 'price': '65', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1576905341935-4ef24434494a?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Ceramic Vase', 'price': '35', 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Yoga Mat', 'price': '20', 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Face Cream', 'price': '15', 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Matte Lipstick', 'price': '12', 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1586776977607-310e9c725c37?q=80&w=1000&auto=format&fit=crop'},
   ];
 
   final List<Map<String, dynamic>> _categories = [
@@ -267,9 +274,34 @@ class _DashboardTabState extends State<DashboardTab> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                    child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                        child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                      ),
+                      Positioned(
+                        top: 5, right: 5,
+                        child: StreamBuilder<bool>(
+                          stream: WishlistService.isInWishlistStream(product['name']!),
+                          builder: (context, snapshot) {
+                            bool isFav = snapshot.data ?? false;
+                            return CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.white.withAlpha(200),
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: Colors.red),
+                                onPressed: () async {
+                                  await WishlistService.toggleWishlist(product);
+                                  Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                                },
+                              ),
+                            );
+                          }
+                        ),
+                      )
+                    ],
                   ),
                 ),
                 Padding(
@@ -277,8 +309,20 @@ class _DashboardTabState extends State<DashboardTab> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(product['name']!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500)),
-                      Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                      Text(product['name']!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14)),
+                          InkWell(
+                            onTap: () {
+                              CartService.addToCart(product);
+                              Fluttertoast.showToast(msg: "Added to cart");
+                            },
+                            child: const Icon(Icons.add_shopping_cart, size: 18, color: Colors.deepPurple),
+                          )
+                        ],
+                      ),
                     ],
                   ),
                 )

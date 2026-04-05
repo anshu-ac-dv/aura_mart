@@ -1,3 +1,4 @@
+import 'package:aura_mart/Services/CartService.dart';
 import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -163,7 +164,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         fontSize: 16,
                       ),
                     ),
-                    const Icon(Icons.add_shopping_cart, color: Colors.deepPurple, size: 20),
+                    InkWell(
+                      onTap: () {
+                        CartService.addToCart(product);
+                        Fluttertoast.showToast(msg: "Added to cart");
+                      },
+                      child: const Icon(Icons.add_shopping_cart, color: Colors.deepPurple, size: 20),
+                    ),
                   ],
                 ),
               ],
