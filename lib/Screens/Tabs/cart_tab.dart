@@ -146,8 +146,40 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     );
   }
 
+  void _onOrderSuccess() {
+    if (mounted) {
+      setState(() {
+        _isProcessing = false;
+        _showSuccessAnimation = true;
+        _selectedPaymentMethodId = null;
+        _selectedPaymentMethodValue = null;
+        CartService.clearCart();
+      });
+      _successController.forward();
+
+      // Automatic redirection after 3 seconds
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _showSuccessAnimation) {
+          setState(() {
+            _showSuccessAnimation = false;
+            _successController.reset();
+          });
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MyOrdersScreen()),
+          );
+        }
+      });
+    }
+  }
+
   void _processCheckout() async {
     if (_selectedPaymentMethodValue == null) return;
+    
+    if (_selectedPaymentMethodId == 'cod') {
+      _showCODAlert();
+      return;
+    }
     
     setState(() => _isProcessing = true);
     try {
@@ -155,32 +187,61 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       await OrderService.createOrder(orderItems, _totalPrice, _selectedPaymentMethodValue!);
       await Future.delayed(const Duration(seconds: 2));
 
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-          _showSuccessAnimation = true;
-          CartService.clearCart();
-        });
-        _successController.forward();
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) {
-            setState(() {
-              _showSuccessAnimation = false;
-              _successController.reset();
-            });
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MyOrdersScreen()),
-            );
-          }
-        });
-      }
+      _onOrderSuccess();
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
         Fluttertoast.showToast(msg: "Order failed: $e");
       }
     }
+  }
+
+  void _showCODAlert() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green),
+            SizedBox(width: 10),
+            Text("Confirm Order"),
+          ],
+        ),
+        content: const Text("You have selected Cash on Delivery. Would you like to place your order?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CANCEL", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              setState(() => _isProcessing = true);
+              
+              try {
+                List<Map<String, dynamic>> orderItems = CartService.getSerializableItems();
+                await OrderService.createOrder(orderItems, _totalPrice, "Cash on Delivery");
+                await Future.delayed(const Duration(seconds: 1)); // Small delay for UX
+                
+                _onOrderSuccess();
+              } catch (e) {
+                if (mounted) {
+                  setState(() => _isProcessing = false);
+                  Fluttertoast.showToast(msg: "Order failed: $e");
+                }
+              }
+            },
+            child: const Text("PLACE ORDER", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
