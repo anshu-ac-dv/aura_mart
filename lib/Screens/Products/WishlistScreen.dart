@@ -74,8 +74,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
-                    // Convert Map<String, dynamic> to Map<String, String> safely
-                    final product = items[index].map((key, value) => MapEntry(key, value.toString()));
+                    final product = items[index];
                     return _buildWishlistCard(context, product, isDarkMode);
                   },
                 ),
@@ -87,7 +86,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     );
   }
 
-  Widget _buildWishlistCard(BuildContext context, Map<String, String> product, bool isDarkMode) {
+  Widget _buildWishlistCard(BuildContext context, Map<String, dynamic> product, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -166,7 +165,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     ),
                     InkWell(
                       onTap: () {
-                        CartService.addToCart(product);
+                        // Create a Map<String, String> for CartService if it expects it
+                        final cartProduct = {
+                          'name': product['name']?.toString() ?? 'Product',
+                          'price': product['price']?.toString() ?? '0',
+                          'image': product['image']?.toString() ?? '',
+                          'category': product['category']?.toString() ?? '',
+                        };
+                        CartService.addToCart(cartProduct);
                         Fluttertoast.showToast(msg: "Added to cart");
                       },
                       child: const Icon(Icons.add_shopping_cart, color: Colors.deepPurple, size: 20),
