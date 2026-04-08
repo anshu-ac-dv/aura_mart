@@ -30,15 +30,21 @@ class WishlistService {
       final docId = generateDocId(name);
       final docRef = wishlist.doc(docId);
 
-      final doc = await docRef.get();
+      // We'll use a transaction or a simple check-and-set. 
+      // Given the 'unavailable' error, it might be due to offline persistence issues 
+      // or network instability. Let's try to set it with a timeout or handle it gracefully.
+      
+      final doc = await docRef.get(const GetOptions(source: Source.serverAndCache)).timeout(const Duration(seconds: 5));
       if (doc.exists) {
-        await docRef.delete();
+        await docRef.delete().timeout(const Duration(seconds: 5));
       } else {
         // Ensure we save the product data as a dynamic map
-        await docRef.set(Map<String, dynamic>.from(product));
+        await docRef.set(Map<String, dynamic>.from(product)).timeout(const Duration(seconds: 5));
       }
     } catch (e) {
       print("Wishlist Error: $e");
+      // If it's a network issue, Firestore should normally queue it if persistence is enabled.
+      // But we are seeing [cloud_firestore/unavailable].
       rethrow;
     }
   }
