@@ -2,6 +2,7 @@ import 'package:aura_mart/Services/OrderService.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MyOrdersScreen extends StatelessWidget {
   const MyOrdersScreen({super.key});
@@ -122,9 +123,24 @@ class MyOrdersScreen extends StatelessWidget {
             const Divider(indent: 20, endIndent: 20),
             ...(order['items'] as List? ?? []).map((item) {
               return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.deepPurple.withAlpha(26),
-                  child: const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple.withAlpha(26),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: item['image'] != null && item['image'] != ''
+                        ? CachedNetworkImage(
+                            imageUrl: item['image'],
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
+                            errorWidget: (context, url, error) => const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
+                          )
+                        : const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
+                  ),
                 ),
                 title: Text(item['name'] ?? 'Unknown Item', style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white : Colors.black)),
                 trailing: Text("x${item['qty'] ?? 1}", style: const TextStyle(color: Colors.grey)),

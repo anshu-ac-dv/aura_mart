@@ -4,6 +4,7 @@ import 'package:aura_mart/Services/OrderService.dart';
 import 'package:aura_mart/Services/PaymentService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CartTab extends StatefulWidget {
   const CartTab({super.key});
@@ -350,8 +351,18 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
           children: [
             Container(
               height: 70, width: 70,
-              decoration: BoxDecoration(color: Colors.deepPurple.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
-              child: Icon(item['icon'], color: Colors.deepPurple, size: 30),
+              decoration: BoxDecoration(color: Colors.deepPurple.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: item['image'] != null && item['image'] != ''
+                    ? CachedNetworkImage(
+                        imageUrl: item['image'],
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Center(child: Icon(item['icon'], color: Colors.deepPurple.withOpacity(0.3))),
+                        errorWidget: (context, url, error) => Icon(item['icon'], color: Colors.deepPurple),
+                      )
+                    : Icon(item['icon'], color: Colors.deepPurple, size: 30),
+              ),
             ),
             const SizedBox(width: 15),
             Expanded(

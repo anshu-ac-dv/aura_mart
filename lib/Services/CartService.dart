@@ -23,6 +23,7 @@ class CartService {
       cartItems.add({
         'name': product['name'] ?? 'Unknown Product',
         'price': price,
+        'image': product['image'] ?? '',
         'icon': _getIconForCategory(product['category'] ?? ''),
         'qty': 1,
       });
