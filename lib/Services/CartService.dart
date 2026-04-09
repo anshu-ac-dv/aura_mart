@@ -5,18 +5,24 @@ class CartService {
   static String? selectedPaymentMethod;
   static String? selectedPaymentMethodId;
 
-  static void addToCart(Map<String, String> product) {
+  static void addToCart(Map<String, dynamic> product) {
     final index = cartItems.indexWhere((item) => item['name'] == product['name']);
     
     if (index >= 0) {
       cartItems[index]['qty']++;
     } else {
-      String priceStr = product['price'] ?? '0';
-      priceStr = priceStr.replaceAll('\$', '').replaceAll(',', '');
+      dynamic priceVal = product['price'] ?? 0.0;
+      double price = 0.0;
+      if (priceVal is String) {
+        String priceStr = priceVal.replaceAll('\$', '').replaceAll(',', '');
+        price = double.tryParse(priceStr) ?? 0.0;
+      } else if (priceVal is num) {
+        price = priceVal.toDouble();
+      }
       
       cartItems.add({
         'name': product['name'] ?? 'Unknown Product',
-        'price': double.tryParse(priceStr) ?? 0.0,
+        'price': price,
         'icon': _getIconForCategory(product['category'] ?? ''),
         'qty': 1,
       });
