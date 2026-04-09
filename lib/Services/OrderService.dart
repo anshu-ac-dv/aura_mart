@@ -19,6 +19,8 @@ class OrderService {
 
     final orderId = DateTime.now().millisecondsSinceEpoch.toString();
     
+    // We'll use a local DateTime as a fallback if the server timestamp hasn't synced yet
+    // because serverTimestamp() only resolves when it hits the server.
     await orders.doc(orderId).set({
       'orderId': orderId,
       'items': items,
@@ -26,6 +28,7 @@ class OrderService {
       'paymentMethod': paymentMethod,
       'status': 'Processing',
       'orderDate': FieldValue.serverTimestamp(),
+      'localTimestamp': DateTime.now().toIso8601String(),
     });
   }
 
@@ -34,7 +37,10 @@ class OrderService {
     final orders = _userOrders;
     if (orders == null) return Stream.value([]);
     
-    return orders.orderBy('orderDate', descending: true).snapshots().map((snapshot) {
+    // We can't orderBy a field that might be null (like serverTimestamp before it syncs)
+    // if we want to show it immediately in offline mode.
+    // Instead, we'll order by orderId which is a timestamp-based string.
+    return orders.orderBy('orderId', descending: true).snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => doc.data()).toList();
     });
   }

@@ -2,6 +2,7 @@ import 'package:aura_mart/Services/CartService.dart';
 import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -26,26 +27,35 @@ class _WishlistScreenState extends State<WishlistScreen> {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: WishlistService.wishlistStream,
         builder: (context, snapshot) {
-          // Check for errors
           if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 60, color: Colors.redAccent),
+                  const SizedBox(height: 10),
+                  Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.redAccent)),
+                  ElevatedButton(
+                    onPressed: () => setState(() {}),
+                    child: const Text("Retry"),
+                  )
+                ],
+              ),
+            );
           }
 
-          // Show loading indicator
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: Colors.deepPurple));
           }
 
           final items = snapshot.data ?? [];
 
-          // Show empty state
           if (items.isEmpty) {
             return _buildEmptyState(isDarkMode);
           }
 
           return Column(
             children: [
-              // Header Summary
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(25),
@@ -61,7 +71,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   style: const TextStyle(color: Colors.white70, fontSize: 16),
                 ),
               ),
-              // Wishlist Grid
               Expanded(
                 child: GridView.builder(
                   padding: const EdgeInsets.all(20),
@@ -70,7 +79,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 15,
                     crossAxisSpacing: 15,
-                    childAspectRatio: 0.72, // Adjusted for better card fit
+                    childAspectRatio: 0.72,
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
@@ -102,18 +111,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Product Image with un-heart button
           Expanded(
             child: Stack(
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                  child: Image.network(
-                    product['image'] ?? 'https://via.placeholder.com/150',
+                  child: CachedNetworkImage(
+                    imageUrl: product['image'] ?? '',
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
-                    errorBuilder: (context, error, stackTrace) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+                    placeholder: (context, url) => Container(color: Colors.grey[200], child: const Center(child: CircularProgressIndicator(strokeWidth: 2))),
+                    errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                   ),
                 ),
                 Positioned(
@@ -126,8 +135,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.favorite, size: 18, color: Colors.red),
                       onPressed: () async {
-                        await WishlistService.toggleWishlist(product);
-                        Fluttertoast.showToast(msg: "Removed from Wishlist");
+                        try {
+                          await WishlistService.toggleWishlist(product);
+                          Fluttertoast.showToast(msg: "Removed from Wishlist");
+                        } catch (e) {
+                          Fluttertoast.showToast(msg: "Action failed. Check connection.");
+                        }
                       },
                     ),
                   ),
@@ -135,7 +148,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
               ],
             ),
           ),
-          // Details: Name, Price, and Cart Shortcut
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -165,14 +177,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     ),
                     InkWell(
                       onTap: () {
-                        // Create a Map<String, String> for CartService if it expects it
-                        final cartProduct = {
-                          'name': product['name']?.toString() ?? 'Product',
-                          'price': product['price']?.toString() ?? '0',
-                          'image': product['image']?.toString() ?? '',
-                          'category': product['category']?.toString() ?? '',
-                        };
-                        CartService.addToCart(cartProduct);
+                        CartService.addToCart(product);
                         Fluttertoast.showToast(msg: "Added to cart");
                       },
                       child: const Icon(Icons.add_shopping_cart, color: Colors.deepPurple, size: 20),

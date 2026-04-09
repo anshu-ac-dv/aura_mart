@@ -4,6 +4,7 @@ import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -18,20 +19,20 @@ class _DashboardTabState extends State<DashboardTab> {
   String _selectedCategory = "All";
 
   // Mock Products
-  final List<Map<String, String>> _allProducts = [
-    {'name': 'Wireless Headphones', 'price': '99', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Running Shoes', 'price': '75', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Smart Watch', 'price': '150', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Coffee Maker', 'price': '45', 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1520970014086-2208d157c9e2?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Gaming Mouse', 'price': '30', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Designer Bag', 'price': '120', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Mechanical Keyboard', 'price': '85', 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Leather Wallet', 'price': '25', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Denim Jacket', 'price': '65', 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1576905341935-4ef24434494a?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Ceramic Vase', 'price': '35', 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Yoga Mat', 'price': '20', 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Face Cream', 'price': '15', 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Matte Lipstick', 'price': '12', 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1586776977607-310e9c725c37?q=80&w=1000&auto=format&fit=crop'},
+  final List<Map<String, dynamic>> _allProducts = [
+    {'name': 'Wireless Headphones', 'price': 99.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Running Shoes', 'price': 75.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Smart Watch', 'price': 150.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Coffee Maker', 'price': 45.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1520970014086-2208d157c9e2?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Gaming Mouse', 'price': 30.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Designer Bag', 'price': 120.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Mechanical Keyboard', 'price': 85.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Leather Wallet', 'price': 25.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Denim Jacket', 'price': 65.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1576905341935-4ef24434494a?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Ceramic Vase', 'price': 35.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Yoga Mat', 'price': 20.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Face Cream', 'price': 15.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Matte Lipstick', 'price': 12.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1586776977607-310e9c725c37?q=80&w=1000&auto=format&fit=crop'},
   ];
 
   final List<Map<String, dynamic>> _categories = [
@@ -42,9 +43,9 @@ class _DashboardTabState extends State<DashboardTab> {
     {'name': 'Beauty', 'icon': Icons.face, 'color': Colors.purple},
   ];
 
-  List<Map<String, String>> get _filteredProducts {
+  List<Map<String, dynamic>> get _filteredProducts {
     return _allProducts.where((p) {
-      final matchesSearch = p['name']!.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesSearch = p['name']!.toString().toLowerCase().contains(_searchQuery.toLowerCase());
       final matchesCategory = _selectedCategory == "All" || p['category'] == _selectedCategory;
       return matchesSearch && matchesCategory;
     }).toList();
@@ -278,12 +279,19 @@ class _DashboardTabState extends State<DashboardTab> {
                     children: [
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                        child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                        child: CachedNetworkImage(
+                          imageUrl: product['image']!.toString(),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          placeholder: (context, url) => Container(color: Colors.grey[200]),
+                          errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                        ),
                       ),
                       Positioned(
                         top: 5, right: 5,
                         child: StreamBuilder<bool>(
-                          stream: WishlistService.isInWishlistStream(product['name']!),
+                          stream: WishlistService.isInWishlistStream(product['name']!.toString()),
                           builder: (context, snapshot) {
                             bool isFav = snapshot.data ?? false;
                             return CircleAvatar(
@@ -309,7 +317,7 @@ class _DashboardTabState extends State<DashboardTab> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(product['name']!, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                      Text(product['name']!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -334,7 +342,7 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildAmazonProductCard(Map<String, String> product, bool isDarkMode) {
+  Widget _buildAmazonProductCard(Map<String, dynamic> product, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -349,7 +357,13 @@ class _DashboardTabState extends State<DashboardTab> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                  child: Image.network(product['image']!, fit: BoxFit.cover, width: double.infinity),
+                  child: CachedNetworkImage(
+                    imageUrl: product['image']!.toString(),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    placeholder: (context, url) => Container(color: Colors.grey[200]),
+                    errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                  ),
                 ),
                 Positioned(
                   top: 5, right: 5,
@@ -386,7 +400,7 @@ class _DashboardTabState extends State<DashboardTab> {
                   children: [
                     Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     const SizedBox(width: 5),
-                    Text("\$${(double.tryParse(product['price']!) ?? 0) + 20}", 
+                    Text("\$${(product['price'] as num) + 20}",
                       style: const TextStyle(fontSize: 10, color: Colors.grey, decoration: TextDecoration.lineThrough)),
                   ],
                 ),

@@ -36,10 +36,10 @@ class WishlistService {
       
       final doc = await docRef.get(const GetOptions(source: Source.serverAndCache)).timeout(const Duration(seconds: 5));
       if (doc.exists) {
-        await docRef.delete().timeout(const Duration(seconds: 5));
+        await docRef.delete();
       } else {
         // Ensure we save the product data as a dynamic map
-        await docRef.set(Map<String, dynamic>.from(product)).timeout(const Duration(seconds: 5));
+        await docRef.set(Map<String, dynamic>.from(product));
       }
     } catch (e) {
       print("Wishlist Error: $e");

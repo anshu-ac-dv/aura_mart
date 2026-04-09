@@ -58,6 +58,9 @@ class MyOrdersScreen extends StatelessWidget {
       } else if (order['orderDate'] is DateTime) {
         date = order['orderDate'];
       }
+    } else if (order['localTimestamp'] != null) {
+      // Fallback to local timestamp if serverTimestamp hasn't resolved yet
+      date = DateTime.tryParse(order['localTimestamp']) ?? DateTime.now();
     }
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(date);
 

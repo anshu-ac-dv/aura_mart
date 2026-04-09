@@ -2,6 +2,7 @@ import 'package:aura_mart/Services/CartService.dart';
 import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CategoryProductsScreen extends StatelessWidget {
   final String categoryName;
@@ -18,28 +19,28 @@ class CategoryProductsScreen extends StatelessWidget {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Mock data for products in this category
-    final List<Map<String, String>> products = [
+    final List<Map<String, dynamic>> products = [
       {
         'name': '$categoryName Product 1',
-        'price': '120',
+        'price': 120.0,
         'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
       {
         'name': '$categoryName Product 2',
-        'price': '85',
+        'price': 85.0,
         'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
       {
         'name': '$categoryName Product 3',
-        'price': '45',
+        'price': 45.0,
         'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
       {
         'name': '$categoryName Product 4',
-        'price': '210',
+        'price': 210.0,
         'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
@@ -105,7 +106,7 @@ class CategoryProductsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Map<String, String> product, bool isDarkMode) {
+  Widget _buildProductCard(BuildContext context, Map<String, dynamic> product, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -126,11 +127,13 @@ class CategoryProductsScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                  child: Image.network(
-                    product['image']!,
+                  child: CachedNetworkImage(
+                    imageUrl: product['image']!.toString(),
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
+                    placeholder: (context, url) => Container(color: Colors.grey[200]),
+                    errorWidget: (context, url, error) => const Icon(Icons.broken_image),
                   ),
                 ),
                 Positioned(
