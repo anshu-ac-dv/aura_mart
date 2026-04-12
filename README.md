@@ -52,14 +52,16 @@ graph TD
 
 | Feature | Description |
 | :--- | :--- |
-| **⚡ Intelligent Onboarding** | High-fidelity animated splash with real-time session validation. |
-| **🛡️ Secure Auth Core** | Firebase-powered Login, Registration, and Password Recovery. |
+| **⚡ Intelligent Onboarding** | High-fidelity animated splash with real-time session validation and a modern brand identity. |
+| **🛡️ Secure Auth Core** | Firebase-powered Login, Registration, and Password Recovery with profile synchronization. |
 | **🔍 Smart Discovery** | Real-time search engine with circular category filtering and expanded product catalog. |
-| **❤️ Cloud Wishlist** | **NEW:** Real-time heart icons on Dashboard with instant Firestore sync and direct "Add to Cart" support. |
-| **🛒 Advanced Cart** | Live quantity management, swipe-to-delete, and real-time subtotal tracking. |
-| **💳 Payment Vault** | **UPDATED:** Manage UPI IDs and Cards. Supports **Cash on Delivery** with confirmation alerts. |
+| **🖼️ Optimized Media** | **NEW:** Global integration of `cached_network_image` for flicker-free browsing and reduced data usage. |
+| **❤️ Cloud Wishlist** | Real-time heart icons on Dashboard with instant Firestore sync and direct "Add to Cart" support. |
+| **🛒 Advanced Cart** | Live quantity management, swipe-to-delete, and real-time numeric subtotal tracking. |
+| **📶 Offline Reliability** | **UPDATED:** Order synchronization with local timestamp fallbacks ensures orders appear instantly even without a connection. |
+| **💳 Payment Vault** | Manage UPI IDs and Cards. Supports **Cash on Delivery** with professional confirmation alerts. |
 | **🎉 Success Flow** | Celebratory checkout animations with automatic redirection to Order History. |
-| **📦 Order Tracking** | Detailed history with collapsible status cards and server timestamps. |
+| **📦 Order Tracking** | Detailed history with collapsible status cards, actual product thumbnails, and server timestamps. |
 | **🌙 Dynamic Themes** | Deep Purple branding with professional Light and Dark mode optimization. |
 
 ---
@@ -67,20 +69,20 @@ graph TD
 ## 🛣️ The Journey (Workflow)
 
 ### 🟢 Phase 1: The Identity Portal
-*   **Premium Entrance:** An immersive 4-second animation that welcomes users while the "Identity Guard" checks for an active session.
-*   **Security First:** Distraction-free authentication forms with profile synchronization.
+*   **Premium Entrance:** An immersive animation that welcomes users while the "Identity Guard" checks for an active session.
+*   **Modern Branding:** A unique shopping-bag inspired icon sets a high-standard retail tone from the home screen.
 
 ### 🔵 Phase 2: Product Discovery
 *   **Modern Hub:** A feature-rich dashboard with delivery location tracking and interactive deal sliders.
-*   **Real-Time Likes:** Tap the heart on any product (Dashboard or Category) to save it instantly to your cloud wishlist.
+*   **High Performance:** Optimized image caching ensures that product photos load instantly across the Dashboard, Wishlist, and Cart.
 
 ### 🟣 Phase 3: Selection & Transaction
-*   **Smart Cart:** Dynamic quantity controls and a professional checkout overlay.
+*   **Smart Cart:** Dynamic quantity controls and a professional checkout overlay with numeric price precision.
 *   **Flexible Payments:** Choose between saved UPI IDs, Credit/Debit cards, or the secure COD confirmation flow.
 
 ### 🟡 Phase 4: Order Lifecycle
 *   **Visual Gratification:** Enjoy a high-quality success animation upon order placement.
-*   **Automatic Navigation:** No need to click—the app takes you straight to your order history after 3 seconds.
+*   **Reliable History:** Orders are visible immediately in the history tab, featuring rich media thumbnails for every purchased item.
 
 ---
 
@@ -88,8 +90,9 @@ graph TD
 
 *   **Frontend Framework:** Flutter 3.x (Material 3)
 *   **Backend Services:** Firebase (Auth, Firestore, Storage)
-*   **State Management:** Real-time Streams (Firestore Snapshots)
-*   **Architecture Pattern:** Clean UI/Service separation
+*   **Offline Support:** Firestore Persistence + Local Fallback Logic
+*   **Performance:** Advanced Image Caching (`cached_network_image`)
+*   **Architecture Pattern:** Clean UI/Service separation with numeric data integrity
 
 ---
 
