@@ -62,6 +62,7 @@ class CartService {
         'name': item['name'],
         'price': item['price'],
         'qty': item['qty'],
+        'image': item['image'] ?? '', // Added image field to serialization
       };
     }).toList();
   }
