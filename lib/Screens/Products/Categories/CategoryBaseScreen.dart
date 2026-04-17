@@ -33,7 +33,7 @@ class CategoryBaseScreen extends StatelessWidget {
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [themeColor, themeColor.withOpacity(0.7)],
+                    colors: [themeColor, themeColor.withValues(alpha: 0.7)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -103,7 +103,7 @@ class CategoryBaseScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )
@@ -129,7 +129,7 @@ class CategoryBaseScreen extends StatelessWidget {
                   top: 10, right: 10,
                   child: CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.white.withOpacity(0.9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
                     child: const Icon(Icons.favorite_border, size: 18, color: Colors.red),
                   ),
                 )

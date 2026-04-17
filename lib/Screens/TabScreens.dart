@@ -107,7 +107,7 @@ class DashboardTab extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: Colors.deepPurple.withOpacity(0.1),
+            backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
             child: Icon(icon, color: Colors.deepPurple),
           ),
           const SizedBox(height: 5),
@@ -124,7 +124,7 @@ class DashboardTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 2,
             blurRadius: 5,
           ),

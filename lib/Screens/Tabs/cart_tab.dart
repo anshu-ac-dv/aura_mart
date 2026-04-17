@@ -281,7 +281,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                     ),
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(15)),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(15)),
                       child: const Icon(Icons.shopping_cart_checkout, color: Colors.white),
                     )
                   ],
@@ -304,7 +304,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
           
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -345,20 +345,20 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           color: isDarkMode ? Colors.grey[900] : Colors.white,
           borderRadius: BorderRadius.circular(25),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 5))],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDarkMode ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 5))],
         ),
         child: Row(
           children: [
             Container(
               height: 70, width: 70,
-              decoration: BoxDecoration(color: Colors.deepPurple.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
+              decoration: BoxDecoration(color: Colors.deepPurple.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(20)),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: item['image'] != null && item['image'] != ''
                     ? CachedNetworkImage(
                         imageUrl: item['image'],
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Center(child: Icon(item['icon'], color: Colors.deepPurple.withOpacity(0.3))),
+                        placeholder: (context, url) => Center(child: Icon(item['icon'], color: Colors.deepPurple.withValues(alpha: 0.3))),
                         errorWidget: (context, url, error) => Icon(item['icon'], color: Colors.deepPurple),
                       )
                     : Icon(item['icon'], color: Colors.deepPurple, size: 30),
@@ -411,7 +411,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, -10))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, -10))],
       ),
       child: Column(
         children: [
@@ -466,7 +466,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
               children: [
                 Container(
                   padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
                   child: const Icon(Icons.check_circle, color: Colors.green, size: 100),
                 ),
                 const SizedBox(height: 20),

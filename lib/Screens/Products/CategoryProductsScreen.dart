@@ -113,7 +113,7 @@ class CategoryProductsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )
@@ -145,7 +145,7 @@ class CategoryProductsScreen extends StatelessWidget {
                       bool isFav = snapshot.data ?? false;
                       return CircleAvatar(
                         radius: 16,
-                        backgroundColor: Colors.white.withOpacity(0.9),
+                        backgroundColor: Colors.white.withValues(alpha: 0.9),
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),

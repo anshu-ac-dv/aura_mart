@@ -102,7 +102,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )
@@ -130,7 +130,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   right: 10,
                   child: CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.white.withOpacity(0.9),
+                    backgroundColor: Colors.white.withValues(alpha: 0.9),
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       icon: const Icon(Icons.favorite, size: 18, color: Colors.red),

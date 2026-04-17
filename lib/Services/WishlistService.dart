@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class WishlistService {
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -42,7 +43,7 @@ class WishlistService {
         await docRef.set(Map<String, dynamic>.from(product));
       }
     } catch (e) {
-      print("Wishlist Error: $e");
+      debugPrint("Wishlist Error: $e");
       // If it's a network issue, Firestore should normally queue it if persistence is enabled.
       // But we are seeing [cloud_firestore/unavailable].
       rethrow;
