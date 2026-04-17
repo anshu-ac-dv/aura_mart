@@ -3,7 +3,6 @@ import 'package:aura_mart/Screens/HomeScreen.dart';
 import 'package:aura_mart/Screens/LoginScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -81,14 +80,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animated Lottie Logo
+            // Reverted to Premium Icon Design
             FadeTransition(
               opacity: _animation,
               child: ScaleTransition(
                 scale: _animation,
                 child: Container(
-                  width: 250,
-                  height: 250,
+                  padding: const EdgeInsets.all(25),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -96,16 +94,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       BoxShadow(color: Colors.black26, blurRadius: 20, spreadRadius: 5)
                     ]
                   ),
-                  child: Center(
-                    child: Lottie.network(
-                      'https://assets2.lottiefiles.com/packages/lf20_m6cuL6.json', // Animated Shopping Cart
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 100,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    size: 80,
+                    color: Colors.deepPurple,
                   ),
                 ),
               ),
