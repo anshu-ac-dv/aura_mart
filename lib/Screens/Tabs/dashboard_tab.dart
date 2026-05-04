@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lottie/lottie.dart';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -15,8 +16,10 @@ class DashboardTab extends StatefulWidget {
 
 class _DashboardTabState extends State<DashboardTab> {
   final TextEditingController _searchController = TextEditingController();
+  final PageController _promoController = PageController();
   String _searchQuery = "";
   String _selectedCategory = "All";
+  int _currentPromoPage = 0;
 
   // Mock Products
   final List<Map<String, dynamic>> _allProducts = [
@@ -54,6 +57,7 @@ class _DashboardTabState extends State<DashboardTab> {
   @override
   void dispose() {
     _searchController.dispose();
+    _promoController.dispose();
     super.dispose();
   }
 
@@ -69,18 +73,43 @@ class _DashboardTabState extends State<DashboardTab> {
           // 1. BEAUTIFUL COLLAPSIBLE APPBAR
           SliverAppBar(
             pinned: true,
-            expandedHeight: 140,
-            backgroundColor: Colors.deepPurple,
-            elevation: 0,
-            title: const Text(
-              "AURA MART",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
+            expandedHeight: 160,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.deepPurple, Colors.indigo],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -20,
+                      top: -20,
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.white.withAlpha(20),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              title: const Text(
+                "AURA MART",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                ),
+              ),
+              centerTitle: false,
+              titlePadding: const EdgeInsets.only(left: 15, bottom: 95),
             ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             actions: [
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white, size: 22),
@@ -97,7 +126,7 @@ class _DashboardTabState extends State<DashboardTab> {
               )
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(70),
+              preferredSize: const Size.fromHeight(75),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
                 child: Container(
@@ -105,7 +134,13 @@ class _DashboardTabState extends State<DashboardTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(20),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -162,17 +197,27 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _buildLocationBar(bool isDarkMode) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      color: Colors.deepPurple.withAlpha(20),
-      child: const Row(
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      color: Colors.deepPurple.withAlpha(15),
+      child: Row(
         children: [
-          Icon(Icons.location_on_outlined, color: Colors.deepPurple, size: 18),
-          SizedBox(width: 5),
-          Text(
-            "Deliver to Anshu - New Delhi 110001",
-            style: TextStyle(color: Colors.deepPurple, fontSize: 13, fontWeight: FontWeight.w500),
+          const Icon(Icons.location_on_outlined, color: Colors.deepPurple, size: 18),
+          const SizedBox(width: 5),
+          const Expanded(
+            child: Text(
+              "Deliver to Anshu - New Delhi 110001",
+              style: TextStyle(color: Colors.deepPurple, fontSize: 13, fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          Icon(Icons.keyboard_arrow_down, color: Colors.deepPurple, size: 18),
+          SizedBox(
+            height: 25,
+            width: 25,
+            child: Lottie.network(
+              'https://assets9.lottiefiles.com/packages/lf20_jt7poy9k.json', // Simple delivery animation
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.keyboard_arrow_down, color: Colors.deepPurple, size: 18),
+            ),
+          ),
         ],
       ),
     );
@@ -180,10 +225,11 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildHorizontalCategories(bool isDarkMode) {
     return Container(
-      height: 95,
+      height: 100,
       margin: const EdgeInsets.only(top: 10),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
         itemCount: _categories.length,
         itemBuilder: (context, index) {
           final cat = _categories[index];
@@ -191,22 +237,33 @@ class _DashboardTabState extends State<DashboardTab> {
           return GestureDetector(
             onTap: () => setState(() => _selectedCategory = cat['name']),
             child: Container(
-              width: 80,
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              width: 85,
+              padding: const EdgeInsets.symmetric(vertical: 5),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withAlpha(30),
-                    child: Icon(cat['icon'], color: isSelected ? Colors.white : cat['color']),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected ? Colors.deepPurple : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 26,
+                      backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withAlpha(35),
+                      child: Icon(cat['icon'], color: isSelected ? Colors.white : cat['color'], size: 22),
+                    ),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 6),
                   Text(
                     cat['name'],
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 12,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      color: isDarkMode ? Colors.white : Colors.black,
+                      color: isSelected ? Colors.deepPurple : (isDarkMode ? Colors.white70 : Colors.black87),
                     ),
                   ),
                 ],
@@ -219,15 +276,36 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildPromoSlider() {
-    return Container(
-      height: 180,
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      child: PageView(
-        children: [
-          _buildBannerImage("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop"),
-          _buildBannerImage("https://images.unsplash.com/photo-1607083206869-4c7672df7231?q=80&w=1000&auto=format&fit=crop"),
-        ],
-      ),
+    return Column(
+      children: [
+        Container(
+          height: 170,
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          child: PageView(
+            controller: _promoController,
+            onPageChanged: (index) {
+              setState(() => _currentPromoPage = index);
+            },
+            children: [
+              _buildBannerImage("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop"),
+              _buildBannerImage("https://images.unsplash.com/photo-1607083206869-4c7672df7231?q=80&w=1000&auto=format&fit=crop"),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(2, (index) => AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            width: _currentPromoPage == index ? 16 : 8,
+            height: 4,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(2),
+              color: _currentPromoPage == index ? Colors.deepPurple : Colors.grey.withAlpha(100),
+            ),
+          )),
+        )
+      ],
     );
   }
 
@@ -366,6 +444,20 @@ class _DashboardTabState extends State<DashboardTab> {
                   ),
                 ),
                 Positioned(
+                  top: 8, left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      "20% OFF",
+                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                Positioned(
                   top: 5, right: 5,
                   child: StreamBuilder<bool>(
                     stream: WishlistService.isInWishlistStream(product['name']!),
@@ -373,7 +465,7 @@ class _DashboardTabState extends State<DashboardTab> {
                       bool isFav = snapshot.data ?? false;
                       return CircleAvatar(
                         radius: 15,
-                        backgroundColor: Colors.white.withAlpha(200),
+                        backgroundColor: Colors.white.withAlpha(220),
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
