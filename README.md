@@ -9,7 +9,7 @@
 
 **Aura Mart** is a high-performance, premium e-commerce application crafted with **Flutter** and powered by **Firebase**. It offers a seamless, secure, and visually stunning shopping experience designed for the modern user.
 
-[Explore the Flow](#-visual-flow) • [Key Features](#-premium-features) • [Workflow](#-the-journey) • [Installation](#-installation--setup)
+[Explore the Flow](#-visual-flow) • [Key Features](#-premium-features-enhanced) • [Workflow](#-the-journey) • [Installation](#-installation--setup)
 
 </div>
 
@@ -48,21 +48,29 @@ graph TD
 
 ---
 
-## 💎 Premium Features
+## 💎 Premium Features (Enhanced)
 
 | Feature | Description |
 | :--- | :--- |
 | **⚡ Intelligent Onboarding** | High-fidelity animated splash with real-time session validation and a modern brand identity. |
 | **🛡️ Secure Auth Core** | Firebase-powered Login, Registration, and Password Recovery with profile synchronization. |
+| **🎨 UI/UX Excellence** | **NEW:** Gradient-infused `SliverAppBar`, glassmorphic elements, and polished product discovery cards. |
 | **🔍 Smart Discovery** | Real-time search engine with circular category filtering and expanded product catalog. |
-| **🖼️ Optimized Media** | **NEW:** Global integration of `cached_network_image` for flicker-free browsing and reduced data usage. |
+| **🖼️ Optimized Media** | Global integration of `cached_network_image` for flicker-free browsing and reduced data usage. |
 | **❤️ Cloud Wishlist** | Real-time heart icons on Dashboard with instant Firestore sync and direct "Add to Cart" support. |
 | **🛒 Advanced Cart** | Live quantity management, swipe-to-delete, and real-time numeric subtotal tracking. |
-| **📶 Offline Reliability** | **UPDATED:** Order synchronization with local timestamp fallbacks ensures orders appear instantly even without a connection. |
-| **💳 Payment Vault** | Manage UPI IDs and Cards. Supports **Cash on Delivery** with professional confirmation alerts. |
-| **🎉 Success Flow** | Celebratory checkout animations with automatic redirection to Order History. |
+| **📶 Offline Reliability** | Order synchronization with local timestamp fallbacks ensures orders appear instantly even without a connection. |
+| **🎉 Success Flow** | **Lottie-powered** checkout animations with automatic redirection to Order History. |
 | **📦 Order Tracking** | Detailed history with collapsible status cards, actual product thumbnails, and server timestamps. |
 | **🌙 Dynamic Themes** | Deep Purple branding with professional Light and Dark mode optimization. |
+
+---
+
+## 🎨 Design Philosophy
+Aura Mart follows the **"Aura Design System"**, focusing on:
+1. **Visual Hierarchy:** Using gradients and depth to guide the user's eye.
+2. **Motion Design:** Subtle animations and Lottie micro-interactions to provide feedback.
+3. **Consistency:** A unified color palette (Deep Purple & Indigo) across all modules.
 
 ---
 
@@ -90,9 +98,9 @@ graph TD
 
 *   **Frontend Framework:** Flutter 3.x (Material 3)
 *   **Backend Services:** Firebase (Auth, Firestore, Storage)
-*   **Offline Support:** Firestore Persistence + Local Fallback Logic
+*   **Animations:** Lottie & Flutter Animate
 *   **Performance:** Advanced Image Caching (`cached_network_image`)
-*   **Architecture Pattern:** Clean UI/Service separation with numeric data integrity
+*   **Architecture Pattern:** Clean UI/Service separation
 
 ---
 
