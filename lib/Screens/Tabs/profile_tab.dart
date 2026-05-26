@@ -44,47 +44,72 @@ class ProfileTab extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             child: Column(
               children: [
-                const CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.deepPurple,
-                  child: Icon(Icons.person, size: 50, color: Colors.white),
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    const CircleAvatar(
+                      radius: 55,
+                      backgroundColor: Colors.deepPurple,
+                      child: CircleAvatar(
+                        radius: 52,
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.person, size: 60, color: Colors.deepPurple),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: const BoxDecoration(color: Colors.green, shape: BoxShape.circle),
+                      child: const Icon(Icons.edit, size: 15, color: Colors.white),
+                    )
+                  ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 Text(
-                  user?.displayName ?? 'User Name',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  user?.displayName ?? 'Aura User',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  user?.email ?? 'email@example.com',
-                  style: const TextStyle(color: Colors.grey),
+                  user?.email ?? 'aura.user@example.com',
+                  style: const TextStyle(color: Colors.grey, letterSpacing: 1),
                 ),
+                const SizedBox(height: 25),
+                
+                // --- QUICK STATS ---
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatCard("12", "Orders", isDarkMode),
+                    _buildStatCard("5", "Wishlist", isDarkMode),
+                    _buildStatCard("2", "Coupons", isDarkMode),
+                  ],
+                ),
+                
                 const SizedBox(height: 30),
-                _buildProfileOption(Icons.shopping_bag, 'My Orders', isDarkMode, onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MyOrdersScreen()),
-                  );
+                
+                _buildProfileOption(Icons.shopping_bag_outlined, 'My Orders', isDarkMode, onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
                 }),
-                _buildProfileOption(Icons.favorite, 'Wishlist', isDarkMode, onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const WishlistScreen()),
-                  );
+                _buildProfileOption(Icons.favorite_outline, 'Wishlist', isDarkMode, onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const WishlistScreen()));
                 }),
-                _buildProfileOption(Icons.location_on, 'Shipping Address', isDarkMode, onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ShippingAddressScreen()),
-                  );
+                _buildProfileOption(Icons.location_on_outlined, 'Shipping Address', isDarkMode, onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ShippingAddressScreen()));
                 }),
-                _buildProfileOption(Icons.payment, 'Payment Methods', isDarkMode, onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const PaymentMethodsScreen()),
-                  );
+                _buildProfileOption(Icons.payment_outlined, 'Payment Methods', isDarkMode, onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodsScreen()));
                 }),
-                const Divider(),
-                _buildProfileOption(Icons.logout, 'Logout', isDarkMode, color: Colors.red, onTap: () async {
+                
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Divider(),
+                ),
+                
+                _buildProfileOption(Icons.help_outline, 'Help & Support', isDarkMode),
+                _buildProfileOption(Icons.settings_outlined, 'Settings', isDarkMode),
+                
+                const SizedBox(height: 10),
+                
+                _buildProfileOption(Icons.logout, 'Logout', isDarkMode, color: Colors.redAccent, onTap: () async {
                   await FirebaseAuth.instance.signOut();
                   Fluttertoast.showToast(msg: "Logged out successfully");
                   if (context.mounted) {
@@ -106,15 +131,54 @@ class ProfileTab extends StatelessWidget {
 
   Widget _buildProfileOption(IconData icon, String title, bool isDarkMode, {Color? color, VoidCallback? onTap}) {
     return ListTile(
-      leading: Icon(icon, color: color ?? Colors.deepPurple),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: (color ?? Colors.deepPurple).withAlpha(20),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: color ?? Colors.deepPurple, size: 22),
+      ),
       title: Text(
         title,
         style: TextStyle(
-          color: color ?? (isDarkMode ? Colors.white : Colors.black),
+          color: color ?? (isDarkMode ? Colors.white : Colors.black87),
+          fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: Icon(Icons.arrow_forward_ios, size: 14, color: isDarkMode ? Colors.white24 : Colors.black26),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildStatCard(String value, String label, bool isDarkMode) {
+    return Container(
+      width: 100,
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(isDarkMode ? 50 : 10),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: isDarkMode ? Colors.white60 : Colors.grey[600]),
+          ),
+        ],
+      ),
     );
   }
 }

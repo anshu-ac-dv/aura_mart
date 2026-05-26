@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lottie/lottie.dart';
+import 'dart:async';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -20,6 +21,9 @@ class _DashboardTabState extends State<DashboardTab> {
   String _searchQuery = "";
   String _selectedCategory = "All";
   int _currentPromoPage = 0;
+  
+  late Timer _timer;
+  Duration _timeLeft = const Duration(hours: 12, minutes: 30, seconds: 0);
 
   // Mock Products
   final List<Map<String, dynamic>> _allProducts = [
@@ -55,7 +59,24 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _timeLeft = _timeLeft - const Duration(seconds: 1);
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _timer.cancel();
     _searchController.dispose();
     _promoController.dispose();
     super.dispose();
@@ -191,6 +212,60 @@ class _DashboardTabState extends State<DashboardTab> {
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showQuickActionMenu(context, isDarkMode);
+        },
+        backgroundColor: Colors.deepPurple,
+        elevation: 10,
+        child: const Icon(Icons.bolt, color: Colors.white, size: 30),
+      ),
+    );
+  }
+
+  void _showQuickActionMenu(BuildContext context, bool isDarkMode) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Quick Actions", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildQuickAction(Icons.support_agent, "Support", Colors.orange),
+                _buildQuickAction(Icons.local_offer, "Coupons", Colors.green),
+                _buildQuickAction(Icons.track_changes, "Track", Colors.blue),
+                _buildQuickAction(Icons.qr_code_scanner, "Scan", Colors.purple),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAction(IconData icon, String label, Color color) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 25,
+          backgroundColor: color.withAlpha(20),
+          child: Icon(icon, color: color),
+        ),
+        const SizedBox(height: 8),
+        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+      ],
     );
   }
 
@@ -320,12 +395,26 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildSectionHeader(String title, bool isDarkMode) {
+    String timeStr = "${_timeLeft.inHours.toString().padLeft(2, '0')}:${(_timeLeft.inMinutes % 60).toString().padLeft(2, '0')}:${(_timeLeft.inSeconds % 60).toString().padLeft(2, '0')}";
+    
     return Padding(
       padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
+          Row(
+            children: [
+              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
+              if (title == "Deals of the Day") ...[
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: Colors.red.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+                  child: Text(timeStr, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
+                )
+              ]
+            ],
+          ),
           const Text("See all", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500)),
         ],
       ),

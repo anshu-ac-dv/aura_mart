@@ -5,6 +5,7 @@ import 'package:aura_mart/Services/PaymentService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lottie/lottie.dart';
 
 class CartTab extends StatefulWidget {
   const CartTab({super.key});
@@ -458,37 +459,44 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         color: isDarkMode ? Colors.black : Colors.white,
         width: double.infinity,
         height: double.infinity,
-        child: Center(
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
-                  child: const Icon(Icons.check_circle, color: Colors.green, size: 100),
+        child: Stack(
+          children: [
+            Center(
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Lottie.network(
+                      'https://assets10.lottiefiles.com/packages/lf20_kz9sxfat.json', // Order Success Lottie
+                      height: 250,
+                      repeat: false,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text("Order Placed!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 15),
+                    const Text("Your order has been placed successfully.", style: TextStyle(color: Colors.grey, fontSize: 16), textAlign: TextAlign.center),
+                    const SizedBox(height: 40),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                      onPressed: () {
+                        setState(() => _showSuccessAnimation = false);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
+                      },
+                      child: const Text("VIEW MY ORDERS", style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                const Text("Order Placed!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 15),
-                const Text("Your order has been placed successfully.", style: TextStyle(color: Colors.grey, fontSize: 16), textAlign: TextAlign.center),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                  onPressed: () {
-                    setState(() => _showSuccessAnimation = false);
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
-                  },
-                  child: const Text("VIEW MY ORDERS", style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-                TextButton(
-                  onPressed: () => setState(() => _showSuccessAnimation = false),
-                  child: const Text("CONTINUE SHOPPING", style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
-                )
-              ],
+              ),
             ),
-          ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Lottie.network(
+                'https://assets2.lottiefiles.com/packages/lf20_obhbe3t1.json', // Confetti
+                repeat: false,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -499,9 +507,31 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_basket_outlined, size: 100, color: isDarkMode ? Colors.white24 : Colors.grey[300]),
+          Lottie.network(
+            'https://assets5.lottiefiles.com/packages/lf20_qh5z2fdq.json',
+            height: 200,
+            repeat: true,
+          ),
           const SizedBox(height: 20),
-          Text('Your cart is empty', style: TextStyle(fontSize: 18, color: isDarkMode ? Colors.white38 : Colors.grey[400], fontWeight: FontWeight.w500)),
+          Text(
+            'Your cart is empty',
+            style: TextStyle(
+              fontSize: 18,
+              color: isDarkMode ? Colors.white38 : Colors.grey[600],
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {
+              // Navigate to home or discovery
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text("Go Shopping", style: TextStyle(color: Colors.white)),
+          )
         ],
       ),
     );
