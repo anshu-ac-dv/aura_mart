@@ -90,10 +90,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                     ElevatedButton.icon(
-                      onPressed: () {
+                      onPressed: () async {
+                        if (items.isEmpty) return;
+                        
+                        // Add all to cart
                         for (var item in items) {
                           CartService.addToCart(item);
                         }
+                        
+                        // Clear wishlist from Firestore
+                        await WishlistService.clearWishlist();
+
                         Fluttertoast.showToast(msg: "All items moved to cart!");
                       },
                       icon: const Icon(Icons.shopping_cart_outlined, size: 18),

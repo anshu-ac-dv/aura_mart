@@ -35,9 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      extendBody: true, // Content flows behind the floating nav bar
-      // AppBar is now handled individually inside each tab for a unique design
-      body: _widgetOptions[_selectedIndex],
+      extendBody: true,
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetOptions,
+      ),
 
       // --- UNIQUE FLOATING "BUBBLE" NAVIGATION BAR ---
       bottomNavigationBar: Container(

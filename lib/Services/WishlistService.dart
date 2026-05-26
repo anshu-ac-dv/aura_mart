@@ -13,10 +13,11 @@ class WishlistService {
     return _db.collection('users').doc(user.uid).collection('wishlist');
   }
 
-  // Unified ID generation to prevent mismatches
+  // Unified ID generation to prevent mismatches and invalid characters
   static String generateDocId(String? name) {
     if (name == null || name.isEmpty) return "unknown_product";
-    return name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '_');
+    // Replace any non-alphanumeric character with underscore for safe Firestore IDs
+    return name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
   }
 
   // Logic: Add or Remove product from Firestore
@@ -31,21 +32,24 @@ class WishlistService {
       final docId = generateDocId(name);
       final docRef = wishlist.doc(docId);
 
-      // We'll use a transaction or a simple check-and-set. 
-      // Given the 'unavailable' error, it might be due to offline persistence issues 
-      // or network instability. Let's try to set it with a timeout or handle it gracefully.
-      
-      final doc = await docRef.get(const GetOptions(source: Source.serverAndCache)).timeout(const Duration(seconds: 5));
+      // Attempt to get the document. If offline, Firestore returns cached data.
+      // If the server is unreachable and cache is empty, it might throw 'unavailable'.
+      DocumentSnapshot doc;
+      try {
+        doc = await docRef.get(const GetOptions(source: Source.serverAndCache));
+      } catch (e) {
+        // Fallback to cache if server is unavailable
+        doc = await docRef.get(const GetOptions(source: Source.cache));
+      }
+
       if (doc.exists) {
         await docRef.delete();
       } else {
-        // Ensure we save the product data as a dynamic map
         await docRef.set(Map<String, dynamic>.from(product));
       }
     } catch (e) {
       debugPrint("Wishlist Error: $e");
-      // If it's a network issue, Firestore should normally queue it if persistence is enabled.
-      // But we are seeing [cloud_firestore/unavailable].
+      // If both server and cache fail, we notify the UI
       rethrow;
     }
   }
