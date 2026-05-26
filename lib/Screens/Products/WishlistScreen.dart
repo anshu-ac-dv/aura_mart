@@ -3,6 +3,7 @@ import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lottie/lottie.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -19,10 +20,25 @@ class _WishlistScreenState extends State<WishlistScreen> {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('My Wishlist', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('My Wishlist', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: WishlistService.wishlistStream,
+            builder: (context, snapshot) {
+              final items = snapshot.data ?? [];
+              if (items.isEmpty) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.delete_sweep_outlined),
+                tooltip: "Clear Wishlist",
+                onPressed: () => _showClearConfirmation(),
+              );
+            }
+          ),
+          const SizedBox(width: 10),
+        ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: WishlistService.wishlistStream,
@@ -58,7 +74,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
             children: [
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(25),
+                padding: const EdgeInsets.fromLTRB(25, 10, 25, 30),
                 decoration: const BoxDecoration(
                   color: Colors.deepPurple,
                   borderRadius: BorderRadius.only(
@@ -66,9 +82,30 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     bottomRight: Radius.circular(40),
                   ),
                 ),
-                child: Text(
-                  'You have ${items.length} items saved',
-                  style: const TextStyle(color: Colors.white70, fontSize: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${items.length} items saved',
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        for (var item in items) {
+                          CartService.addToCart(item);
+                        }
+                        Fluttertoast.showToast(msg: "All items moved to cart!");
+                      },
+                      icon: const Icon(Icons.shopping_cart_outlined, size: 18),
+                      label: const Text("MOVE ALL"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.deepPurple,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                    )
+                  ],
                 ),
               ),
               Expanded(
@@ -79,7 +116,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 15,
                     crossAxisSpacing: 15,
-                    childAspectRatio: 0.72,
+                    childAspectRatio: 0.7,
                   ),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
@@ -99,10 +136,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withAlpha(isDarkMode ? 50 : 10),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )
@@ -115,7 +152,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                   child: CachedNetworkImage(
                     imageUrl: product['image'] ?? '',
                     fit: BoxFit.cover,
@@ -126,22 +163,24 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   ),
                 ),
                 Positioned(
-                  top: 10,
-                  right: 10,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.white.withValues(alpha: 0.9),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.favorite, size: 18, color: Colors.red),
-                      onPressed: () async {
-                        try {
-                          await WishlistService.toggleWishlist(product);
-                          Fluttertoast.showToast(msg: "Removed from Wishlist");
-                        } catch (e) {
-                          Fluttertoast.showToast(msg: "Action failed. Check connection.");
-                        }
-                      },
+                  top: 8,
+                  right: 8,
+                  child: InkWell(
+                    onTap: () async {
+                      try {
+                        await WishlistService.toggleWishlist(product);
+                        Fluttertoast.showToast(msg: "Removed from Wishlist");
+                      } catch (e) {
+                        Fluttertoast.showToast(msg: "Action failed.");
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(220),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.favorite, size: 18, color: Colors.red),
                     ),
                   ),
                 )
@@ -158,31 +197,38 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: isDarkMode ? Colors.white : Colors.black,
+                    color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "\$${product['price'] ?? '0'}",
-                      style: const TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                const SizedBox(height: 4),
+                Text(
+                  "\$${product['price'] ?? '0'}",
+                  style: const TextStyle(
+                    color: Colors.deepPurple,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 35,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      CartService.addToCart(product);
+                      Fluttertoast.showToast(msg: "Added to cart");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    InkWell(
-                      onTap: () {
-                        CartService.addToCart(product);
-                        Fluttertoast.showToast(msg: "Added to cart");
-                      },
-                      child: const Icon(Icons.add_shopping_cart, color: Colors.deepPurple, size: 20),
-                    ),
-                  ],
+                    child: const Text("ADD TO CART", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ],
             ),
@@ -197,15 +243,50 @@ class _WishlistScreenState extends State<WishlistScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.favorite_border, size: 100, color: isDarkMode ? Colors.white24 : Colors.grey[300]),
-          const SizedBox(height: 20),
+          Lottie.network(
+            'https://assets9.lottiefiles.com/packages/lf20_96m5z9y8.json', // Empty Heart Animation
+            height: 200,
+            repeat: true,
+          ),
+          const SizedBox(height: 10),
           Text(
             'Your wishlist is empty',
             style: TextStyle(
               fontSize: 18,
-              color: isDarkMode ? Colors.white38 : Colors.grey[400],
-              fontWeight: FontWeight.w500,
+              color: isDarkMode ? Colors.white38 : Colors.grey[600],
+              fontWeight: FontWeight.w600,
             ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            ),
+            child: const Text("DISCOVER PRODUCTS", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showClearConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Clear Wishlist?"),
+        content: const Text("Are you sure you want to remove all items from your wishlist?"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL")),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await WishlistService.clearWishlist();
+              Fluttertoast.showToast(msg: "Wishlist cleared");
+            },
+            child: const Text("CLEAR ALL", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

@@ -70,4 +70,21 @@ class WishlistService {
       return snapshot.docs.map((doc) => doc.data()).toList();
     });
   }
+
+  // Clear all items from the wishlist
+  static Future<void> clearWishlist() async {
+    try {
+      final wishlist = _userWishlist;
+      if (wishlist == null) return;
+
+      final snapshot = await wishlist.get();
+      final batch = _db.batch();
+      for (var doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint("Clear Wishlist Error: $e");
+    }
+  }
 }
