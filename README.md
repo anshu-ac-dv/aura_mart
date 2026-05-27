@@ -1,16 +1,6 @@
 <div align="center">
 
-<br/>
 
-```
-╔═══════════════════════════════════════════╗
-║                                           ║
-║  ✨  A U R A   M A R T  ✨                ║
-║                                           ║
-║   The Future of Premium E-Commerce       ║
-║                                           ║
-╚═══════════════════════════════════════════╝
-```
 
 ### *Redefining Mobile Shopping Excellence*
 
