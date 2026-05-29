@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:lottie/lottie.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -26,88 +27,72 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
-      Fluttertoast.showToast(msg: "Password reset link sent! Check your email.");
-      if (mounted) {
-        Navigator.pop(context); // Go back to login after sending
-      }
+      Fluttertoast.showToast(msg: "Reset link sent! Check your inbox.");
+      if (mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       Fluttertoast.showToast(msg: e.message ?? "An error occurred");
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Reset Password'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(25.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(30.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.lock_reset_rounded,
-              size: 100,
-              color: Colors.deepPurple,
+            const SizedBox(height: 20),
+            Lottie.network(
+              'https://assets5.lottiefiles.com/packages/lf20_m69yvcmv.json', // Security Animation
+              height: 200,
+              errorBuilder: (context, error, stackTrace) => const Icon(Icons.lock_reset_rounded, size: 100, color: Colors.deepPurple),
             ),
             const SizedBox(height: 30),
-            const Text(
-              'Forgot Your Password?',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              'Recover Account',
+              style: TextStyle(
+                fontSize: 28, 
+                fontWeight: FontWeight.w900, 
+                color: isDarkMode ? Colors.white : Colors.deepPurple.shade800
+              ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Enter your email address and we will send you a link to reset your password.',
+            Text(
+              'Enter your registered email below to receive a secure password reset link.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey.shade600, fontSize: 16),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 50),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+              decoration: const InputDecoration(
                 labelText: 'Email Address',
-                prefixIcon: const Icon(Icons.email_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                prefixIcon: Icon(Icons.email_outlined),
               ),
             ),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _resetPassword,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'SEND RESET LINK',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-              ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _resetPassword,
+              child: _isLoading
+                  ? const SizedBox(height: 25, width: 25, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text('SEND RESET LINK', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
             ),
           ],
         ),

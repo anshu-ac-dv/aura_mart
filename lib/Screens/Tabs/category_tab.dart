@@ -1,8 +1,7 @@
 import 'package:aura_mart/Screens/LoginScreen.dart';
-import 'package:aura_mart/Screens/Products/CategoryProductsScreen.dart'; // Ensure filename matches your project
+import 'package:aura_mart/Screens/Products/CategoryProductsScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 
 class CategoryTab extends StatefulWidget {
   const CategoryTab({super.key});
@@ -15,7 +14,6 @@ class _CategoryTabState extends State<CategoryTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  // Refined Category Data
   final List<Map<String, dynamic>> _categories = [
     {'name': 'Fashion', 'icon': Icons.checkroom_rounded, 'color': Colors.pink},
     {'name': 'Mobiles', 'icon': Icons.smartphone_rounded, 'color': Colors.blue},
@@ -43,25 +41,49 @@ class _CategoryTabState extends State<CategoryTab> {
         .toList();
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
+      backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // 1. BRANDED COLLAPSIBLE APPBAR
           SliverAppBar(
             pinned: true,
-            expandedHeight: 140,
-            backgroundColor: Colors.deepPurple,
-            elevation: 0,
-            title: const Text(
-              "AURA MART",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 2,
+            expandedHeight: 160,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.deepPurple, Colors.indigo],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: -30,
+                      bottom: -20,
+                      child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.white.withOpacity(0.05),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              title: const Text(
+                "DISCOVER",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                ),
+              ),
+              centerTitle: false,
+              titlePadding: const EdgeInsets.only(left: 15, bottom: 95),
             ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             actions: [
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white, size: 22),
@@ -69,16 +91,16 @@ class _CategoryTabState extends State<CategoryTab> {
                   await FirebaseAuth.instance.signOut();
                   if (mounted) {
                     Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
-                            (r) => false
+                      context, 
+                      MaterialPageRoute(builder: (context) => const LoginScreen()), 
+                      (r) => false
                     );
                   }
                 },
               )
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(70),
+              preferredSize: const Size.fromHeight(75),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
                 child: Container(
@@ -86,13 +108,19 @@ class _CategoryTabState extends State<CategoryTab> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      )
+                    ],
                   ),
                   child: TextField(
                     controller: _searchController,
                     onChanged: (v) => setState(() => _searchQuery = v),
                     decoration: const InputDecoration(
-                      hintText: 'Search all categories...',
+                      hintText: 'Search categories...',
                       prefixIcon: Icon(Icons.search, color: Colors.grey),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -103,30 +131,23 @@ class _CategoryTabState extends State<CategoryTab> {
             ),
           ),
 
-          // 2. CATEGORY GRID
           SliverPadding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
             sliver: filteredCategories.isEmpty
-                ? const SliverToBoxAdapter(
-              child: Center(child: Text("No categories found")),
-            )
+                ? const SliverToBoxAdapter(child: Center(child: Text("No categories found")))
                 : SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 25,
-                crossAxisSpacing: 20,
-                childAspectRatio: 0.8,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                  final cat = filteredCategories[index];
-                  return _buildCategoryItem(cat, isDarkMode);
-                },
-                childCount: filteredCategories.length,
-              ),
-            ),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 25,
+                      crossAxisSpacing: 20,
+                      childAspectRatio: 0.8,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildCategoryItem(filteredCategories[index], isDarkMode),
+                      childCount: filteredCategories.length,
+                    ),
+                  ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
@@ -155,26 +176,22 @@ class _CategoryTabState extends State<CategoryTab> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
+                    color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   )
                 ],
               ),
               child: Center(
-                child: Icon(
-                  cat['icon'],
-                  size: 32,
-                  color: cat['color'],
-                ),
+                child: Icon(cat['icon'], size: 34, color: cat['color']),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Text(
             cat['name'],
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white : Colors.black87,
             ),

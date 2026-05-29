@@ -3,6 +3,7 @@ import 'package:aura_mart/Screens/HomeScreen.dart';
 import 'package:aura_mart/Screens/LoginScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -18,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    // Initialize the animation controller for the fade-in and scale effect
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -29,110 +29,98 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       curve: Curves.easeIn,
     );
 
-    // Check if the user is already logged in or not
     _checkUserStatus();
   }
 
   void _checkUserStatus() {
-    final auth = FirebaseAuth.instance;
-    final user = auth.currentUser;
+    final user = FirebaseAuth.instance.currentUser;
 
-    // Timer to keep the splash screen visible for a few seconds
     Timer(const Duration(seconds: 4), () {
       if (mounted) {
-        if (user != null) {
-          // If user is logged in, navigate to Home Screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        } else {
-          // If no user is logged in, navigate to Login Screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-          );
-        }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => user != null ? const HomeScreen() : const LoginScreen(),
+          ),
+        );
       }
     });
   }
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is removed from the tree
     _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          // Gradient background for a modern look
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            colors: isDarkMode 
+              ? [Colors.black, Colors.deepPurple.shade900] 
+              : [Colors.deepPurple, Colors.indigo],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Reverted to Premium Icon Design
             FadeTransition(
               opacity: _animation,
               child: ScaleTransition(
                 scale: _animation,
-                child: Container(
-                  padding: const EdgeInsets.all(25),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(color: Colors.black26, blurRadius: 20, spreadRadius: 5)
-                    ]
-                  ),
-                  child: const Icon(
-                    Icons.shopping_bag_outlined,
-                    size: 80,
-                    color: Colors.deepPurple,
+                child: Lottie.network(
+                  'https://assets10.lottiefiles.com/packages/lf20_go8pndki.json', // Premium Ecommerce Logo Animation
+                  height: 250,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    padding: const EdgeInsets.all(25),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                    child: const Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.deepPurple),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 30),
-            // Animated App Name
+            const SizedBox(height: 20),
             FadeTransition(
               opacity: _animation,
               child: const Text(
                 'AURA MART',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 4,
+                  fontSize: 42,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 8,
                 ),
               ),
             ),
             const SizedBox(height: 10),
-            // Tagline
             FadeTransition(
               opacity: _animation,
               child: const Text(
-                'Your Premium Shopping Destination',
+                'EXPERIENCE THE ELEGANCE',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w300,
+                  letterSpacing: 4,
                 ),
               ),
             ),
-            const SizedBox(height: 50),
-            // Loading indicator
-            const CircularProgressIndicator(
-              color: Colors.white,
+            const SizedBox(height: 80),
+            const SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
             ),
           ],
         ),
