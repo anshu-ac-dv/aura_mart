@@ -54,6 +54,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isShortDevice = size.height < 700;
 
     return Scaffold(
       body: Stack(
@@ -78,25 +80,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SizedBox(height: 40),
+                    SizedBox(height: isShortDevice ? 20 : 40),
                     // Lottie Animation for a dynamic look
                     Lottie.network(
                       'https://assets9.lottiefiles.com/packages/lf20_mjlh3h76.json', // Premium Shopping Animation
-                      height: 200,
+                      height: isShortDevice ? 150 : 200,
                       errorBuilder: (context, error, stackTrace) => Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: Colors.deepPurple.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.deepPurple),
+                        child: Icon(Icons.shopping_bag_outlined, size: isShortDevice ? 60 : 80, color: Colors.deepPurple),
                       ),
                     ),
                     const SizedBox(height: 20),
                     Text(
                       'Welcome Back',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: isShortDevice ? 26 : 32,
                         fontWeight: FontWeight.w900,
                         color: isDarkMode ? Colors.white : Colors.deepPurple.shade800,
                         letterSpacing: 1.5,

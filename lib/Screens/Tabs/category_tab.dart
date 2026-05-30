@@ -35,6 +35,8 @@ class _CategoryTabState extends State<CategoryTab> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth > 900 ? 5 : (screenWidth > 600 ? 4 : 3);
 
     final filteredCategories = _categories
         .where((c) => c['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase()))
@@ -136,8 +138,8 @@ class _CategoryTabState extends State<CategoryTab> {
             sliver: filteredCategories.isEmpty
                 ? const SliverToBoxAdapter(child: Center(child: Text("No categories found")))
                 : SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
                       mainAxisSpacing: 25,
                       crossAxisSpacing: 20,
                       childAspectRatio: 0.8,

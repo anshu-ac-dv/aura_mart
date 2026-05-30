@@ -33,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
 
     return Scaffold(
       extendBody: true,
@@ -44,8 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
       // --- UNIQUE FLOATING "BUBBLE" NAVIGATION BAR ---
       bottomNavigationBar: Container(
         height: 70,
-        margin: const EdgeInsets.fromLTRB(20, 0, 20, 25),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        margin: EdgeInsets.fromLTRB(
+          isSmallScreen ? 10 : 20, 
+          0, 
+          isSmallScreen ? 10 : 20, 
+          25
+        ),
+        padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 5 : 10),
         decoration: BoxDecoration(
           color: isDarkMode ? Colors.grey[900] : Colors.white,
           borderRadius: BorderRadius.circular(35),
@@ -61,13 +68,17 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(_navIcons.length, (index) {
             bool isSelected = _selectedIndex == index;
+            double targetWidth = isSelected 
+              ? (isSmallScreen ? 90 : 110) 
+              : (isSmallScreen ? 50 : 60);
+            
             return GestureDetector(
               onTap: () => setState(() => _selectedIndex = index),
               behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                width: isSelected ? 110 : 60,
+                width: targetWidth,
                 height: 50,
                 decoration: BoxDecoration(
                   color: isSelected ? Colors.deepPurple : Colors.transparent,
@@ -79,17 +90,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icon(
                       _navIcons[index],
                       color: isSelected ? Colors.white : Colors.grey,
-                      size: 26,
+                      size: isSmallScreen ? 22 : 26,
                     ),
                     if (isSelected) ...[
-                      const SizedBox(width: 8),
+                      SizedBox(width: isSmallScreen ? 4 : 8),
                       Flexible(
                         child: Text(
                           _navLabels[index],
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                            fontSize: isSmallScreen ? 12 : 14,
                           ),
                           maxLines: 1,
                         ),

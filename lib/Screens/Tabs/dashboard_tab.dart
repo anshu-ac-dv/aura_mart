@@ -85,6 +85,8 @@ class _DashboardTabState extends State<DashboardTab> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width > 600;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
@@ -94,7 +96,7 @@ class _DashboardTabState extends State<DashboardTab> {
           // 1. BEAUTIFUL COLLAPSIBLE APPBAR
           SliverAppBar(
             pinned: true,
-            expandedHeight: 160,
+            expandedHeight: isTablet ? 200 : 160,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
@@ -196,11 +198,11 @@ class _DashboardTabState extends State<DashboardTab> {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, 
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isTablet ? 3 : 2, 
                 crossAxisSpacing: 10, 
                 mainAxisSpacing: 10, 
-                childAspectRatio: 0.75,
+                childAspectRatio: isTablet ? 0.85 : 0.75,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) => _buildAmazonProductCard(_filteredProducts[index], isDarkMode),
