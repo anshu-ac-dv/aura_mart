@@ -10,16 +10,6 @@
   A production-grade mobile solution focused on <b>UI/UX precision</b>, <b>real-time sync</b>, and <b>premium motion design</b>.
 </p>
 
----
-
-## 📸 Preview
-<p align="center">
-  <img src="https://via.placeholder.com/200x400?text=Splash+Screen" width="200" alt="Splash Screen" />
-  <img src="https://via.placeholder.com/200x400?text=Home+Hub" width="200" alt="Home Hub" />
-  <img src="https://via.placeholder.com/200x400?text=Cart+Experience" width="200" alt="Cart Experience" />
-</p>
-
----
 
 ## 🚀 Key Features
 
