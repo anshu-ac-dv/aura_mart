@@ -18,30 +18,29 @@ class CategoryProductsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    // Mock data for products in this category
     final List<Map<String, dynamic>> products = [
       {
-        'name': '$categoryName Product 1',
-        'price': 120.0,
+        'name': '$categoryName Premium',
+        'price': 145.0,
         'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
       {
-        'name': '$categoryName Product 2',
-        'price': 85.0,
-        'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop',
+        'name': '$categoryName Essential',
+        'price': 95.0,
+        'image': 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
       {
-        'name': '$categoryName Product 3',
-        'price': 45.0,
-        'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop',
+        'name': '$categoryName Elite',
+        'price': 180.0,
+        'image': 'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
       {
-        'name': '$categoryName Product 4',
-        'price': 210.0,
-        'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop',
+        'name': '$categoryName Classic',
+        'price': 65.0,
+        'image': 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=1000&auto=format&fit=crop',
         'category': categoryName
       },
     ];

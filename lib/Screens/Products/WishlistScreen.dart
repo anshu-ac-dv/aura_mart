@@ -251,7 +251,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Lottie.network(
-            'https://assets9.lottiefiles.com/packages/lf20_96m5z9y8.json', // Empty Heart Animation
+            'https://lottie.host/17079d85-c64a-466d-a60d-71b55979bc6c/fTjM1a36E8.json', // Cute Empty Heart
             height: 200,
             repeat: true,
           ),

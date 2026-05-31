@@ -14,9 +14,9 @@
 
 ## 📸 Preview
 <p align="center">
-  <img src="https://via.placeholder.com/200x400?text=Splash+Screen" width="200" alt="Splash Screen" />
-  <img src="https://via.placeholder.com/200x400?text=Home+Hub" width="200" alt="Home Hub" />
-  <img src="https://via.placeholder.com/200x400?text=Cart+Experience" width="200" alt="Cart Experience" />
+  <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=400" width="200" alt="Splash Screen" />
+  <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=400" width="200" alt="Home Hub" />
+  <img src="https://images.unsplash.com/photo-1557821552-17105176677c?q=80&w=400" width="200" alt="Cart Experience" />
 </p>
 
 ---

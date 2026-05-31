@@ -27,19 +27,19 @@ class _DashboardTabState extends State<DashboardTab> {
 
   // Mock Products
   final List<Map<String, dynamic>> _allProducts = [
-    {'name': 'Wireless Headphones', 'price': 99.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Running Shoes', 'price': 75.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Smart Watch', 'price': 150.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Coffee Maker', 'price': 45.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1520970014086-2208d157c9e2?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Gaming Mouse', 'price': 30.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Designer Bag', 'price': 120.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Mechanical Keyboard', 'price': 85.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Leather Wallet', 'price': 25.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Denim Jacket', 'price': 65.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1576905341935-4ef24434494a?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Ceramic Vase', 'price': 35.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Yoga Mat', 'price': 20.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Face Cream', 'price': 15.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Matte Lipstick', 'price': 12.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1586776977607-310e9c725c37?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Aura Buds Pro', 'price': 129.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Urban Sneakers', 'price': 89.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Elite SmartWatch', 'price': 199.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1544117518-30df578096a4?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Artisan Coffee', 'price': 55.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Pro Gamer Mouse', 'price': 45.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Vogue Leather Bag', 'price': 149.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'RGB Mechanical', 'price': 95.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Classic Wallet', 'price': 35.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Street Denim', 'price': 79.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1576905341935-4ef24434494a?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Minimalist Vase', 'price': 42.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Zen Yoga Mat', 'price': 25.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Glow Face Cream', 'price': 22.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Velvet Lipstick', 'price': 18.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1586776977607-310e9c725c37?q=80&w=1000&auto=format&fit=crop'},
   ];
 
   final List<Map<String, dynamic>> _categories = [
@@ -98,25 +98,27 @@ class _DashboardTabState extends State<DashboardTab> {
             pinned: true,
             expandedHeight: isTablet ? 200 : 160,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.deepPurple, Colors.indigo],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: -20,
-                      top: -20,
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.white.withAlpha(20),
-                      ),
+              background: RepaintBoundary(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.deepPurple, Colors.indigo],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ],
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -20,
+                        top: -20,
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.white.withAlpha(20),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               title: const Text(
@@ -187,11 +189,11 @@ class _DashboardTabState extends State<DashboardTab> {
           SliverToBoxAdapter(child: _buildHorizontalCategories(isDarkMode)),
 
           // 4. Promo Banner Slider
-          SliverToBoxAdapter(child: _buildPromoSlider()),
+          SliverToBoxAdapter(child: RepaintBoundary(child: _buildPromoSlider())),
 
           // 5. Section Headers and Horizontal Lists
           SliverToBoxAdapter(child: _buildSectionHeader("Deals of the Day", isDarkMode)),
-          SliverToBoxAdapter(child: _buildHorizontalProductList(isDarkMode)),
+          SliverToBoxAdapter(child: RepaintBoundary(child: _buildHorizontalProductList(isDarkMode))),
 
           // 6. Featured Grid Section
           SliverToBoxAdapter(child: _buildSectionHeader("Suggested for You", isDarkMode)),
@@ -301,53 +303,55 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildHorizontalCategories(bool isDarkMode) {
-    return Container(
-      height: 100,
-      margin: const EdgeInsets.only(top: 10),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final cat = _categories[index];
-          bool isSelected = _selectedCategory == cat['name'];
-          return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = cat['name']),
-            child: Container(
-              width: 85,
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Column(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? Colors.deepPurple : Colors.transparent,
-                        width: 2,
+    return RepaintBoundary(
+      child: Container(
+        height: 100,
+        margin: const EdgeInsets.only(top: 10),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          itemCount: _categories.length,
+          itemBuilder: (context, index) {
+            final cat = _categories[index];
+            bool isSelected = _selectedCategory == cat['name'];
+            return GestureDetector(
+              onTap: () => setState(() => _selectedCategory = cat['name']),
+              child: Container(
+                width: 85,
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Column(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: isSelected ? Colors.deepPurple : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                      child: CircleAvatar(
+                        radius: 26,
+                        backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withAlpha(35),
+                        child: Icon(cat['icon'], color: isSelected ? Colors.white : cat['color'], size: 22),
                       ),
                     ),
-                    child: CircleAvatar(
-                      radius: 26,
-                      backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withAlpha(35),
-                      child: Icon(cat['icon'], color: isSelected ? Colors.white : cat['color'], size: 22),
+                    const SizedBox(height: 6),
+                    Text(
+                      cat['name'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected ? Colors.deepPurple : (isDarkMode ? Colors.white70 : Colors.black87),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    cat['name'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      color: isSelected ? Colors.deepPurple : (isDarkMode ? Colors.white70 : Colors.black87),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -364,8 +368,8 @@ class _DashboardTabState extends State<DashboardTab> {
               setState(() => _currentPromoPage = index);
             },
             children: [
-              _buildBannerImage("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1000&auto=format&fit=crop"),
-              _buildBannerImage("https://images.unsplash.com/photo-1607083206869-4c7672df7231?q=80&w=1000&auto=format&fit=crop"),
+              _buildBannerImage("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop"),
+              _buildBannerImage("https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop"),
             ],
           ),
         ),

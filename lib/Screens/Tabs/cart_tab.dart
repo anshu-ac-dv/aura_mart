@@ -355,7 +355,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Lottie.network('https://assets10.lottiefiles.com/packages/lf20_kz9sxfat.json', height: 250),
+                Lottie.network('https://lottie.host/8017e887-848e-4903-88da-901d812a67e0/S30043uX9K.json', height: 250),
                 const Text("Order Placed!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
               ],
             ),
@@ -370,7 +370,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.network('https://assets5.lottiefiles.com/packages/lf20_qh5z2fdq.json', height: 200),
+          Lottie.network('https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', height: 200),
           const Text('Your cart is empty', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         ],
       ),

@@ -58,7 +58,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           children: [
             const SizedBox(height: 20),
             Lottie.network(
-              'https://assets5.lottiefiles.com/packages/lf20_m69yvcmv.json', // Security Animation
+              'https://lottie.host/825f3c1b-254c-4293-9c86-163e7c88b0f9/H5Tz89Z2fA.json', // Modern Security
               height: 200,
               errorBuilder: (context, error, stackTrace) => const Icon(Icons.lock_reset_rounded, size: 100, color: Colors.deepPurple),
             ),

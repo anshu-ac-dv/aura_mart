@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   void _checkUserStatus() {
     final user = FirebaseAuth.instance.currentUser;
 
-    Timer(const Duration(seconds: 4), () {
+    Timer(const Duration(milliseconds: 2500), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -77,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: ScaleTransition(
                 scale: _animation,
                 child: Lottie.network(
-                  'https://assets10.lottiefiles.com/packages/lf20_go8pndki.json', // Premium Ecommerce Logo Animation
+                  'https://lottie.host/87023c92-69f8-4676-9d41-35616a273185/876yO7S3S6.json', // Premium Ecommerce Logo Animation
                   height: 250,
                   errorBuilder: (context, error, stackTrace) => Container(
                     padding: const EdgeInsets.all(25),

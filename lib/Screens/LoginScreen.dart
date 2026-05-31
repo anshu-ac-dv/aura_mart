@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(height: isShortDevice ? 20 : 40),
                     // Lottie Animation for a dynamic look
                     Lottie.network(
-                      'https://assets9.lottiefiles.com/packages/lf20_mjlh3h76.json', // Premium Shopping Animation
+                      'https://lottie.host/362f6890-e448-4e89-980b-f351336a18d3/C6Z09Y4ZpX.json', // Modern Cute Shopping
                       height: isShortDevice ? 150 : 200,
                       errorBuilder: (context, error, stackTrace) => Container(
                         padding: const EdgeInsets.all(20),

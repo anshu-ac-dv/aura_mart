@@ -90,7 +90,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     const SizedBox(height: 10),
                     Lottie.network(
-                      'https://assets2.lottiefiles.com/packages/lf20_6wutsrox.json', // Welcome Animation
+                      'https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', // Cute Welcome
                       height: 180,
                       errorBuilder: (context, error, stackTrace) => const Icon(Icons.person_add_outlined, size: 80, color: Colors.deepPurple),
                     ),

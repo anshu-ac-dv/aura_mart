@@ -53,7 +53,7 @@ class ProfileTab extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 52,
                         backgroundColor: Colors.white,
-                        child: Icon(Icons.person, size: 60, color: Colors.deepPurple),
+                        backgroundImage: NetworkImage('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop'),
                       ),
                     ),
                     Container(
