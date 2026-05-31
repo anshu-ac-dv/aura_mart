@@ -1,10 +1,13 @@
+import 'package:aura_mart/Services/CartService.dart';
+import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CategoryBaseScreen extends StatelessWidget {
   final String title;
   final Color themeColor;
-  final List<Map<String, String>> products;
+  final List<Map<String, dynamic>> products;
 
   const CategoryBaseScreen({
     super.key,
@@ -40,14 +43,6 @@ class CategoryBaseScreen extends StatelessWidget {
                 ),
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-                onPressed: () {
-                  Fluttertoast.showToast(msg: "Opening Cart...");
-                },
-              )
-            ],
           ),
 
           // Product Count & Title
@@ -96,7 +91,11 @@ class CategoryBaseScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Map<String, String> product, bool isDarkMode) {
+  Widget _buildProductCard(BuildContext context, Map<String, dynamic> product, bool isDarkMode) {
+    final String name = product['name']?.toString() ?? 'Product';
+    final String image = product['image']?.toString() ?? '';
+    final String price = product['price']?.toString() ?? '0';
+
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -118,19 +117,34 @@ class CategoryBaseScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                  child: Image.network(
-                    product['image']!,
+                  child: CachedNetworkImage(
+                    imageUrl: image,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
+                    placeholder: (context, url) => Container(color: Colors.grey[200]),
+                    errorWidget: (context, url, error) => const Icon(Icons.broken_image),
                   ),
                 ),
                 Positioned(
                   top: 10, right: 10,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.white.withOpacity(0.9),
-                    child: const Icon(Icons.favorite_border, size: 18, color: Colors.red),
+                  child: StreamBuilder<bool>(
+                    stream: WishlistService.isInWishlistStream(name),
+                    builder: (context, snapshot) {
+                      bool isFav = snapshot.data ?? false;
+                      return CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.white.withOpacity(0.9),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
+                          onPressed: () async {
+                            await WishlistService.toggleWishlist(product);
+                            Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                          },
+                        ),
+                      );
+                    }
                   ),
                 )
               ],
@@ -143,7 +157,7 @@ class CategoryBaseScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name']!,
+                  name,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -157,7 +171,7 @@ class CategoryBaseScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      product['price']!,
+                      price.startsWith('$') ? price : '\$$price',
                       style: TextStyle(
                         color: themeColor,
                         fontWeight: FontWeight.bold,
@@ -165,7 +179,10 @@ class CategoryBaseScreen extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () => Fluttertoast.showToast(msg: "Added to Cart"),
+                      onTap: () {
+                        CartService.addToCart(product);
+                        Fluttertoast.showToast(msg: "Added to Cart");
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(color: themeColor, shape: BoxShape.circle),

@@ -128,7 +128,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final product = items[index];
-                    return _buildWishlistCard(context, product, isDarkMode);
+                    return RepaintBoundary(child: _buildWishlistCard(context, product, isDarkMode));
                   },
                 ),
               ),

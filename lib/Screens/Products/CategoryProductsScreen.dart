@@ -106,100 +106,102 @@ class CategoryProductsScreen extends StatelessWidget {
   }
 
   Widget _buildProductCard(BuildContext context, Map<String, dynamic> product, bool isDarkMode) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-                  child: CachedNetworkImage(
-                    imageUrl: product['image']!.toString(),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                    placeholder: (context, url) => Container(color: Colors.grey[200]),
-                    errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(13),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                    child: CachedNetworkImage(
+                      imageUrl: product['image']!.toString(),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      placeholder: (context, url) => Container(color: Colors.grey[200]),
+                      errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: StreamBuilder<bool>(
-                    stream: WishlistService.isInWishlistStream(product['name']!),
-                    builder: (context, snapshot) {
-                      bool isFav = snapshot.data ?? false;
-                      return CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.white.withOpacity(0.9),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
-                          onPressed: () async {
-                            await WishlistService.toggleWishlist(product);
-                            Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
-                          },
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: StreamBuilder<bool>(
+                      stream: WishlistService.isInWishlistStream(product['name']!),
+                      builder: (context, snapshot) {
+                        bool isFav = snapshot.data ?? false;
+                        return CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white.withAlpha(230),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
+                            onPressed: () async {
+                              await WishlistService.toggleWishlist(product);
+                              Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                            },
+                          ),
+                        );
+                      }
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name']!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "\$${product['price']!}",
+                        style: TextStyle(
+                          color: categoryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                      );
-                    }
-                  ),
-                )
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product['name']!,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "\$${product['price']!}",
-                      style: TextStyle(
-                        color: categoryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        CartService.addToCart(product);
-                        Fluttertoast.showToast(msg: "Added to cart");
-                      },
-                      child: Icon(Icons.add_shopping_cart, color: categoryColor, size: 20),
-                    ),
-                  ],
-                ),
-              ],
+                      InkWell(
+                        onTap: () {
+                          CartService.addToCart(product);
+                          Fluttertoast.showToast(msg: "Added to cart");
+                        },
+                        child: Icon(Icons.add_shopping_cart, color: categoryColor, size: 20),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

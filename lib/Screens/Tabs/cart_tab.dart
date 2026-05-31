@@ -225,19 +225,21 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             children: [
               Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(25, 60, 25, 30),
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
-                    ),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('My Cart', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-                        Text('Real-time shopping bag', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                      ],
+                  RepaintBoundary(
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(25, 60, 25, 30),
+                      width: double.infinity,
+                      decoration: const BoxDecoration(
+                        color: Colors.deepPurple,
+                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('My Cart', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                          Text('Real-time shopping bag', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        ],
+                      ),
                     ),
                   ),
                   Expanded(
@@ -246,10 +248,10 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                         : ListView.builder(
                             padding: const EdgeInsets.all(20),
                             itemCount: items.length,
-                            itemBuilder: (context, i) => _buildCartItem(items[i], isDarkMode),
+                            itemBuilder: (context, i) => RepaintBoundary(child: _buildCartItem(items[i], isDarkMode)),
                           ),
                   ),
-                  if (items.isNotEmpty) _buildCheckoutSection(isDarkMode, items, total),
+                  if (items.isNotEmpty) RepaintBoundary(child: _buildCheckoutSection(isDarkMode, items, total)),
                   const SizedBox(height: 100),
                 ],
               ),

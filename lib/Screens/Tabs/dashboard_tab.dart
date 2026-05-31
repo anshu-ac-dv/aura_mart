@@ -22,8 +22,7 @@ class _DashboardTabState extends State<DashboardTab> {
   String _selectedCategory = "All";
   int _currentPromoPage = 0;
   
-  late Timer _timer;
-  Duration _timeLeft = const Duration(hours: 12, minutes: 30, seconds: 0);
+  // Timer is now handled in a separate widget to avoid full-screen rebuilds
 
   // Mock Products
   final List<Map<String, dynamic>> _allProducts = [
@@ -61,22 +60,10 @@ class _DashboardTabState extends State<DashboardTab> {
   @override
   void initState() {
     super.initState();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _timeLeft = _timeLeft - const Duration(seconds: 1);
-        });
-      }
-    });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
     _searchController.dispose();
     _promoController.dispose();
     super.dispose();
@@ -401,8 +388,6 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildSectionHeader(String title, bool isDarkMode) {
-    String timeStr = "${_timeLeft.inHours.toString().padLeft(2, '0')}:${(_timeLeft.inMinutes % 60).toString().padLeft(2, '0')}:${(_timeLeft.inSeconds % 60).toString().padLeft(2, '0')}";
-    
     return Padding(
       padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
       child: Row(
@@ -413,11 +398,7 @@ class _DashboardTabState extends State<DashboardTab> {
               Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
               if (title == "Deals of the Day") ...[
                 const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(color: Colors.red.withAlpha(20), borderRadius: BorderRadius.circular(4)),
-                  child: Text(timeStr, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
-                )
+                const _DealsTimerWidget(),
               ]
             ],
           ),
@@ -436,78 +417,80 @@ class _DashboardTabState extends State<DashboardTab> {
         itemCount: _filteredProducts.length,
         itemBuilder: (context, index) {
           final product = _filteredProducts[index];
-          return Container(
-            width: 150,
-            margin: const EdgeInsets.symmetric(horizontal: 5),
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.grey[900] : Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey.withAlpha(20)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                        child: CachedNetworkImage(
-                          imageUrl: product['image']!.toString(),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          placeholder: (context, url) => Container(color: Colors.grey[200]),
-                          errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+          return RepaintBoundary(
+            child: Container(
+              width: 150,
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.grey[900] : Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.withAlpha(20)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                          child: CachedNetworkImage(
+                            imageUrl: product['image']!.toString(),
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                            placeholder: (context, url) => Container(color: Colors.grey[200]),
+                            errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        top: 5, right: 5,
-                        child: StreamBuilder<bool>(
-                          stream: WishlistService.isInWishlistStream(product['name']!.toString()),
-                          builder: (context, snapshot) {
-                            bool isFav = snapshot.data ?? false;
-                            return CircleAvatar(
-                              radius: 14,
-                              backgroundColor: Colors.white.withAlpha(200),
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: Colors.red),
-                                onPressed: () async {
-                                  await WishlistService.toggleWishlist(product);
-                                  Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
-                                },
-                              ),
-                            );
-                          }
+                        Positioned(
+                          top: 5, right: 5,
+                          child: StreamBuilder<bool>(
+                            stream: WishlistService.isInWishlistStream(product['name']!.toString()),
+                            builder: (context, snapshot) {
+                              bool isFav = snapshot.data ?? false;
+                              return CircleAvatar(
+                                radius: 14,
+                                backgroundColor: Colors.white.withAlpha(200),
+                                child: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: Colors.red),
+                                  onPressed: () async {
+                                    await WishlistService.toggleWishlist(product);
+                                    Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                                  },
+                                ),
+                              );
+                            }
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(product['name']!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14)),
+                            InkWell(
+                              onTap: () {
+                                CartService.addToCart(product);
+                                Fluttertoast.showToast(msg: "Added to cart");
+                              },
+                              child: const Icon(Icons.add_shopping_cart, size: 18, color: Colors.deepPurple),
+                            )
+                          ],
                         ),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(product['name']!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14)),
-                          InkWell(
-                            onTap: () {
-                              CartService.addToCart(product);
-                              Fluttertoast.showToast(msg: "Added to cart");
-                            },
-                            child: const Icon(Icons.add_shopping_cart, size: 18, color: Colors.deepPurple),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              ],
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           );
         },
@@ -516,104 +499,146 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildAmazonProductCard(Map<String, dynamic> product, bool isDarkMode) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.withAlpha(30)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                  child: CachedNetworkImage(
-                    imageUrl: product['image']!.toString(),
-                    fit: BoxFit.cover,
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.withAlpha(30)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                    child: CachedNetworkImage(
+                      imageUrl: product['image']!.toString(),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      placeholder: (context, url) => Container(color: Colors.grey[200]),
+                      errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8, left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        "20% OFF",
+                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 5, right: 5,
+                    child: StreamBuilder<bool>(
+                      stream: WishlistService.isInWishlistStream(product['name']!),
+                      builder: (context, snapshot) {
+                        bool isFav = snapshot.data ?? false;
+                        return CircleAvatar(
+                          radius: 15,
+                          backgroundColor: Colors.white.withAlpha(220),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
+                            onPressed: () async {
+                              await WishlistService.toggleWishlist(product);
+                              Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
+                            },
+                          ),
+                        );
+                      }
+                    ),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(product['name']!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const SizedBox(width: 5),
+                      Text("\$${(product['price'] as num) + 20}",
+                        style: const TextStyle(fontSize: 10, color: Colors.grey, decoration: TextDecoration.lineThrough)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
                     width: double.infinity,
-                    placeholder: (context, url) => Container(color: Colors.grey[200]),
-                    errorWidget: (context, url, error) => const Icon(Icons.broken_image),
-                  ),
-                ),
-                Positioned(
-                  top: 8, left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(4),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        CartService.addToCart(product);
+                        Fluttertoast.showToast(msg: "Added to cart");
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                        padding: const EdgeInsets.symmetric(vertical: 0),
+                      ),
+                      child: const Text("Add to Cart", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
-                    child: const Text(
-                      "20% OFF",
-                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 5, right: 5,
-                  child: StreamBuilder<bool>(
-                    stream: WishlistService.isInWishlistStream(product['name']!),
-                    builder: (context, snapshot) {
-                      bool isFav = snapshot.data ?? false;
-                      return CircleAvatar(
-                        radius: 15,
-                        backgroundColor: Colors.white.withAlpha(220),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
-                          onPressed: () async {
-                            await WishlistService.toggleWishlist(product);
-                            Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
-                          },
-                        ),
-                      );
-                    }
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(product['name']!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(width: 5),
-                    Text("\$${(product['price'] as num) + 20}",
-                      style: const TextStyle(fontSize: 10, color: Colors.grey, decoration: TextDecoration.lineThrough)),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      CartService.addToCart(product);
-                      Fluttertoast.showToast(msg: "Added to cart");
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
-                      foregroundColor: Colors.black,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                      padding: const EdgeInsets.symmetric(vertical: 0),
-                    ),
-                    child: const Text("Add to Cart", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _DealsTimerWidget extends StatefulWidget {
+  const _DealsTimerWidget();
+
+  @override
+  State<_DealsTimerWidget> createState() => _DealsTimerWidgetState();
+}
+
+class _DealsTimerWidgetState extends State<_DealsTimerWidget> {
+  late Timer _timer;
+  Duration _timeLeft = const Duration(hours: 12, minutes: 30, seconds: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _timeLeft = _timeLeft - const Duration(seconds: 1);
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String timeStr = "${_timeLeft.inHours.toString().padLeft(2, '0')}:${(_timeLeft.inMinutes % 60).toString().padLeft(2, '0')}:${(_timeLeft.inSeconds % 60).toString().padLeft(2, '0')}";
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(color: Colors.red.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+      child: Text(timeStr, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
     );
   }
 }

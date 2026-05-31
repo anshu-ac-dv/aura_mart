@@ -121,8 +121,13 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
               if (!isDefault)
                 ElevatedButton(
                   onPressed: () => AddressService.setDefaultAddress(address['id']),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
-                  child: const Text("SET AS DEFAULT"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple, 
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(120, 40),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text("SET AS DEFAULT", style: TextStyle(fontSize: 12)),
                 )
             ],
           )
@@ -169,7 +174,11 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple, 
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   onPressed: () async {
                     final data = {
                       'name': nameController.text,

@@ -145,7 +145,7 @@ class _CategoryTabState extends State<CategoryTab> {
                       childAspectRatio: 0.8,
                     ),
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => _buildCategoryItem(filteredCategories[index], isDarkMode),
+                      (context, index) => RepaintBoundary(child: _buildCategoryItem(filteredCategories[index], isDarkMode)),
                       childCount: filteredCategories.length,
                     ),
                   ),

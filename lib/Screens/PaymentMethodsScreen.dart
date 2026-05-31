@@ -176,7 +176,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple, 
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: () async {
                   if (upiController.text.isNotEmpty) {
                     await PaymentService.savePaymentMethod({
@@ -258,7 +262,11 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple, 
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                   onPressed: () async {
                     if (cardNoController.text.length >= 16) {
                       String maskedValue = "**** **** **** ${cardNoController.text.substring(cardNoController.text.length - 4)}";
