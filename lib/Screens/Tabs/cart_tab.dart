@@ -47,10 +47,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  double get _totalPrice => CartService.totalPrice;
-
-  void _showPaymentOptions(bool isDarkMode) {
-    if (CartService.cartItems.isEmpty) {
+  void _showPaymentOptions(bool isDarkMode, List<Map<String, dynamic>> items, double total) {
+    if (items.isEmpty) {
       Fluttertoast.showToast(msg: "Your cart is empty!");
       return;
     }
@@ -58,8 +56,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     showModalBottomSheet(
       context: context,
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30),
       ),
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
@@ -67,10 +65,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40, height: 5,
-                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)),
-              ),
+              Container(width: 40, height: 5, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10))),
               const SizedBox(height: 20),
               const Text("Select Payment Method", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
@@ -78,11 +73,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 child: StreamBuilder<List<Map<String, dynamic>>>(
                   stream: PaymentService.paymentMethodsStream,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
                     final methods = snapshot.data ?? [];
-                    
                     return ListView(
                       shrinkWrap: true,
                       children: [
@@ -91,7 +82,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                           return ListTile(
                             leading: Icon(icon, color: Colors.deepPurple),
                             title: Text(method['value'], style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-                            subtitle: Text(method['type'].toString().toUpperCase()),
                             trailing: Icon(
                               _selectedPaymentMethodId == method['id'] ? Icons.radio_button_checked : Icons.radio_button_off,
                               color: Colors.deepPurple,
@@ -130,13 +120,10 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
                   onPressed: _selectedPaymentMethodId == null ? null : () {
                     Navigator.pop(context);
-                    _processCheckout();
+                    _processCheckout(items, total);
                   },
                   child: const Text("PAY NOW", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
@@ -149,97 +136,63 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   }
 
   void _onOrderSuccess() {
-    if (mounted) {
-      setState(() {
-        _isProcessing = false;
-        _showSuccessAnimation = true;
-        _selectedPaymentMethodId = null;
-        _selectedPaymentMethodValue = null;
-        CartService.clearCart();
-      });
-      _successController.forward();
-
-      // Automatic redirection after 3 seconds
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted && _showSuccessAnimation) {
-          setState(() {
-            _showSuccessAnimation = false;
-            _successController.reset();
-          });
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MyOrdersScreen()),
-          );
-        }
-      });
-    }
+    setState(() {
+      _isProcessing = false;
+      _showSuccessAnimation = true;
+      _selectedPaymentMethodId = null;
+      _selectedPaymentMethodValue = null;
+    });
+    CartService.clearCart();
+    _successController.forward();
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted && _showSuccessAnimation) {
+        setState(() {
+          _showSuccessAnimation = false;
+          _successController.reset();
+        });
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
+      }
+    });
   }
 
-  void _processCheckout() async {
+  void _processCheckout(List<Map<String, dynamic>> items, double total) async {
     if (_selectedPaymentMethodValue == null) return;
-    
     if (_selectedPaymentMethodId == 'cod') {
-      _showCODAlert();
+      _showCODAlert(items, total);
       return;
     }
-    
     setState(() => _isProcessing = true);
     try {
-      List<Map<String, dynamic>> orderItems = CartService.getSerializableItems();
-      await OrderService.createOrder(orderItems, _totalPrice, _selectedPaymentMethodValue!);
+      await OrderService.createOrder(items, total, _selectedPaymentMethodValue!);
       await Future.delayed(const Duration(seconds: 2));
-
       _onOrderSuccess();
     } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        Fluttertoast.showToast(msg: "Order failed: $e");
-      }
+      setState(() => _isProcessing = false);
+      Fluttertoast.showToast(msg: "Order failed: $e");
     }
   }
 
-  void _showCODAlert() {
+  void _showCODAlert(List<Map<String, dynamic>> items, double total) {
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 10),
-            Text("Confirm Order"),
-          ],
-        ),
-        content: const Text("You have selected Cash on Delivery. Would you like to place your order?"),
+        title: const Text("Confirm Order"),
+        content: const Text("Place order with Cash on Delivery?"),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("CANCEL", style: TextStyle(color: Colors.grey)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL")),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
             onPressed: () async {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
               setState(() => _isProcessing = true);
-              
               try {
-                List<Map<String, dynamic>> orderItems = CartService.getSerializableItems();
-                await OrderService.createOrder(orderItems, _totalPrice, "Cash on Delivery");
-                await Future.delayed(const Duration(seconds: 1)); // Small delay for UX
-                
+                await OrderService.createOrder(items, total, "Cash on Delivery");
                 _onOrderSuccess();
               } catch (e) {
-                if (mounted) {
-                  setState(() => _isProcessing = false);
-                  Fluttertoast.showToast(msg: "Order failed: $e");
-                }
+                setState(() => _isProcessing = false);
+                Fluttertoast.showToast(msg: "Order failed: $e");
               }
             },
-            child: const Text("PLACE ORDER", style: TextStyle(color: Colors.white)),
+            child: const Text("CONFIRM"),
           ),
         ],
       ),
@@ -249,202 +202,125 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final items = CartService.cartItems;
-
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
-      body: Stack(
-        children: [
-          Column(
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: CartService.cartStream,
+        builder: (context, snapshot) {
+          final items = snapshot.data ?? [];
+          final total = CartService.calculateTotal(items);
+
+          return Stack(
             children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(25, 60, 25, 30),
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.deepPurple,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Column(
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(25, 60, 25, 30),
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Colors.deepPurple,
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
+                    ),
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'My Cart',
-                          style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                        ),
-                        Text('Check your items before checkout', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        Text('My Cart', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                        Text('Real-time shopping bag', style: TextStyle(color: Colors.white70, fontSize: 14)),
                       ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(15)),
-                      child: const Icon(Icons.shopping_cart_checkout, color: Colors.white),
-                    )
-                  ],
-                ),
-              ),
-              Expanded(
-                child: items.isEmpty
-                    ? _buildEmptyState(isDarkMode)
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: items.length,
-                        itemBuilder: (context, i) => _buildCartItem(items[i], i, isDarkMode),
-                      ),
-              ),
-              if (items.isNotEmpty) _buildCheckoutSection(isDarkMode),
-              const SizedBox(height: 100),
-            ],
-          ),
-          
-          if (_isProcessing)
-            Container(
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 20),
-                    Text("Processing Order...", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ),
-
-          if (_showSuccessAnimation) _buildSuccessOverlay(isDarkMode),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCartItem(Map<String, dynamic> item, int index, bool isDarkMode) {
-    return Dismissible(
-      key: Key(item['name'] + index.toString()),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) {
-        setState(() {
-          CartService.removeItem(index);
-        });
-        Fluttertoast.showToast(msg: "${item['name']} removed");
-      },
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(25)),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 15),
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey[900] : Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, 5))],
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 70, width: 70,
-              decoration: BoxDecoration(color: Colors.deepPurple.withOpacity(0.05), borderRadius: BorderRadius.circular(20)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: item['image'] != null && item['image'] != ''
-                    ? CachedNetworkImage(
-                        imageUrl: item['image'],
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Center(child: Icon(item['icon'], color: Colors.deepPurple.withOpacity(0.3))),
-                        errorWidget: (context, url, error) => Icon(item['icon'], color: Colors.deepPurple),
-                      )
-                    : Icon(item['icon'], color: Colors.deepPurple, size: 30),
-              ),
-            ),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item['name'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDarkMode ? Colors.white : Colors.black)),
-                  const SizedBox(height: 4),
-                  Text('\$${item['price']}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 15)),
+                  ),
+                  Expanded(
+                    child: items.isEmpty
+                        ? _buildEmptyState(isDarkMode)
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(20),
+                            itemCount: items.length,
+                            itemBuilder: (context, i) => _buildCartItem(items[i], isDarkMode),
+                          ),
+                  ),
+                  if (items.isNotEmpty) _buildCheckoutSection(isDarkMode, items, total),
+                  const SizedBox(height: 100),
                 ],
               ),
-            ),
-            _buildQtyControl(index, isDarkMode),
-          ],
-        ),
+              if (_isProcessing) 
+                Container(
+                  color: Colors.black54, 
+                  child: const Center(child: CircularProgressIndicator(color: Colors.white))
+                ),
+              if (_showSuccessAnimation) _buildSuccessOverlay(isDarkMode),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildQtyControl(int index, bool isDarkMode) {
+  Widget _buildCartItem(Map<String, dynamic> item, bool isDarkMode) {
     return Container(
-      decoration: BoxDecoration(color: isDarkMode ? Colors.black : Colors.grey[100], borderRadius: BorderRadius.circular(15)),
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 5))],
+      ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            padding: const EdgeInsets.all(8), constraints: const BoxConstraints(),
-            icon: Icon(Icons.remove, size: 18, color: isDarkMode ? Colors.white70 : Colors.black54),
-            onPressed: () => setState(() { CartService.decrementQty(index); }),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: CachedNetworkImage(imageUrl: item['image'], height: 70, width: 70, fit: BoxFit.cover),
           ),
-          Text('${CartService.cartItems[index]['qty']}', style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
-          IconButton(
-            padding: const EdgeInsets.all(8), constraints: const BoxConstraints(),
-            icon: const Icon(Icons.add, size: 18, color: Colors.deepPurple),
-            onPressed: () => setState(() { CartService.incrementQty(index); }),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('\$${item['price']}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
+          _buildQtyControl(item, isDarkMode),
         ],
       ),
     );
   }
 
-  Widget _buildCheckoutSection(bool isDarkMode) {
+  Widget _buildQtyControl(Map<String, dynamic> item, bool isDarkMode) {
+    return Row(
+      children: [
+        IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => CartService.decrementQty(item['name'], item['qty'])),
+        Text('${item['qty']}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        IconButton(icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), onPressed: () => CartService.incrementQty(item['name'])),
+      ],
+    );
+  }
+
+  Widget _buildCheckoutSection(bool isDarkMode, List<Map<String, dynamic>> items, double total) {
     return Container(
       padding: const EdgeInsets.all(25),
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, -10))],
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total Amount', style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey[600], fontSize: 16)),
-              Text('\$${_totalPrice.toStringAsFixed(2)}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 20)),
+              const Text('Total Amount', style: TextStyle(fontSize: 16)),
+              Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 20)),
             ],
           ),
-          if (_selectedPaymentMethodValue != null) ...[
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Payment Method', style: TextStyle(fontSize: 14)),
-                Text(_selectedPaymentMethodValue!, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.deepPurple)),
-              ],
-            ),
-          ],
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
             height: 55,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                elevation: 5,
-              ),
-              onPressed: () => _showPaymentOptions(isDarkMode),
-              child: const Text('PROCEED TO PAY', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              onPressed: () => _showPaymentOptions(isDarkMode, items, total),
+              child: const Text('PROCEED TO PAY', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -457,46 +333,17 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       opacity: _opacityAnimation,
       child: Container(
         color: isDarkMode ? Colors.black : Colors.white,
-        width: double.infinity,
-        height: double.infinity,
-        child: Stack(
-          children: [
-            Center(
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Lottie.network(
-                      'https://assets10.lottiefiles.com/packages/lf20_kz9sxfat.json', // Order Success Lottie
-                      height: 250,
-                      repeat: false,
-                    ),
-                    const SizedBox(height: 20),
-                    const Text("Order Placed!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 15),
-                    const Text("Your order has been placed successfully.", style: TextStyle(color: Colors.grey, fontSize: 16), textAlign: TextAlign.center),
-                    const SizedBox(height: 40),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                      onPressed: () {
-                        setState(() => _showSuccessAnimation = false);
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyOrdersScreen()));
-                      },
-                      child: const Text("VIEW MY ORDERS", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-              ),
+        child: Center(
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Lottie.network('https://assets10.lottiefiles.com/packages/lf20_kz9sxfat.json', height: 250),
+                const Text("Order Placed!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              ],
             ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Lottie.network(
-                'https://assets2.lottiefiles.com/packages/lf20_obhbe3t1.json', // Confetti
-                repeat: false,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -507,31 +354,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.network(
-            'https://assets5.lottiefiles.com/packages/lf20_qh5z2fdq.json',
-            height: 200,
-            repeat: true,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Your cart is empty',
-            style: TextStyle(
-              fontSize: 18,
-              color: isDarkMode ? Colors.white38 : Colors.grey[600],
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {
-              // Navigate to home or discovery
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text("Go Shopping", style: TextStyle(color: Colors.white)),
-          )
+          Lottie.network('https://assets5.lottiefiles.com/packages/lf20_qh5z2fdq.json', height: 200),
+          const Text('Your cart is empty', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         ],
       ),
     );

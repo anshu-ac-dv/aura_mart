@@ -1,91 +1,99 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class CartService {
-  static final List<Map<String, dynamic>> cartItems = [];
-  static String? selectedPaymentMethod;
-  static String? selectedPaymentMethodId;
+  static final FirebaseFirestore _db = FirebaseFirestore.instance;
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  static void addToCart(Map<String, dynamic> product) {
-    final index = cartItems.indexWhere((item) => item['name'] == product['name']);
-    
-    if (index >= 0) {
-      cartItems[index]['qty']++;
+  static CollectionReference<Map<String, dynamic>>? get _userCart {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+    return _db.collection('users').doc(user.uid).collection('cart');
+  }
+
+  // Temporary local list for backward compatibility if needed, 
+  // but we should move to Streams.
+  static final List<Map<String, dynamic>> cartItems = [];
+
+  static Future<void> addToCart(Map<String, dynamic> product) async {
+    final cart = _userCart;
+    if (cart == null) return;
+
+    final name = product['name']?.toString() ?? 'Unknown';
+    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+    final docRef = cart.doc(docId);
+
+    final doc = await docRef.get();
+    if (doc.exists) {
+      await docRef.update({'qty': FieldValue.increment(1)});
     } else {
       dynamic priceVal = product['price'] ?? 0.0;
       double price = 0.0;
       if (priceVal is String) {
-        String priceStr = priceVal.replaceAll('\$', '').replaceAll(',', '');
-        price = double.tryParse(priceStr) ?? 0.0;
+        price = double.tryParse(priceVal.replaceAll('\$', '').replaceAll(',', '')) ?? 0.0;
       } else if (priceVal is num) {
         price = priceVal.toDouble();
       }
-      
-      cartItems.add({
-        'name': product['name'] ?? 'Unknown Product',
+
+      await docRef.set({
+        'name': name,
         'price': price,
         'image': product['image'] ?? '',
-        'icon': _getIconForCategory(product['category'] ?? ''),
+        'category': product['category'] ?? '',
         'qty': 1,
       });
     }
   }
 
-  static void incrementQty(int index) {
-    if (index >= 0 && index < cartItems.length) {
-      cartItems[index]['qty']++;
+  static Future<void> incrementQty(String name) async {
+    final cart = _userCart;
+    if (cart == null) return;
+    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+    await cart.doc(docId).update({'qty': FieldValue.increment(1)});
+  }
+
+  static Future<void> decrementQty(String name, int currentQty) async {
+    final cart = _userCart;
+    if (cart == null) return;
+    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+    if (currentQty > 1) {
+      await cart.doc(docId).update({'qty': FieldValue.increment(-1)});
+    } else {
+      await cart.doc(docId).delete();
     }
   }
 
-  static void decrementQty(int index) {
-    if (index >= 0 && index < cartItems.length) {
-      if (cartItems[index]['qty'] > 1) {
-        cartItems[index]['qty']--;
-      } else {
-        cartItems.removeAt(index);
-      }
+  static Future<void> removeItem(String name) async {
+    final cart = _userCart;
+    if (cart == null) return;
+    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+    await cart.doc(docId).delete();
+  }
+
+  static Future<void> clearCart() async {
+    final cart = _userCart;
+    if (cart == null) return;
+    final snapshot = await cart.get();
+    final batch = _db.batch();
+    for (var doc in snapshot.docs) {
+      batch.delete(doc.reference);
     }
+    await batch.commit();
   }
 
-  static void removeItem(int index) {
-    if (index >= 0 && index < cartItems.length) {
-      cartItems.removeAt(index);
-    }
+  static Stream<List<Map<String, dynamic>>> get cartStream {
+    final cart = _userCart;
+    if (cart == null) return Stream.value([]);
+    return cart.snapshots().map((s) => s.docs.map((d) => d.data()).toList());
   }
 
-  static void clearCart() {
-    cartItems.clear();
+  static double calculateTotal(List<Map<String, dynamic>> items) {
+    return items.fold(0, (total, item) => total + ((item['price'] as num) * (item['qty'] as num)));
   }
 
-  static List<Map<String, dynamic>> getSerializableItems() {
-    return cartItems.map((item) {
-      return {
-        'name': item['name'],
-        'price': item['price'],
-        'qty': item['qty'],
-        'image': item['image'] ?? '', // Added image field to serialization
-      };
-    }).toList();
-  }
-
-  static IconData _getIconForCategory(String category) {
-    switch (category) {
-      case 'Electronics': return Icons.bolt_rounded;
-      case 'Fashion': return Icons.checkroom_rounded;
-      case 'Home': return Icons.home_rounded;
-      case 'Toys': return Icons.smart_toy_rounded;
-      case 'Beauty': return Icons.face_retouching_natural_rounded;
-      case 'Sports': return Icons.sports_tennis_rounded;
-      case 'Accessories': return Icons.watch_rounded;
-      case 'Books': return Icons.auto_stories_rounded;
-      default: return Icons.shopping_bag_rounded;
-    }
-  }
-
+  // Legacy support for totalPrice if needed without stream
   static double get totalPrice {
-    double total = 0.0;
-    for (var item in cartItems) {
-      total += (item['price'] as double) * (item['qty'] as int);
-    }
-    return total;
+    return 0.0; // Should use calculateTotal with stream data
   }
 }

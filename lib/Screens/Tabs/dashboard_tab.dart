@@ -137,10 +137,10 @@ class _DashboardTabState extends State<DashboardTab> {
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white, size: 22),
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
                   await FirebaseAuth.instance.signOut();
                   if (mounted) {
-                    Navigator.pushAndRemoveUntil(
-                      context, 
+                    navigator.pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => const LoginScreen()), 
                       (r) => false
                     );
