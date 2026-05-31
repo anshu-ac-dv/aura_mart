@@ -73,6 +73,9 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 child: StreamBuilder<List<Map<String, dynamic>>>(
                   stream: PaymentService.paymentMethodsStream,
                   builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(child: Text("Error loading methods", style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black54)));
+                    }
                     final methods = snapshot.data ?? [];
                     return ListView(
                       shrinkWrap: true,
@@ -81,15 +84,15 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                           IconData icon = method['type'] == 'upi' ? Icons.account_balance_wallet : Icons.credit_card;
                           return ListTile(
                             leading: Icon(icon, color: Colors.deepPurple),
-                            title: Text(method['value'], style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                            title: Text(method['value']?.toString() ?? 'Payment Method', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
                             trailing: Icon(
-                              _selectedPaymentMethodId == method['id'] ? Icons.radio_button_checked : Icons.radio_button_off,
+                              _selectedPaymentMethodId == method['id']?.toString() ? Icons.radio_button_checked : Icons.radio_button_off,
                               color: Colors.deepPurple,
                             ),
                             onTap: () {
                               setModalState(() {
-                                _selectedPaymentMethodId = method['id'];
-                                _selectedPaymentMethodValue = method['value'];
+                                _selectedPaymentMethodId = method['id']?.toString();
+                                _selectedPaymentMethodValue = method['value']?.toString();
                               });
                               setState(() {}); 
                             },
@@ -120,7 +123,11 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
                   onPressed: _selectedPaymentMethodId == null ? null : () {
                     Navigator.pop(context);
                     _processCheckout(items, total);
@@ -181,6 +188,10 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL")),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               Navigator.pop(context);
               setState(() => _isProcessing = true);
@@ -262,7 +273,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 5))],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))],
       ),
       child: Row(
         children: [
@@ -275,8 +286,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('\$${item['price']}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
+                Text(item['name']?.toString() ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('\$${(item['price'] as num).toStringAsFixed(2)}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -289,9 +300,9 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   Widget _buildQtyControl(Map<String, dynamic> item, bool isDarkMode) {
     return Row(
       children: [
-        IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => CartService.decrementQty(item['name'], item['qty'])),
+        IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => CartService.decrementQty(item['name']?.toString() ?? '', (item['qty'] as num).toInt())),
         Text('${item['qty']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-        IconButton(icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), onPressed: () => CartService.incrementQty(item['name'])),
+        IconButton(icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), onPressed: () => CartService.incrementQty(item['name']?.toString() ?? '')),
       ],
     );
   }
@@ -303,7 +314,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 20)],
       ),
       child: Column(
         children: [
@@ -319,6 +330,11 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             width: double.infinity,
             height: 55,
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              ),
               onPressed: () => _showPaymentOptions(isDarkMode, items, total),
               child: const Text('PROCEED TO PAY', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
