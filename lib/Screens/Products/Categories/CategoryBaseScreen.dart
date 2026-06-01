@@ -36,7 +36,7 @@ class CategoryBaseScreen extends StatelessWidget {
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [themeColor, themeColor.withOpacity(0.7)],
+                    colors: [themeColor, themeColor.withAlpha(178)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -80,7 +80,9 @@ class CategoryBaseScreen extends StatelessWidget {
                 childAspectRatio: 0.72,
               ),
               delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildProductCard(context, products[index], isDarkMode),
+                (context, index) => RepaintBoundary(
+                  child: _buildProductCard(context, products[index], isDarkMode),
+                ),
                 childCount: products.length,
               ),
             ),
@@ -102,7 +104,7 @@ class CategoryBaseScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )
@@ -134,7 +136,7 @@ class CategoryBaseScreen extends StatelessWidget {
                       bool isFav = snapshot.data ?? false;
                       return CircleAvatar(
                         radius: 16,
-                        backgroundColor: Colors.white.withOpacity(0.9),
+                        backgroundColor: Colors.white.withAlpha(230),
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
@@ -171,7 +173,7 @@ class CategoryBaseScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      price.startsWith('$') ? price : '\$$price',
+                      price.startsWith('\$') ? price : '\$$price',
                       style: TextStyle(
                         color: themeColor,
                         fontWeight: FontWeight.bold,
