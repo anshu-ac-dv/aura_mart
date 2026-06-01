@@ -1,4 +1,4 @@
-import 'package:aura_mart/Services/AddressService.dart';
+import 'package:aura_mart/core_services/address_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -180,6 +180,7 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () async {
+                    final navigator = Navigator.of(context);
                     final data = {
                       'name': nameController.text,
                       'phone': phoneController.text,
@@ -192,7 +193,7 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                     };
                     await AddressService.saveAddress(data, docId: address?['id']);
                     if (mounted) {
-                      Navigator.pop(context);
+                      navigator.pop();
                       Fluttertoast.showToast(msg: "Address saved successfully");
                     }
                   },

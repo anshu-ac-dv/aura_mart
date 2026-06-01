@@ -1,5 +1,5 @@
-import 'package:aura_mart/Screens/LoginScreen.dart';
-import 'package:aura_mart/Screens/Products/CategoryProductsScreen.dart';
+import 'package:aura_mart/screens/login_screen.dart';
+import 'package:aura_mart/screens/products/aura_category_products_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -66,7 +66,7 @@ class _CategoryTabState extends State<CategoryTab> {
                       bottom: -20,
                       child: CircleAvatar(
                         radius: 80,
-                        backgroundColor: Colors.white.withOpacity(0.05),
+                        backgroundColor: Colors.white.withAlpha(13),
                       ),
                     ),
                   ],
@@ -90,10 +90,10 @@ class _CategoryTabState extends State<CategoryTab> {
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white, size: 22),
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
                   await FirebaseAuth.instance.signOut();
                   if (mounted) {
-                    Navigator.pushAndRemoveUntil(
-                      context, 
+                    navigator.pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => const LoginScreen()), 
                       (r) => false
                     );
@@ -112,7 +112,7 @@ class _CategoryTabState extends State<CategoryTab> {
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withAlpha(26),
                         blurRadius: 15,
                         offset: const Offset(0, 5),
                       )
@@ -178,7 +178,7 @@ class _CategoryTabState extends State<CategoryTab> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.05),
+                    color: Colors.black.withAlpha(isDarkMode ? 77 : 13),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   )

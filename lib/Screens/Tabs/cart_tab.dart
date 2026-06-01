@@ -1,7 +1,7 @@
-import 'package:aura_mart/Screens/MyOrdersScreen.dart';
-import 'package:aura_mart/Services/CartService.dart';
-import 'package:aura_mart/Services/OrderService.dart';
-import 'package:aura_mart/Services/PaymentService.dart';
+import 'package:aura_mart/screens/my_orders_screen.dart';
+import 'package:aura_mart/core_services/cart_service.dart';
+import 'package:aura_mart/core_services/order_service.dart';
+import 'package:aura_mart/core_services/payment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -149,7 +149,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       _selectedPaymentMethodId = null;
       _selectedPaymentMethodValue = null;
     });
-    CartService.clearCart();
+    AuraCartService.clearCart();
     _successController.forward();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted && _showSuccessAnimation) {
@@ -215,10 +215,10 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: CartService.cartStream,
+        stream: AuraCartService.cartStream,
         builder: (context, snapshot) {
           final items = snapshot.data ?? [];
-          final total = CartService.calculateTotal(items);
+          final total = AuraCartService.calculateTotal(items);
 
           return Stack(
             children: [
@@ -274,7 +274,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       key: Key(name),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
-        CartService.removeItem(name);
+        AuraCartService.removeItem(name);
         Fluttertoast.showToast(msg: "$name removed from cart");
       },
       background: Container(
@@ -333,12 +333,12 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       children: [
         IconButton(
           icon: const Icon(Icons.remove_circle_outline), 
-          onPressed: () => CartService.decrementQty(name, qty),
+          onPressed: () => AuraCartService.decrementQty(name, qty),
         ),
         Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold)),
         IconButton(
           icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), 
-          onPressed: () => CartService.incrementQty(name),
+          onPressed: () => AuraCartService.incrementQty(name),
         ),
       ],
     );

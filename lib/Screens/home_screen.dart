@@ -1,7 +1,7 @@
-import 'package:aura_mart/Screens/Tabs/cart_tab.dart';
-import 'package:aura_mart/Screens/Tabs/category_tab.dart';
-import 'package:aura_mart/Screens/Tabs/dashboard_tab.dart';
-import 'package:aura_mart/Screens/Tabs/profile_tab.dart';
+import 'package:aura_mart/screens/tabs/cart_tab.dart';
+import 'package:aura_mart/screens/tabs/category_tab.dart';
+import 'package:aura_mart/screens/tabs/dashboard_tab.dart';
+import 'package:aura_mart/screens/tabs/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(35),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withAlpha(38),
               blurRadius: 25,
               offset: const Offset(0, 10),
             ),

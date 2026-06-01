@@ -1,4 +1,4 @@
-import 'package:aura_mart/Services/PaymentService.dart';
+import 'package:aura_mart/core_services/payment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -96,7 +96,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.grey[900] : Colors.white,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5)],
       ),
       child: Row(
         children: [
@@ -183,12 +183,13 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                 ),
                 onPressed: () async {
                   if (upiController.text.isNotEmpty) {
+                    final navigator = Navigator.of(context);
                     await PaymentService.savePaymentMethod({
                       'type': 'upi',
                       'value': upiController.text,
                     });
                     if (mounted) {
-                      Navigator.pop(context);
+                      navigator.pop();
                       Fluttertoast.showToast(msg: "UPI ID saved");
                     }
                   }
@@ -269,6 +270,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                   ),
                   onPressed: () async {
                     if (cardNoController.text.length >= 16) {
+                      final navigator = Navigator.of(context);
                       String maskedValue = "**** **** **** ${cardNoController.text.substring(cardNoController.text.length - 4)}";
                       await PaymentService.savePaymentMethod({
                         'type': 'card',
@@ -276,7 +278,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
                         'value': maskedValue,
                       });
                       if (mounted) {
-                        Navigator.pop(context);
+                        navigator.pop();
                         Fluttertoast.showToast(msg: "Card saved");
                       }
                     } else {

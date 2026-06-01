@@ -1,4 +1,4 @@
-import 'package:aura_mart/Splash%20Services/Splash_Screen.dart';
+import 'package:aura_mart/core_services/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

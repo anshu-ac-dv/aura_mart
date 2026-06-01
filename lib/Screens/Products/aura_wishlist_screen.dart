@@ -1,5 +1,6 @@
-import 'package:aura_mart/Services/CartService.dart';
-import 'package:aura_mart/Services/WishlistService.dart';
+import 'package:aura_mart/core_services/cart_service.dart';
+import 'package:aura_mart/core_services/wishlist_service.dart';
+// Using relative imports for reliability
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,7 +27,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         elevation: 0,
         actions: [
           StreamBuilder<List<Map<String, dynamic>>>(
-            stream: WishlistService.wishlistStream,
+            stream: AuraWishlistService.wishlistStream,
             builder: (context, snapshot) {
               final items = snapshot.data ?? [];
               if (items.isEmpty) return const SizedBox.shrink();
@@ -41,7 +42,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: WishlistService.wishlistStream,
+        stream: AuraWishlistService.wishlistStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -95,11 +96,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         
                         // Add all to cart
                         for (var item in items) {
-                          CartService.addToCart(item);
+                          AuraCartService.addToCart(item);
                         }
                         
                         // Clear wishlist from Firestore
-                        await WishlistService.clearWishlist();
+                        await AuraWishlistService.clearWishlist();
 
                         Fluttertoast.showToast(msg: "All items moved to cart!");
                       },
@@ -175,7 +176,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: InkWell(
                     onTap: () async {
                       try {
-                        await WishlistService.toggleWishlist(product);
+                        await AuraWishlistService.toggleWishlist(product);
                         Fluttertoast.showToast(msg: "Removed from Wishlist");
                       } catch (e) {
                         Fluttertoast.showToast(msg: "Action failed.");
@@ -224,7 +225,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   height: 35,
                   child: ElevatedButton(
                     onPressed: () {
-                      CartService.addToCart(product);
+                      AuraCartService.addToCart(product);
                       Fluttertoast.showToast(msg: "Added to cart");
                     },
                     style: ElevatedButton.styleFrom(
@@ -291,7 +292,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await WishlistService.clearWishlist();
+              await AuraWishlistService.clearWishlist();
               Fluttertoast.showToast(msg: "Wishlist cleared");
             },
             child: const Text("CLEAR ALL", style: TextStyle(color: Colors.red)),

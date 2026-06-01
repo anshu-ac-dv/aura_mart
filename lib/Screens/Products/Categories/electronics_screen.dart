@@ -1,4 +1,4 @@
-import 'package:aura_mart/Screens/Products/Categories/CategoryBaseScreen.dart';
+import 'package:aura_mart/screens/products/categories/aura_category_base_screen.dart';
 import 'package:flutter/material.dart';
 
 class ElectronicsScreen extends StatelessWidget {

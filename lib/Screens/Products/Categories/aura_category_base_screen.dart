@@ -1,5 +1,5 @@
-import 'package:aura_mart/Services/CartService.dart';
-import 'package:aura_mart/Services/WishlistService.dart';
+import 'package:aura_mart/core_services/cart_service.dart';
+import 'package:aura_mart/core_services/wishlist_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -131,7 +131,7 @@ class CategoryBaseScreen extends StatelessWidget {
                 Positioned(
                   top: 10, right: 10,
                   child: StreamBuilder<bool>(
-                    stream: WishlistService.isInWishlistStream(name),
+                    stream: AuraWishlistService.isInWishlistStream(name),
                     builder: (context, snapshot) {
                       bool isFav = snapshot.data ?? false;
                       return CircleAvatar(
@@ -141,7 +141,7 @@ class CategoryBaseScreen extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
                           onPressed: () async {
-                            await WishlistService.toggleWishlist(product);
+                            await AuraWishlistService.toggleWishlist(product);
                             Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
                           },
                         ),
@@ -182,7 +182,7 @@ class CategoryBaseScreen extends StatelessWidget {
                     ),
                     InkWell(
                       onTap: () {
-                        CartService.addToCart(product);
+                        AuraCartService.addToCart(product);
                         Fluttertoast.showToast(msg: "Added to Cart");
                       },
                       child: Container(

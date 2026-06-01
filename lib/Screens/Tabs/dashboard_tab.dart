@@ -1,13 +1,13 @@
-import 'package:aura_mart/Screens/LoginScreen.dart';
-import 'package:aura_mart/Services/CartService.dart';
-import 'package:aura_mart/Services/ProductService.dart';
-import 'package:aura_mart/Services/WishlistService.dart';
+import 'package:aura_mart/screens/login_screen.dart';
+import 'package:aura_mart/core_services/cart_service.dart';
+import 'package:aura_mart/core_services/product_service.dart';
+import 'package:aura_mart/core_services/wishlist_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:lottie/lottie.dart';
-import 'dart:async';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'dart:ui';
 
 class DashboardTab extends StatefulWidget {
   const DashboardTab({super.key});
@@ -18,14 +18,17 @@ class DashboardTab extends StatefulWidget {
 
 class _DashboardTabState extends State<DashboardTab> {
   final TextEditingController _searchController = TextEditingController();
-  final PageController _promoController = PageController();
   String _searchQuery = "";
   String _selectedCategory = "All";
-  int _currentPromoPage = 0;
-  
-  // Timer is now handled in a separate widget to avoid full-screen rebuilds
 
-  // Mock Products
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.grey},
+    {'name': 'Fashion', 'icon': Icons.shopping_bag_rounded, 'color': Colors.pink},
+    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.amber},
+    {'name': 'Home', 'icon': Icons.home_filled, 'color': Colors.green},
+    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded, 'color': Colors.purple},
+  ];
+
   final List<Map<String, dynamic>> _allProducts = [
     {'name': 'Aura Buds Pro', 'price': 129.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Urban Sneakers', 'price': 89.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000&auto=format&fit=crop'},
@@ -33,21 +36,6 @@ class _DashboardTabState extends State<DashboardTab> {
     {'name': 'Artisan Coffee', 'price': 55.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Pro Gamer Mouse', 'price': 45.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Vogue Leather Bag', 'price': 149.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'RGB Mechanical', 'price': 95.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Classic Wallet', 'price': 35.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1627123424574-724758594e93?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Street Denim', 'price': 79.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1576905341935-4ef24434494a?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Minimalist Vase', 'price': 42.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Zen Yoga Mat', 'price': 25.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1592432678016-e910b452f9a2?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Glow Face Cream', 'price': 22.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Velvet Lipstick', 'price': 18.0, 'category': 'Beauty', 'image': 'https://images.unsplash.com/photo-1586776977607-310e9c725c37?q=80&w=1000&auto=format&fit=crop'},
-  ];
-
-  final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.blue},
-    {'name': 'Fashion', 'icon': Icons.checkroom, 'color': Colors.pink},
-    {'name': 'Electronics', 'icon': Icons.bolt, 'color': Colors.amber},
-    {'name': 'Home', 'icon': Icons.home, 'color': Colors.orange},
-    {'name': 'Beauty', 'icon': Icons.face, 'color': Colors.purple},
   ];
 
   List<Map<String, dynamic>> get _filteredProducts {
@@ -59,175 +47,124 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _searchController.dispose();
-    _promoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Colors.black : Colors.grey[100],
+      backgroundColor: isDarkMode ? const Color(0xFF0A0A0A) : Colors.white,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // 1. BEAUTIFUL COLLAPSIBLE APPBAR
-          SliverAppBar(
-            pinned: true,
-            expandedHeight: isTablet ? 200 : 160,
-            flexibleSpace: FlexibleSpaceBar(
-              background: RepaintBoundary(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.deepPurple, Colors.indigo],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Stack(
+          // UNIQUE EDITORIAL HEADER
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Positioned(
-                        right: -20,
-                        top: -20,
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.white.withAlpha(20),
+                      Text(
+                        "DISCOVER",
+                        style: TextStyle(
+                          fontSize: 12,
+                          letterSpacing: 6,
+                          fontWeight: FontWeight.w200,
+                          color: isDarkMode ? Colors.white54 : Colors.black54,
                         ),
                       ),
+                      _buildLogoutButton(isDarkMode),
                     ],
                   ),
-                ),
-              ),
-              title: const Text(
-                "AURA MART",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
-              ),
-              centerTitle: false,
-              titlePadding: const EdgeInsets.only(left: 15, bottom: 95),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white, size: 22),
-                onPressed: () async {
-                  final navigator = Navigator.of(context);
-                  await FirebaseAuth.instance.signOut();
-                  if (mounted) {
-                    navigator.pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => const LoginScreen()), 
-                      (r) => false
-                    );
-                  }
-                },
-              )
-            ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(75),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withAlpha(20),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      )
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (v) => setState(() => _searchQuery = v),
-                    decoration: const InputDecoration(
-                      hintText: 'Search products, brands and more...',
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Aura Collection",
+                    style: TextStyle(
+                      fontSize: 42,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
 
-          // 2. Location Bar
-          SliverToBoxAdapter(child: _buildLocationBar(isDarkMode)),
+          // UNIQUE SEARCH PILL
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _PillSearchDelegate(
+              child: _buildSearchPill(isDarkMode),
+            ),
+          ),
 
-          // 3. Horizontal Category List
-          SliverToBoxAdapter(child: _buildHorizontalCategories(isDarkMode)),
+          // CATEGORY STRIP
+          SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode)),
 
-          // 4. Promo Banner Slider
-          SliverToBoxAdapter(child: RepaintBoundary(child: _buildPromoSlider())),
+          // BENTO HIGHLIGHT
+          SliverToBoxAdapter(child: _buildBentoHighlight(isDarkMode)),
 
-          // 5. Section Headers and Horizontal Lists
-          SliverToBoxAdapter(child: _buildSectionHeader("Deals of the Day", isDarkMode)),
-          SliverToBoxAdapter(child: RepaintBoundary(child: _buildHorizontalProductList(isDarkMode))),
-
-          // 6. Featured Grid Section
-          SliverToBoxAdapter(child: _buildSectionHeader("Suggested for You", isDarkMode)),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: isTablet ? 3 : 2, 
-                crossAxisSpacing: 10, 
-                mainAxisSpacing: 10, 
-                childAspectRatio: isTablet ? 0.85 : 0.75,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildAmazonProductCard(_filteredProducts[index], isDarkMode),
+          // STAGGERED MARKETPLACE (Mock Products)
+          if (_filteredProducts.isNotEmpty)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverMasonryGrid.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 20,
+                itemBuilder: (context, index) {
+                  return _buildModernBentoCard(_filteredProducts[index], isDarkMode, index);
+                },
                 childCount: _filteredProducts.length,
               ),
             ),
-          ),
 
-          // 7. Seller Marketplace Section
-          SliverToBoxAdapter(child: _buildSectionHeader("Seller Marketplace", isDarkMode)),
+          // SELLER MARKETPLACE (Firestore Products)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(25, 40, 25, 20),
+              child: Text(
+                "Marketplace",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+          ),
           StreamBuilder<List<Map<String, dynamic>>>(
             stream: ProductService.productsStream,
             builder: (context, snapshot) {
               final products = snapshot.data ?? [];
               if (products.isEmpty) {
                 return const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(30),
-                    child: Center(child: Text("No items listed by sellers yet.", style: TextStyle(color: Colors.grey))),
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Text("No items listed by sellers yet.", style: TextStyle(color: Colors.grey)),
+                    ),
                   ),
                 );
               }
               return SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: isTablet ? 3 : 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: isTablet ? 0.85 : 0.75,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => _buildAmazonProductCard(products[index], isDarkMode),
-                    childCount: products.length,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverMasonryGrid.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                  itemBuilder: (context, index) {
+                    return _buildModernBentoCard(products[index], isDarkMode, index + _filteredProducts.length);
+                  },
+                  childCount: products.length,
                 ),
               );
             },
@@ -236,293 +173,90 @@ class _DashboardTabState extends State<DashboardTab> {
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _showQuickActionMenu(context, isDarkMode);
-        },
-        backgroundColor: Colors.deepPurple,
-        elevation: 10,
-        child: const Icon(Icons.bolt, color: Colors.white, size: 30),
+    );
+  }
+
+  Widget _buildLogoutButton(bool isDarkMode) {
+    return GestureDetector(
+      onTap: () async {
+        await FirebaseAuth.instance.signOut();
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            (r) => false,
+          );
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: isDarkMode ? Colors.white12 : Colors.black12),
+        ),
+        child: const Icon(Icons.logout_rounded, size: 18),
       ),
     );
   }
 
-  void _showQuickActionMenu(BuildContext context, bool isDarkMode) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(20),
-        padding: const EdgeInsets.all(20),
+  Widget _buildSearchPill(bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Container(
+        height: 60,
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          color: isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(30),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text("Quick Actions", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildQuickAction(Icons.support_agent, "Support", Colors.orange),
-                _buildQuickAction(Icons.local_offer, "Coupons", Colors.green),
-                _buildQuickAction(Icons.track_changes, "Track", Colors.blue),
-                _buildQuickAction(Icons.qr_code_scanner, "Scan", Colors.purple),
-              ],
-            ),
-            const SizedBox(height: 10),
+          boxShadow: [
+            if (!isDarkMode)
+              BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 20, offset: const Offset(0, 10))
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildQuickAction(IconData icon, String label, Color color) {
-    return Column(
-      children: [
-        CircleAvatar(
-          radius: 25,
-          backgroundColor: color.withAlpha(20),
-          child: Icon(icon, color: color),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-      ],
-    );
-  }
-
-  Widget _buildLocationBar(bool isDarkMode) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-      color: Colors.deepPurple.withAlpha(15),
-      child: Row(
-        children: [
-          const Icon(Icons.location_on_outlined, color: Colors.deepPurple, size: 18),
-          const SizedBox(width: 5),
-          const Expanded(
-            child: Text(
-              "Deliver to Anshu - New Delhi 110001",
-              style: TextStyle(color: Colors.deepPurple, fontSize: 13, fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          SizedBox(
-            height: 25,
-            width: 25,
-            child: Lottie.network(
-              'https://lottie.host/be453715-7798-449e-9d26-78e906b3a0e3/D5B3oG0D7M.json', // Cute delivery animation
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.keyboard_arrow_down, color: Colors.deepPurple, size: 18),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHorizontalCategories(bool isDarkMode) {
-    return RepaintBoundary(
-      child: Container(
-        height: 100,
-        margin: const EdgeInsets.only(top: 10),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          itemCount: _categories.length,
-          itemBuilder: (context, index) {
-            final cat = _categories[index];
-            bool isSelected = _selectedCategory == cat['name'];
-            return GestureDetector(
-              onTap: () => setState(() => _selectedCategory = cat['name']),
-              child: Container(
-                width: 85,
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: Column(
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? Colors.deepPurple : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: CircleAvatar(
-                        radius: 26,
-                        backgroundColor: isSelected ? Colors.deepPurple : (cat['color'] as Color).withAlpha(35),
-                        child: Icon(cat['icon'], color: isSelected ? Colors.white : cat['color'], size: 22),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      cat['name'],
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? Colors.deepPurple : (isDarkMode ? Colors.white70 : Colors.black87),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPromoSlider() {
-    return Column(
-      children: [
-        Container(
-          height: 170,
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          child: PageView(
-            controller: _promoController,
-            onPageChanged: (index) {
-              setState(() => _currentPromoPage = index);
-            },
-            children: [
-              _buildBannerImage("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop"),
-              _buildBannerImage("https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop"),
-            ],
+        child: TextField(
+          controller: _searchController,
+          onChanged: (v) => setState(() => _searchQuery = v),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          decoration: InputDecoration(
+            hintText: "Search Aura...",
+            hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
+            prefixIcon: const Icon(Icons.search_rounded, color: Colors.deepPurple),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(vertical: 20),
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(2, (index) => AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            margin: const EdgeInsets.symmetric(horizontal: 3),
-            width: _currentPromoPage == index ? 16 : 8,
-            height: 4,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(2),
-              color: _currentPromoPage == index ? Colors.deepPurple : Colors.grey.withAlpha(100),
-            ),
-          )),
-        )
-      ],
-    );
-  }
-
-  Widget _buildBannerImage(String url) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        image: DecorationImage(image: NetworkImage(url), fit: BoxFit.cover),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, bool isDarkMode) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black)),
-              if (title == "Deals of the Day") ...[
-                const SizedBox(width: 10),
-                const _DealsTimerWidget(),
-              ]
-            ],
-          ),
-          const Text("See all", style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w500)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHorizontalProductList(bool isDarkMode) {
+  Widget _buildCategoryStrip(bool isDarkMode) {
     return SizedBox(
-      height: 200,
+      height: 70,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        itemCount: _filteredProducts.length,
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        itemCount: _categories.length,
         itemBuilder: (context, index) {
-          final product = _filteredProducts[index];
-          return RepaintBoundary(
-            child: Container(
-              width: 150,
-              margin: const EdgeInsets.symmetric(horizontal: 5),
+          final cat = _categories[index];
+          bool isSelected = _selectedCategory == cat['name'];
+          return GestureDetector(
+            onTap: () => setState(() => _selectedCategory = cat['name']),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 25),
               decoration: BoxDecoration(
-                color: isDarkMode ? Colors.grey[900] : Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.withAlpha(20)),
+                color: isSelected ? Colors.deepPurple : (isDarkMode ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5)),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                          child: CachedNetworkImage(
-                            imageUrl: product['image']!.toString(),
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                            placeholder: (context, url) => Container(color: Colors.grey[200]),
-                            errorWidget: (context, url, error) => const Icon(Icons.broken_image),
-                          ),
-                        ),
-                        Positioned(
-                          top: 5, right: 5,
-                          child: StreamBuilder<bool>(
-                            stream: WishlistService.isInWishlistStream(product['name']!.toString()),
-                            builder: (context, snapshot) {
-                              bool isFav = snapshot.data ?? false;
-                              return CircleAvatar(
-                                radius: 14,
-                                backgroundColor: Colors.white.withAlpha(200),
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: Colors.red),
-                                  onPressed: () async {
-                                    await WishlistService.toggleWishlist(product);
-                                    Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
-                                  },
-                                ),
-                              );
-                            }
-                          ),
-                        )
-                      ],
-                    ),
+              child: Center(
+                child: Text(
+                  cat['name'],
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected ? Colors.white : (isDarkMode ? Colors.white54 : Colors.black54),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(product['name']!.toString(), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14)),
-                            InkWell(
-                              onTap: () {
-                                CartService.addToCart(product);
-                                Fluttertoast.showToast(msg: "Added to cart");
-                              },
-                              child: const Icon(Icons.add_shopping_cart, size: 18, color: Colors.deepPurple),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+                ),
               ),
             ),
           );
@@ -531,147 +265,153 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildAmazonProductCard(Map<String, dynamic> product, bool isDarkMode) {
-    return RepaintBoundary(
+  Widget _buildBentoHighlight(bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
       child: Container(
+        height: 220,
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey[900] : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.withAlpha(30)),
+          borderRadius: BorderRadius.circular(35),
+          image: const DecorationImage(
+            image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop"),
+            fit: BoxFit.cover,
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(35),
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [Colors.black.withAlpha(150), Colors.transparent],
+            ),
+          ),
+          padding: const EdgeInsets.all(25),
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Limited Edition",
+                style: TextStyle(color: Colors.deepPurpleAccent, fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 10),
+              ),
+              SizedBox(height: 5),
+              Text(
+                "Aura Studio Series",
+                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernBentoCard(Map<String, dynamic> product, bool isDarkMode, int index) {
+    bool isTall = index % 3 == 0;
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: () {
+          AuraCartService.addToCart(product);
+          Fluttertoast.showToast(msg: "Added to cart");
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDarkMode ? const Color(0xFF151515) : const Color(0xFFF9F9F9),
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                    borderRadius: BorderRadius.circular(30),
                     child: CachedNetworkImage(
                       imageUrl: product['image']!.toString(),
-                      fit: BoxFit.cover,
+                      height: isTall ? 240 : 180,
                       width: double.infinity,
+                      fit: BoxFit.cover,
                       placeholder: (context, url) => Container(color: Colors.grey[200]),
                       errorWidget: (context, url, error) => const Icon(Icons.broken_image),
                     ),
                   ),
                   Positioned(
-                    top: 8, left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        "20% OFF",
-                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                    ),
+                    top: 15,
+                    right: 15,
+                    child: _buildWishlistButton(product),
                   ),
-                  Positioned(
-                    top: 5, right: 5,
-                    child: StreamBuilder<bool>(
-                      stream: WishlistService.isInWishlistStream(product['name']!),
-                      builder: (context, snapshot) {
-                        bool isFav = snapshot.data ?? false;
-                        return CircleAvatar(
-                          radius: 15,
-                          backgroundColor: Colors.white.withAlpha(220),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
-                            onPressed: () async {
-                              await WishlistService.toggleWishlist(product);
-                              Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
-                            },
-                          ),
-                        );
-                      }
-                    ),
-                  )
                 ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(product['name']!, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      Text("\$${product['price']}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      const SizedBox(width: 5),
-                      Text("\$${(product['price'] as num) + 20}",
-                        style: const TextStyle(fontSize: 10, color: Colors.grey, decoration: TextDecoration.lineThrough)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        CartService.addToCart(product);
-                        Fluttertoast.showToast(msg: "Added to cart");
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.amber,
-                        foregroundColor: Colors.black,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        padding: const EdgeInsets.symmetric(vertical: 0),
-                      ),
-                      child: const Text("Add to Cart", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product['name']!.toString(),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: -0.5),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  )
-                ],
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "\$${product['price']}",
+                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Colors.grey),
+                        ),
+                        const Icon(Icons.add_circle_outline_rounded, size: 20),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
-class _DealsTimerWidget extends StatefulWidget {
-  const _DealsTimerWidget();
-
-  @override
-  State<_DealsTimerWidget> createState() => _DealsTimerWidgetState();
-}
-
-class _DealsTimerWidgetState extends State<_DealsTimerWidget> {
-  late Timer _timer;
-  Duration _timeLeft = const Duration(hours: 12, minutes: 30, seconds: 0);
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) {
-        setState(() {
-          _timeLeft = _timeLeft - const Duration(seconds: 1);
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    String timeStr = "${_timeLeft.inHours.toString().padLeft(2, '0')}:${(_timeLeft.inMinutes % 60).toString().padLeft(2, '0')}:${(_timeLeft.inSeconds % 60).toString().padLeft(2, '0')}";
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(color: Colors.red.withAlpha(20), borderRadius: BorderRadius.circular(4)),
-      child: Text(timeStr, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
+  Widget _buildWishlistButton(Map<String, dynamic> product) {
+    return StreamBuilder<bool>(
+      stream: AuraWishlistService.isInWishlistStream(product['name']!),
+      builder: (context, snapshot) {
+        bool isFav = snapshot.data ?? false;
+        return GestureDetector(
+          onTap: () => AuraWishlistService.toggleWishlist(product),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.black.withAlpha(20),
+                child: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: isFav ? Colors.red : Colors.white),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
+}
+
+class _PillSearchDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  _PillSearchDelegate({required this.child});
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => 80;
+  @override
+  double get minExtent => 80;
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }
