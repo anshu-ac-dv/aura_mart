@@ -1,5 +1,6 @@
 import 'package:aura_mart/Screens/LoginScreen.dart';
 import 'package:aura_mart/Services/CartService.dart';
+import 'package:aura_mart/Services/ProductService.dart';
 import 'package:aura_mart/Services/WishlistService.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -198,6 +199,38 @@ class _DashboardTabState extends State<DashboardTab> {
                 childCount: _filteredProducts.length,
               ),
             ),
+          ),
+
+          // 7. Seller Marketplace Section
+          SliverToBoxAdapter(child: _buildSectionHeader("Seller Marketplace", isDarkMode)),
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: ProductService.productsStream,
+            builder: (context, snapshot) {
+              final products = snapshot.data ?? [];
+              if (products.isEmpty) {
+                return const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(30),
+                    child: Center(child: Text("No items listed by sellers yet.", style: TextStyle(color: Colors.grey))),
+                  ),
+                );
+              }
+              return SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                sliver: SliverGrid(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: isTablet ? 3 : 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: isTablet ? 0.85 : 0.75,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => _buildAmazonProductCard(products[index], isDarkMode),
+                    childCount: products.length,
+                  ),
+                ),
+              );
+            },
           ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 120)),

@@ -1,6 +1,7 @@
 import 'package:aura_mart/Screens/MyOrdersScreen.dart';
 import 'package:aura_mart/Screens/PaymentMethodsScreen.dart';
 import 'package:aura_mart/Screens/Products/WishlistScreen.dart';
+import 'package:aura_mart/Screens/Seller/add_product_screen.dart';
 import 'package:aura_mart/Screens/ShippingAddressScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -103,6 +104,10 @@ class ProfileTab extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 10),
                   child: Divider(),
                 ),
+
+                _buildProfileOption(Icons.storefront_outlined, 'Seller Hub - List Items', isDarkMode, color: Colors.blueAccent, onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const AddProductScreen()));
+                }),
                 
                 _buildProfileOption(Icons.help_outline, 'Help & Support', isDarkMode),
                 _buildProfileOption(Icons.settings_outlined, 'Settings', isDarkMode),
