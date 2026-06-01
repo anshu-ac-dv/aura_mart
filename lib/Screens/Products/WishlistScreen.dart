@@ -254,6 +254,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
             'https://lottie.host/17079d85-c64a-466d-a60d-71b55979bc6c/fTjM1a36E8.json', // Cute Empty Heart
             height: 200,
             repeat: true,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.favorite_border, size: 80, color: Colors.grey),
           ),
           const SizedBox(height: 10),
           Text(

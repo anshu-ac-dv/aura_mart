@@ -313,7 +313,7 @@ class _DashboardTabState extends State<DashboardTab> {
             height: 25,
             width: 25,
             child: Lottie.network(
-              'https://assets9.lottiefiles.com/packages/lf20_jt7poy9k.json', // Simple delivery animation
+              'https://lottie.host/be453715-7798-449e-9d26-78e906b3a0e3/D5B3oG0D7M.json', // Cute delivery animation
               errorBuilder: (context, error, stackTrace) => const Icon(Icons.keyboard_arrow_down, color: Colors.deepPurple, size: 18),
             ),
           ),

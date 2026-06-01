@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDarkMode 
-                  ? [Colors.black, Colors.deepPurple.shade900.withOpacity(0.3)]
+                  ? [Colors.black, Colors.deepPurple.shade900.withAlpha(77)]
                   : [Colors.white, Colors.deepPurple.shade50],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,

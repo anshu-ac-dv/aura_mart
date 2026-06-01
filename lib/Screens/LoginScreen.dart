@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: isDarkMode 
-                  ? [Colors.black, Colors.deepPurple.shade900.withOpacity(0.5)]
+                  ? [Colors.black, Colors.deepPurple.shade900.withAlpha(128)]
                   : [Colors.white, Colors.deepPurple.shade50],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       errorBuilder: (context, error, stackTrace) => Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.deepPurple.withOpacity(0.1),
+                          color: Colors.deepPurple.withAlpha(26),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.shopping_bag_outlined, size: isShortDevice ? 60 : 80, color: Colors.deepPurple),

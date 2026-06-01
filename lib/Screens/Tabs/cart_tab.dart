@@ -171,7 +171,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     setState(() => _isProcessing = true);
     try {
       await OrderService.createOrder(items, total, _selectedPaymentMethodValue!);
-      await Future.delayed(const Duration(seconds: 2));
       _onOrderSuccess();
     } catch (e) {
       setState(() => _isProcessing = false);
@@ -269,42 +268,78 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   }
 
   Widget _buildCartItem(Map<String, dynamic> item, bool isDarkMode) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))],
+    final String name = item['name']?.toString() ?? 'Unknown';
+    
+    return Dismissible(
+      key: Key(name),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        CartService.removeItem(name);
+        Fluttertoast.showToast(msg: "$name removed from cart");
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 15),
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: const Icon(Icons.delete_outline, color: Colors.white, size: 30),
       ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: CachedNetworkImage(imageUrl: item['image'], height: 70, width: 70, fit: BoxFit.cover),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item['name']?.toString() ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('\$${(item['price'] as num).toStringAsFixed(2)}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
-              ],
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: CachedNetworkImage(
+                imageUrl: item['image'] ?? '', 
+                height: 70, 
+                width: 70, 
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(color: Colors.grey[200]),
+                errorWidget: (context, url, error) => const Icon(Icons.broken_image, color: Colors.grey),
+              ),
             ),
-          ),
-          _buildQtyControl(item, isDarkMode),
-        ],
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('\$${((item['price'] ?? 0) as num).toStringAsFixed(2)}', style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            _buildQtyControl(item, isDarkMode),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQtyControl(Map<String, dynamic> item, bool isDarkMode) {
+    final String name = item['name']?.toString() ?? '';
+    final int qty = ((item['qty'] ?? 1) as num).toInt();
+    
     return Row(
       children: [
-        IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => CartService.decrementQty(item['name']?.toString() ?? '', (item['qty'] as num).toInt())),
-        Text('${item['qty']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-        IconButton(icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), onPressed: () => CartService.incrementQty(item['name']?.toString() ?? '')),
+        IconButton(
+          icon: const Icon(Icons.remove_circle_outline), 
+          onPressed: () => CartService.decrementQty(name, qty),
+        ),
+        Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold)),
+        IconButton(
+          icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), 
+          onPressed: () => CartService.incrementQty(name),
+        ),
       ],
     );
   }
@@ -357,7 +392,11 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Lottie.network('https://lottie.host/8017e887-848e-4903-88da-901d812a67e0/S30043uX9K.json', height: 250),
+                Lottie.network(
+                  'https://lottie.host/8017e887-848e-4903-88da-901d812a67e0/S30043uX9K.json', 
+                  height: 250,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.check_circle_outline, size: 100, color: Colors.green),
+                ),
                 const Text("Order Placed!", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
               ],
             ),
@@ -372,7 +411,11 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.network('https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', height: 200),
+          Lottie.network(
+            'https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', 
+            height: 200,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey),
+          ),
           const Text('Your cart is empty', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         ],
       ),
