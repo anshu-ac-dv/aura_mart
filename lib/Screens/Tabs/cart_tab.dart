@@ -1,7 +1,7 @@
-import 'package:aura_mart/screens/my_orders_screen.dart';
-import 'package:aura_mart/core_services/cart_service.dart';
-import 'package:aura_mart/core_services/order_service.dart';
-import 'package:aura_mart/core_services/payment_service.dart';
+import 'package:eloria_collection/screens/my_orders_screen.dart';
+import 'package:eloria_collection/core_services/cart_service.dart';
+import 'package:eloria_collection/core_services/order_service.dart';
+import 'package:eloria_collection/core_services/payment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';

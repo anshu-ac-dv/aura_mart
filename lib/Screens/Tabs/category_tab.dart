@@ -1,5 +1,5 @@
-import 'package:aura_mart/screens/login_screen.dart';
-import 'package:aura_mart/screens/products/aura_category_products_screen.dart';
+import 'package:eloria_collection/screens/login_screen.dart';
+import 'package:eloria_collection/screens/products/aura_category_products_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

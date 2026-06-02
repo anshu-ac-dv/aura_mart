@@ -1,4 +1,4 @@
-import 'package:aura_mart/screens/home_screen.dart';
+import 'package:eloria_collection/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Join Aura Mart',
+                      'Join Eloria Collection',
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w900,

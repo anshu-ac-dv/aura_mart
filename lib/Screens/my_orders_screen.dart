@@ -1,4 +1,4 @@
-import 'package:aura_mart/core_services/order_service.dart';
+import 'package:eloria_collection/core_services/order_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

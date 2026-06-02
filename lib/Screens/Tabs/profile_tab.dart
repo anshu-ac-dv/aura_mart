@@ -1,11 +1,11 @@
-import 'package:aura_mart/screens/my_orders_screen.dart';
-import 'package:aura_mart/screens/payment_methods_screen.dart';
-import 'package:aura_mart/screens/products/aura_wishlist_screen.dart';
-import 'package:aura_mart/screens/seller/add_product_screen.dart';
-import 'package:aura_mart/screens/shipping_address_screen.dart';
+import 'package:eloria_collection/screens/my_orders_screen.dart';
+import 'package:eloria_collection/screens/payment_methods_screen.dart';
+import 'package:eloria_collection/screens/products/aura_wishlist_screen.dart';
+import 'package:eloria_collection/screens/seller/add_product_screen.dart';
+import 'package:eloria_collection/screens/shipping_address_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:aura_mart/screens/login_screen.dart';
+import 'package:eloria_collection/screens/login_screen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ProfileTab extends StatelessWidget {

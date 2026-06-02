@@ -1,7 +1,7 @@
-import 'package:aura_mart/screens/login_screen.dart';
-import 'package:aura_mart/core_services/cart_service.dart';
-import 'package:aura_mart/core_services/product_service.dart';
-import 'package:aura_mart/core_services/wishlist_service.dart';
+import 'package:eloria_collection/screens/login_screen.dart';
+import 'package:eloria_collection/core_services/cart_service.dart';
+import 'package:eloria_collection/core_services/product_service.dart';
+import 'package:eloria_collection/core_services/wishlist_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';

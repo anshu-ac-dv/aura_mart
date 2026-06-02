@@ -1,7 +1,7 @@
-import 'package:aura_mart/screens/tabs/cart_tab.dart';
-import 'package:aura_mart/screens/tabs/category_tab.dart';
-import 'package:aura_mart/screens/tabs/dashboard_tab.dart';
-import 'package:aura_mart/screens/tabs/profile_tab.dart';
+import 'package:eloria_collection/screens/tabs/cart_tab.dart';
+import 'package:eloria_collection/screens/tabs/category_tab.dart';
+import 'package:eloria_collection/screens/tabs/dashboard_tab.dart';
+import 'package:eloria_collection/screens/tabs/profile_tab.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {

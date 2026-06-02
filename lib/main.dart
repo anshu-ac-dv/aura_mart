@@ -1,4 +1,4 @@
-import 'package:aura_mart/core_services/splash/splash_screen.dart';
+import 'package:eloria_collection/core_services/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Aura Mart',
+      title: 'Eloria Collection',
       themeMode: ThemeMode.system, 
       theme: ThemeData(
         useMaterial3: true,

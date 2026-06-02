@@ -1,4 +1,4 @@
-# <p align="center">✨ AURA MART ✨</p>
+# <p align="center">✨ ELORIA COLLECTION ✨</p>
 <p align="center">
   <img src="https://img.shields.io/badge/FLUTTER-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
   <img src="https://img.shields.io/badge/FIREBASE-Backend-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase" />

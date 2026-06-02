@@ -1,6 +1,6 @@
-import 'package:aura_mart/screens/forgot_password_screen.dart';
-import 'package:aura_mart/screens/home_screen.dart';
-import 'package:aura_mart/screens/register_screen.dart';
+import 'package:eloria_collection/screens/forgot_password_screen.dart';
+import 'package:eloria_collection/screens/home_screen.dart';
+import 'package:eloria_collection/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';

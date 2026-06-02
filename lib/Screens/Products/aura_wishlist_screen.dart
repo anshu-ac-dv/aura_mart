@@ -1,5 +1,5 @@
-import 'package:aura_mart/core_services/cart_service.dart';
-import 'package:aura_mart/core_services/wishlist_service.dart';
+import 'package:eloria_collection/core_services/cart_service.dart';
+import 'package:eloria_collection/core_services/wishlist_service.dart';
 // Using relative imports for reliability
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
