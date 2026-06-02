@@ -1,6 +1,6 @@
 import 'package:eloria_collection/screens/my_orders_screen.dart';
 import 'package:eloria_collection/screens/payment_methods_screen.dart';
-import 'package:eloria_collection/screens/products/aura_wishlist_screen.dart';
+import 'package:eloria_collection/screens/products/eloria_wishlist_screen.dart';
 import 'package:eloria_collection/screens/seller/add_product_screen.dart';
 import 'package:eloria_collection/screens/shipping_address_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';

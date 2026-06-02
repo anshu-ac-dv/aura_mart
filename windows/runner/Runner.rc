@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.auramart" "\0"
-            VALUE "FileDescription", "aura_mart" "\0"
+            VALUE "CompanyName", "com.eloriacollection" "\0"
+            VALUE "FileDescription", "Eloria Collection" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "aura_mart" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.auramart. All rights reserved." "\0"
-            VALUE "OriginalFilename", "aura_mart.exe" "\0"
-            VALUE "ProductName", "aura_mart" "\0"
+            VALUE "InternalName", "eloria_collection" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.eloriacollection. All rights reserved." "\0"
+            VALUE "OriginalFilename", "eloria_collection.exe" "\0"
+            VALUE "ProductName", "Eloria Collection" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

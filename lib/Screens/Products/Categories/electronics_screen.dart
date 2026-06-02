@@ -1,4 +1,4 @@
-import 'package:eloria_collection/screens/products/categories/aura_category_base_screen.dart';
+import 'package:eloria_collection/screens/products/categories/eloria_category_base_screen.dart';
 import 'package:flutter/material.dart';
 
 class ElectronicsScreen extends StatelessWidget {
