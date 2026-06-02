@@ -36,12 +36,12 @@
 
 ```mermaid
 graph LR
-    A[<b>Aura Splash</b>] --> B{Auth?}
+    A[<b>Eloria Splash</b>] --> B{Auth?}
     B -- No --> C[<b>Identity Hub</b>]
     B -- Yes --> D[<b>Editorial Dashboard</b>]
     C --> D
     D --> E[<b>Bento Discovery</b>]
-    E --> F[<b>Aura Cart & Wishlist</b>]
+    E --> F[<b>Eloria Cart & Wishlist</b>]
     F --> G[<b>Swift Checkout</b>]
     G --> H[<b>Order Timeline</b>]
 ```
@@ -75,8 +75,8 @@ lib/
 
 1. **Setup**
    ```bash
-   git clone https://github.com/anshu-ac-dv/aura_mart.git
-   cd aura_mart
+   git clone https://github.com/anshu-ac-dv/eloria_collection.git
+   cd eloria_collection
    flutter pub get
    ```
 

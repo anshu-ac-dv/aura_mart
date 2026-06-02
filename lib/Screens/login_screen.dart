@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 50),
                     
-                    // Email Field with Aura Style
+                    // Email Field with Eloria Style
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // Password Field with Aura Style
+                    // Password Field with Eloria Style
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,

@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '176895512440',
     projectId: 'aura-mart-4f432',
     storageBucket: 'aura-mart-4f432.firebasestorage.app',
-    iosBundleId: 'com.auramart.auraMart',
+    iosBundleId: 'com.eloriacollection.eloriaCollection',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '176895512440',
     projectId: 'aura-mart-4f432',
     storageBucket: 'aura-mart-4f432.firebasestorage.app',
-    iosBundleId: 'com.auramart.auraMart',
+    iosBundleId: 'com.eloriacollection.eloriaCollection',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

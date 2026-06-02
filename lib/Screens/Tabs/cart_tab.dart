@@ -149,7 +149,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       _selectedPaymentMethodId = null;
       _selectedPaymentMethodValue = null;
     });
-    AuraCartService.clearCart();
+    EloriaCartService.clearCart();
     _successController.forward();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted && _showSuccessAnimation) {
@@ -215,10 +215,10 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: AuraCartService.cartStream,
+        stream: EloriaCartService.cartStream,
         builder: (context, snapshot) {
           final items = snapshot.data ?? [];
-          final total = AuraCartService.calculateTotal(items);
+          final total = EloriaCartService.calculateTotal(items);
 
           return Stack(
             children: [
@@ -274,7 +274,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       key: Key(name),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
-        AuraCartService.removeItem(name);
+        EloriaCartService.removeItem(name);
         Fluttertoast.showToast(msg: "$name removed from cart");
       },
       background: Container(
@@ -333,12 +333,12 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       children: [
         IconButton(
           icon: const Icon(Icons.remove_circle_outline), 
-          onPressed: () => AuraCartService.decrementQty(name, qty),
+          onPressed: () => EloriaCartService.decrementQty(name, qty),
         ),
         Text('$qty', style: const TextStyle(fontWeight: FontWeight.bold)),
         IconButton(
           icon: const Icon(Icons.add_circle_outline, color: Colors.deepPurple), 
-          onPressed: () => AuraCartService.incrementQty(name),
+          onPressed: () => EloriaCartService.incrementQty(name),
         ),
       ],
     );

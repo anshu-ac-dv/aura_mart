@@ -66,11 +66,11 @@ class ProfileTab extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  user?.displayName ?? 'Aura User',
+                  user?.displayName ?? 'Eloria User',
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  user?.email ?? 'aura.user@example.com',
+                  user?.email ?? 'eloria.user@example.com',
                   style: const TextStyle(color: Colors.grey, letterSpacing: 1),
                 ),
                 const SizedBox(height: 25),

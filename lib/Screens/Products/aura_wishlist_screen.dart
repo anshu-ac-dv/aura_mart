@@ -27,7 +27,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         elevation: 0,
         actions: [
           StreamBuilder<List<Map<String, dynamic>>>(
-            stream: AuraWishlistService.wishlistStream,
+            stream: EloriaWishlistService.wishlistStream,
             builder: (context, snapshot) {
               final items = snapshot.data ?? [];
               if (items.isEmpty) return const SizedBox.shrink();
@@ -42,7 +42,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
         ],
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: AuraWishlistService.wishlistStream,
+        stream: EloriaWishlistService.wishlistStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -96,11 +96,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         
                         // Add all to cart
                         for (var item in items) {
-                          AuraCartService.addToCart(item);
+                          EloriaCartService.addToCart(item);
                         }
                         
                         // Clear wishlist from Firestore
-                        await AuraWishlistService.clearWishlist();
+                        await EloriaWishlistService.clearWishlist();
 
                         Fluttertoast.showToast(msg: "All items moved to cart!");
                       },
@@ -176,7 +176,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   child: InkWell(
                     onTap: () async {
                       try {
-                        await AuraWishlistService.toggleWishlist(product);
+                        await EloriaWishlistService.toggleWishlist(product);
                         Fluttertoast.showToast(msg: "Removed from Wishlist");
                       } catch (e) {
                         Fluttertoast.showToast(msg: "Action failed.");
@@ -225,7 +225,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   height: 35,
                   child: ElevatedButton(
                     onPressed: () {
-                      AuraCartService.addToCart(product);
+                      EloriaCartService.addToCart(product);
                       Fluttertoast.showToast(msg: "Added to cart");
                     },
                     style: ElevatedButton.styleFrom(
@@ -292,7 +292,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              await AuraWishlistService.clearWishlist();
+              await EloriaWishlistService.clearWishlist();
               Fluttertoast.showToast(msg: "Wishlist cleared");
             },
             child: const Text("CLEAR ALL", style: TextStyle(color: Colors.red)),

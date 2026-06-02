@@ -30,7 +30,7 @@ class _DashboardTabState extends State<DashboardTab> {
   ];
 
   final List<Map<String, dynamic>> _allProducts = [
-    {'name': 'Aura Buds Pro', 'price': 129.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'Eloria Buds Pro', 'price': 129.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Urban Sneakers', 'price': 89.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Elite SmartWatch', 'price': 199.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1544117518-30df578096a4?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Artisan Coffee', 'price': 55.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=1000&auto=format&fit=crop'},
@@ -85,7 +85,7 @@ class _DashboardTabState extends State<DashboardTab> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Aura Collection",
+                    "Eloria Collection",
                     style: TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w900,
@@ -217,7 +217,7 @@ class _DashboardTabState extends State<DashboardTab> {
           onChanged: (v) => setState(() => _searchQuery = v),
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           decoration: InputDecoration(
-            hintText: "Search Aura...",
+            hintText: "Search Eloria...",
             hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
             prefixIcon: const Icon(Icons.search_rounded, color: Colors.deepPurple),
             border: InputBorder.none,
@@ -297,7 +297,7 @@ class _DashboardTabState extends State<DashboardTab> {
               ),
               SizedBox(height: 5),
               Text(
-                "Aura Studio Series",
+                "Eloria Studio Series",
                 style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
               ),
             ],
@@ -312,7 +312,7 @@ class _DashboardTabState extends State<DashboardTab> {
     return RepaintBoundary(
       child: GestureDetector(
         onTap: () {
-          AuraCartService.addToCart(product);
+          EloriaCartService.addToCart(product);
           Fluttertoast.showToast(msg: "Added to cart");
         },
         child: Container(
@@ -377,11 +377,11 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildWishlistButton(Map<String, dynamic> product) {
     return StreamBuilder<bool>(
-      stream: AuraWishlistService.isInWishlistStream(product['name']!),
+      stream: EloriaWishlistService.isInWishlistStream(product['name']!),
       builder: (context, snapshot) {
         bool isFav = snapshot.data ?? false;
         return GestureDetector(
-          onTap: () => AuraWishlistService.toggleWishlist(product),
+          onTap: () => EloriaWishlistService.toggleWishlist(product),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
             child: BackdropFilter(

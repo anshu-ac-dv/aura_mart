@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // Background "Aura"
+          // Background "Eloria"
           AnimatedBuilder(
             animation: _pulseAnimation,
             builder: (context, child) {
@@ -101,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ScaleTransition(
                 scale: _scaleAnimation,
                 child: Text(
-                  'AURA',
+                  'ELORIA',
                   style: TextStyle(
                     fontSize: 60,
                     fontWeight: FontWeight.w100,
@@ -126,7 +126,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ),
               const SizedBox(height: 10),
               Text(
-                'MART',
+                'COLLECTION',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w900,

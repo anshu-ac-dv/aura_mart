@@ -1,4 +1,4 @@
-package com.auramart.aura_mart
+package com.eloriacollection.eloria_collection
 
 import io.flutter.embedding.android.FlutterActivity
 

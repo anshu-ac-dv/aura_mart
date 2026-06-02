@@ -131,7 +131,7 @@ class CategoryBaseScreen extends StatelessWidget {
                 Positioned(
                   top: 10, right: 10,
                   child: StreamBuilder<bool>(
-                    stream: AuraWishlistService.isInWishlistStream(name),
+                    stream: EloriaWishlistService.isInWishlistStream(name),
                     builder: (context, snapshot) {
                       bool isFav = snapshot.data ?? false;
                       return CircleAvatar(
@@ -141,7 +141,7 @@ class CategoryBaseScreen extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
                           onPressed: () async {
-                            await AuraWishlistService.toggleWishlist(product);
+                            await EloriaWishlistService.toggleWishlist(product);
                             Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
                           },
                         ),
@@ -182,7 +182,7 @@ class CategoryBaseScreen extends StatelessWidget {
                     ),
                     InkWell(
                       onTap: () {
-                        AuraCartService.addToCart(product);
+                        EloriaCartService.addToCart(product);
                         Fluttertoast.showToast(msg: "Added to Cart");
                       },
                       child: Container(
