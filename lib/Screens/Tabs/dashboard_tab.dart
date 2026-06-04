@@ -22,14 +22,14 @@ class _DashboardTabState extends State<DashboardTab> {
   String _selectedCategory = "All";
 
   final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.grey},
-    {'name': 'Fashion', 'icon': Icons.shopping_bag_rounded, 'color': Colors.pink},
-    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.amber},
-    {'name': 'Home', 'icon': Icons.home_filled, 'color': Colors.green},
-    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded, 'color': Colors.purple},
+    {'name': 'All', 'icon': Icons.grid_view_rounded},
+    {'name': 'Fashion', 'icon': Icons.shopping_bag_rounded},
+    {'name': 'Electronics', 'icon': Icons.bolt_rounded},
+    {'name': 'Home', 'icon': Icons.home_filled},
+    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded},
   ];
 
-  final List<Map<String, dynamic>> _allProducts = [
+  final List<Map<String, dynamic>> _mockProducts = [
     {'name': 'Eloria Buds Pro', 'price': 129.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Urban Sneakers', 'price': 89.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000&auto=format&fit=crop'},
     {'name': 'Elite SmartWatch', 'price': 199.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1544117518-30df578096a4?q=80&w=1000&auto=format&fit=crop'},
@@ -39,8 +39,8 @@ class _DashboardTabState extends State<DashboardTab> {
   ];
 
   List<Map<String, dynamic>> get _filteredProducts {
-    return _allProducts.where((p) {
-      final matchesSearch = p['name']!.toString().toLowerCase().contains(_searchQuery.toLowerCase());
+    return _mockProducts.where((p) {
+      final matchesSearch = p['name']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) ?? false;
       final matchesCategory = _selectedCategory == "All" || p['category'] == _selectedCategory;
       return matchesSearch && matchesCategory;
     }).toList();
@@ -55,173 +55,213 @@ class _DashboardTabState extends State<DashboardTab> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF0A0A0A) : Colors.white,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // UNIQUE EDITORIAL HEADER
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      backgroundColor: isDarkMode ? const Color(0xFF08080A) : const Color(0xFFFBFBFF),
+      body: Stack(
+        children: [
+          // Background soft glows
+          if (isDarkMode) ...[
+            _buildGlow(primaryColor.withAlpha(25), const Offset(-100, -100), 400),
+            _buildGlow(primaryColor.withAlpha(20), const Offset(200, 300), 300),
+          ],
+          
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              // HEADER
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "DISCOVER",
-                        style: TextStyle(
-                          fontSize: 12,
-                          letterSpacing: 6,
-                          fontWeight: FontWeight.w200,
-                          color: isDarkMode ? Colors.white54 : Colors.black54,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "WELCOME TO",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  letterSpacing: 4,
+                                  fontWeight: FontWeight.w800,
+                                  color: isDarkMode ? Colors.white38 : Colors.black38,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Eloria",
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.w200,
+                                  letterSpacing: 2,
+                                  color: isDarkMode ? Colors.white : Colors.black,
+                                ),
+                              ),
+                            ],
+                          ),
+                          _buildLogoutButton(isDarkMode),
+                        ],
                       ),
-                      _buildLogoutButton(isDarkMode),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Eloria Collection",
-                    style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      height: 1.1,
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // UNIQUE SEARCH PILL
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _PillSearchDelegate(
-              child: _buildSearchPill(isDarkMode),
-            ),
-          ),
+              // SEARCH BAR (Sticky)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _PillSearchDelegate(
+                  child: _buildSearchPill(isDarkMode),
+                ),
+              ),
 
-          // CATEGORY STRIP
-          SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode)),
+              // CATEGORIES
+              SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode)),
 
-          // BENTO HIGHLIGHT
-          SliverToBoxAdapter(child: _buildBentoHighlight(isDarkMode)),
+              // PROMO SECTION
+              SliverToBoxAdapter(child: _buildFeaturedPromotion(isDarkMode)),
 
-          // STAGGERED MARKETPLACE (Mock Products)
-          if (_filteredProducts.isNotEmpty)
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverMasonryGrid.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-                itemBuilder: (context, index) {
-                  return _buildModernBentoCard(_filteredProducts[index], isDarkMode, index);
+              // PRODUCTS GRID (MOCKS)
+              if (_filteredProducts.isNotEmpty) ...[
+                _buildSectionHeader("Curated for you", isDarkMode),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverMasonryGrid.count(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 18,
+                    crossAxisSpacing: 18,
+                    itemBuilder: (context, index) {
+                      return _buildPremiumProductCard(_filteredProducts[index], isDarkMode, index);
+                    },
+                    childCount: _filteredProducts.length,
+                  ),
+                ),
+              ],
+
+              // MARKETPLACE (REAL DATA)
+              _buildSectionHeader("Marketplace", isDarkMode),
+              StreamBuilder<List<Map<String, dynamic>>>(
+                stream: ProductService.productsStream,
+                builder: (context, snapshot) {
+                  final products = snapshot.data ?? [];
+                  if (products.isEmpty) {
+                    return const SliverToBoxAdapter(
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(60),
+                          child: Text("Waiting for new arrivals...", style: TextStyle(color: Colors.grey)),
+                        ),
+                      ),
+                    );
+                  }
+                  return SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverMasonryGrid.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 18,
+                      crossAxisSpacing: 18,
+                      itemBuilder: (context, index) {
+                        return _buildPremiumProductCard(products[index], isDarkMode, index + 100);
+                      },
+                      childCount: products.length,
+                    ),
+                  );
                 },
-                childCount: _filteredProducts.length,
               ),
-            ),
 
-          // SELLER MARKETPLACE (Firestore Products)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(25, 40, 25, 20),
-              child: Text(
-                "Marketplace",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: isDarkMode ? Colors.white : Colors.black,
-                ),
-              ),
-            ),
+              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+            ],
           ),
-          StreamBuilder<List<Map<String, dynamic>>>(
-            stream: ProductService.productsStream,
-            builder: (context, snapshot) {
-              final products = snapshot.data ?? [];
-              if (products.isEmpty) {
-                return const SliverToBoxAdapter(
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(40),
-                      child: Text("No items listed by sellers yet.", style: TextStyle(color: Colors.grey)),
-                    ),
-                  ),
-                );
-              }
-              return SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                sliver: SliverMasonryGrid.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  itemBuilder: (context, index) {
-                    return _buildModernBentoCard(products[index], isDarkMode, index + _filteredProducts.length);
-                  },
-                  childCount: products.length,
-                ),
-              );
-            },
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
         ],
       ),
     );
   }
 
+  Widget _buildGlow(Color color, Offset offset, double size) {
+    return Positioned(
+      left: offset.dx,
+      top: offset.dy,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [color, Colors.transparent],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, bool isDarkMode) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(25, 40, 25, 20),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            color: isDarkMode ? Colors.white : Colors.black87,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLogoutButton(bool isDarkMode) {
-    return GestureDetector(
+    return InkWell(
       onTap: () async {
         await FirebaseAuth.instance.signOut();
         if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (r) => false,
-          );
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
         }
       },
+      borderRadius: BorderRadius.circular(15),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: isDarkMode ? Colors.white12 : Colors.black12),
+          color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(13),
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: const Icon(Icons.logout_rounded, size: 18),
+        child: Icon(Icons.power_settings_new_rounded, size: 20, color: isDarkMode ? Colors.white70 : Colors.black87),
       ),
     );
   }
 
   Widget _buildSearchPill(bool isDarkMode) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Container(
-        height: 60,
-        decoration: BoxDecoration(
-          color: isDarkMode ? const Color(0xFF1A1A1A) : const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            if (!isDarkMode)
-              BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 20, offset: const Offset(0, 10))
-          ],
-        ),
-        child: TextField(
-          controller: _searchController,
-          onChanged: (v) => setState(() => _searchQuery = v),
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          decoration: InputDecoration(
-            hintText: "Search Eloria...",
-            hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
-            prefixIcon: const Icon(Icons.search_rounded, color: Colors.deepPurple),
-            border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 55,
+            decoration: BoxDecoration(
+              color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13)),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (v) => setState(() => _searchQuery = v),
+              style: const TextStyle(fontSize: 15),
+              decoration: InputDecoration(
+                hintText: "Search collections...",
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
+                prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 15),
+              ),
+            ),
           ),
         ),
       ),
@@ -229,8 +269,9 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildCategoryStrip(bool isDarkMode) {
-    return SizedBox(
-      height: 70,
+    return Container(
+      height: 80,
+      margin: const EdgeInsets.only(top: 10),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -242,18 +283,22 @@ class _DashboardTabState extends State<DashboardTab> {
             onTap: () => setState(() => _selectedCategory = cat['name']),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 25),
+              curve: Curves.easeOutCubic,
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.deepPurple : (isDarkMode ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5)),
-                borderRadius: BorderRadius.circular(20),
+                color: isSelected 
+                    ? Theme.of(context).primaryColor 
+                    : (isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8)),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: isSelected ? [BoxShadow(color: Theme.of(context).primaryColor.withAlpha(77), blurRadius: 10, offset: const Offset(0, 4))] : [],
               ),
               child: Center(
                 child: Text(
-                  cat['name'],
+                  cat['name'] ?? '',
                   style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     color: isSelected ? Colors.white : (isDarkMode ? Colors.white54 : Colors.black54),
                   ),
                 ),
@@ -265,25 +310,25 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildBentoHighlight(bool isDarkMode) {
+  Widget _buildFeaturedPromotion(bool isDarkMode) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Container(
-        height: 220,
+        height: 200,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(35),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [BoxShadow(color: Colors.black.withAlpha(26), blurRadius: 20, offset: const Offset(0, 10))],
           image: const DecorationImage(
-            image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop"),
+            image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000"),
             fit: BoxFit.cover,
           ),
         ),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(35),
+            borderRadius: BorderRadius.circular(30),
             gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [Colors.black.withAlpha(150), Colors.transparent],
+              begin: Alignment.bottomRight,
+              colors: [Colors.black.withAlpha(204), Colors.transparent],
             ),
           ),
           padding: const EdgeInsets.all(25),
@@ -291,15 +336,9 @@ class _DashboardTabState extends State<DashboardTab> {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Limited Edition",
-                style: TextStyle(color: Colors.deepPurpleAccent, fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 10),
-              ),
+              Text("SEASONAL", style: TextStyle(color: Colors.white60, fontSize: 10, letterSpacing: 3, fontWeight: FontWeight.bold)),
               SizedBox(height: 5),
-              Text(
-                "Eloria Studio Series",
-                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
-              ),
+              Text("The Winter\nEdit 2026", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w200, height: 1)),
             ],
           ),
         ),
@@ -307,18 +346,24 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildModernBentoCard(Map<String, dynamic> product, bool isDarkMode, int index) {
+  Widget _buildPremiumProductCard(Map<String, dynamic> product, bool isDarkMode, int index) {
     bool isTall = index % 3 == 0;
+    final String name = product['name']?.toString() ?? 'Unknown';
+    final String image = product['image']?.toString() ?? '';
+    final String category = product['category']?.toString().toUpperCase() ?? "";
+    final double price = (product['price'] is num) ? (product['price'] as num).toDouble() : 0.0;
+
     return RepaintBoundary(
       child: GestureDetector(
         onTap: () {
           EloriaCartService.addToCart(product);
-          Fluttertoast.showToast(msg: "Added to cart");
+          Fluttertoast.showToast(msg: "Added to your collection");
         },
         child: Container(
           decoration: BoxDecoration(
-            color: isDarkMode ? const Color(0xFF151515) : const Color(0xFFF9F9F9),
-            borderRadius: BorderRadius.circular(30),
+            color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,44 +371,56 @@ class _DashboardTabState extends State<DashboardTab> {
               Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(24),
                     child: CachedNetworkImage(
-                      imageUrl: product['image']!.toString(),
+                      imageUrl: image,
                       height: isTall ? 240 : 180,
                       width: double.infinity,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: Colors.grey[200]),
-                      errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+                      placeholder: (context, url) => Container(color: isDarkMode ? Colors.white10 : Colors.black12),
+                      errorWidget: (context, url, error) => Container(color: Colors.grey[300], child: const Icon(Icons.broken_image)),
                     ),
                   ),
+                  Positioned(top: 12, right: 12, child: _buildWishlistButton(product)),
                   Positioned(
-                    top: 15,
-                    right: 15,
-                    child: _buildWishlistButton(product),
+                    bottom: 12,
+                    left: 12,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          color: Colors.black.withAlpha(77),
+                          child: Text(
+                            "\$$price",
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product['name']!.toString(),
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, letterSpacing: -0.5),
+                      name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: isDarkMode ? Colors.white : Colors.black87,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "\$${product['price']}",
-                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: Colors.grey),
-                        ),
-                        const Icon(Icons.add_circle_outline_rounded, size: 20),
-                      ],
+                    const SizedBox(height: 4),
+                    Text(
+                      category,
+                      style: TextStyle(fontSize: 9, letterSpacing: 1, color: isDarkMode ? Colors.white30 : Colors.black38, fontWeight: FontWeight.w800),
                     ),
                   ],
                 ),
@@ -376,20 +433,24 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildWishlistButton(Map<String, dynamic> product) {
+    final String name = product['name']?.toString() ?? 'Unknown';
     return StreamBuilder<bool>(
-      stream: EloriaWishlistService.isInWishlistStream(product['name']!),
+      stream: EloriaWishlistService.isInWishlistStream(name),
       builder: (context, snapshot) {
         bool isFav = snapshot.data ?? false;
         return GestureDetector(
           onTap: () => EloriaWishlistService.toggleWishlist(product),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
+          child: ClipOval(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
               child: Container(
                 padding: const EdgeInsets.all(8),
-                color: Colors.black.withAlpha(20),
-                child: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 16, color: isFav ? Colors.red : Colors.white),
+                color: Colors.white.withAlpha(51),
+                child: Icon(
+                  isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  size: 16,
+                  color: isFav ? Colors.redAccent : Colors.white,
+                ),
               ),
             ),
           ),
@@ -409,9 +470,9 @@ class _PillSearchDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 80;
+  double get maxExtent => 75;
   @override
-  double get minExtent => 80;
+  double get minExtent => 75;
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
 }
