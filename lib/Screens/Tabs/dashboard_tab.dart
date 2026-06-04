@@ -23,7 +23,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   final List<Map<String, dynamic>> _categories = [
     {'name': 'All', 'icon': Icons.grid_view_rounded},
-    {'name': 'Fashion', 'icon': Icons.shopping_bag_rounded},
+    {'name': 'Fashion', 'icon': Icons.checkroom_rounded},
     {'name': 'Electronics', 'icon': Icons.bolt_rounded},
     {'name': 'Home', 'icon': Icons.home_filled},
     {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded},
@@ -38,7 +38,7 @@ class _DashboardTabState extends State<DashboardTab> {
     {'name': 'Vogue Leather Bag', 'price': 149.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=1000&auto=format&fit=crop'},
   ];
 
-  List<Map<String, dynamic>> get _filteredProducts {
+  List<Map<String, dynamic>> get _filteredMocks {
     return _mockProducts.where((p) {
       final matchesSearch = p['name']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) ?? false;
       final matchesCategory = _selectedCategory == "All" || p['category'] == _selectedCategory;
@@ -67,115 +67,136 @@ class _DashboardTabState extends State<DashboardTab> {
             _buildGlow(primaryColor.withAlpha(20), const Offset(200, 300), 300),
           ],
           
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              // HEADER
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(25, 60, 25, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "WELCOME TO",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  letterSpacing: 4,
-                                  fontWeight: FontWeight.w800,
-                                  color: isDarkMode ? Colors.white38 : Colors.black38,
+          StreamBuilder<List<Map<String, dynamic>>>(
+            stream: ProductService.productsStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text("Error: ${snapshot.error}"));
+              }
+              
+              if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final allProducts = snapshot.data ?? [];
+              final marketplaceProducts = allProducts.where((p) {
+                final matchesSearch = p['name']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) ?? false;
+                final matchesCategory = _selectedCategory == "All" || p['category'] == _selectedCategory;
+                return matchesSearch && matchesCategory;
+              }).toList();
+
+              return CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  // --- PREMIUM BRAND HEADER ---
+                  SliverAppBar(
+                    expandedHeight: 120,
+                    collapsedHeight: 80,
+                    pinned: true,
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        padding: const EdgeInsets.fromLTRB(25, 60, 25, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "ELORIA",
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w200,
+                                    letterSpacing: 4,
+                                    color: isDarkMode ? Colors.white : Colors.black,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Eloria",
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w200,
-                                  letterSpacing: 2,
-                                  color: isDarkMode ? Colors.white : Colors.black,
+                                Text(
+                                  "COLLECTION",
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    letterSpacing: 6,
+                                    fontWeight: FontWeight.w900,
+                                    color: primaryColor,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          _buildLogoutButton(isDarkMode),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // SEARCH BAR (Sticky)
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _PillSearchDelegate(
-                  child: _buildSearchPill(isDarkMode),
-                ),
-              ),
-
-              // CATEGORIES
-              SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode)),
-
-              // PROMO SECTION
-              SliverToBoxAdapter(child: _buildFeaturedPromotion(isDarkMode)),
-
-              // PRODUCTS GRID (MOCKS)
-              if (_filteredProducts.isNotEmpty) ...[
-                _buildSectionHeader("Curated for you", isDarkMode),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverMasonryGrid.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 18,
-                    crossAxisSpacing: 18,
-                    itemBuilder: (context, index) {
-                      return _buildPremiumProductCard(_filteredProducts[index], isDarkMode, index);
-                    },
-                    childCount: _filteredProducts.length,
-                  ),
-                ),
-              ],
-
-              // MARKETPLACE (REAL DATA)
-              _buildSectionHeader("Marketplace", isDarkMode),
-              StreamBuilder<List<Map<String, dynamic>>>(
-                stream: ProductService.productsStream,
-                builder: (context, snapshot) {
-                  final products = snapshot.data ?? [];
-                  if (products.isEmpty) {
-                    return const SliverToBoxAdapter(
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(60),
-                          child: Text("Waiting for new arrivals...", style: TextStyle(color: Colors.grey)),
+                              ],
+                            ),
+                            _buildLogoutButton(isDarkMode),
+                          ],
                         ),
                       ),
-                    );
-                  }
-                  return SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    sliver: SliverMasonryGrid.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 18,
-                      crossAxisSpacing: 18,
-                      itemBuilder: (context, index) {
-                        return _buildPremiumProductCard(products[index], isDarkMode, index + 100);
-                      },
-                      childCount: products.length,
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 120)),
-            ],
+                  // --- STICKY SEARCH ---
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _PillSearchDelegate(
+                      child: _buildSearchPill(isDarkMode),
+                    ),
+                  ),
+
+                  // --- CATEGORY CHIPS ---
+                  SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode)),
+
+                  // --- FEATURED HERO ---
+                  SliverToBoxAdapter(child: _buildHeroCard(isDarkMode)),
+
+                  // --- CURATED SECTION ---
+                  if (_filteredMocks.isNotEmpty) ...[
+                    _buildSectionHeader("Curated Specials", isDarkMode),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverMasonryGrid.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 18,
+                        crossAxisSpacing: 18,
+                        itemBuilder: (context, index) {
+                          return _buildModernProductCard(_filteredMocks[index], isDarkMode, index);
+                        },
+                        childCount: _filteredMocks.length,
+                      ),
+                    ),
+                  ],
+
+                  // --- MARKETPLACE SECTION ---
+                  _buildSectionHeader("Marketplace", isDarkMode),
+                  if (marketplaceProducts.isEmpty)
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(80),
+                          child: Column(
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 40, color: isDarkMode ? Colors.white10 : Colors.black12),
+                              const SizedBox(height: 15),
+                              const Text("No items found", style: TextStyle(color: Colors.grey, letterSpacing: 1)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverMasonryGrid.count(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 18,
+                        crossAxisSpacing: 18,
+                        itemBuilder: (context, index) {
+                          return _buildModernProductCard(marketplaceProducts[index], isDarkMode, index + 1000);
+                        },
+                        childCount: marketplaceProducts.length,
+                      ),
+                    ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -202,15 +223,21 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _buildSectionHeader(String title, bool isDarkMode) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(25, 40, 25, 20),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-            color: isDarkMode ? Colors.white : Colors.black87,
-          ),
+        padding: const EdgeInsets.fromLTRB(25, 45, 25, 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title.toUpperCase(),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                color: isDarkMode ? Colors.white38 : Colors.black38,
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 12, color: isDarkMode ? Colors.white12 : Colors.black12),
+          ],
         ),
       ),
     );
@@ -228,10 +255,11 @@ class _DashboardTabState extends State<DashboardTab> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(13),
+          color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(10),
           borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(10)),
         ),
-        child: Icon(Icons.power_settings_new_rounded, size: 20, color: isDarkMode ? Colors.white70 : Colors.black87),
+        child: Icon(Icons.logout_rounded, size: 18, color: isDarkMode ? Colors.white70 : Colors.black87),
       ),
     );
   }
@@ -240,24 +268,28 @@ class _DashboardTabState extends State<DashboardTab> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(25),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
           child: Container(
             height: 55,
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13)),
+              color: isDarkMode ? Colors.white.withAlpha(20) : Colors.white.withAlpha(200),
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(15)),
+              boxShadow: [
+                if (!isDarkMode)
+                  BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 20, offset: const Offset(0, 10)),
+              ],
             ),
             child: TextField(
               controller: _searchController,
               onChanged: (v) => setState(() => _searchQuery = v),
               style: const TextStyle(fontSize: 15),
               decoration: InputDecoration(
-                hintText: "Search collections...",
-                hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
-                prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor),
+                hintText: "Find your style...",
+                hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26, letterSpacing: 1),
+                prefixIcon: Icon(Icons.search_rounded, color: Theme.of(context).primaryColor, size: 20),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(vertical: 15),
               ),
@@ -270,8 +302,8 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildCategoryStrip(bool isDarkMode) {
     return Container(
-      height: 80,
-      margin: const EdgeInsets.only(top: 10),
+      height: 60,
+      margin: const EdgeInsets.only(top: 20),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -282,26 +314,39 @@ class _DashboardTabState extends State<DashboardTab> {
           return GestureDetector(
             onTap: () => setState(() => _selectedCategory = cat['name']),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCubic,
-              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.fastOutSlowIn,
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
               decoration: BoxDecoration(
                 color: isSelected 
                     ? Theme.of(context).primaryColor 
-                    : (isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8)),
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: isSelected ? [BoxShadow(color: Theme.of(context).primaryColor.withAlpha(77), blurRadius: 10, offset: const Offset(0, 4))] : [],
-              ),
-              child: Center(
-                child: Text(
-                  cat['name'] ?? '',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? Colors.white : (isDarkMode ? Colors.white54 : Colors.black54),
-                  ),
+                    : (isDarkMode ? Colors.white.withAlpha(13) : Colors.white),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected ? Colors.transparent : (isDarkMode ? Colors.white10 : Colors.black.withAlpha(10)),
                 ),
+                boxShadow: isSelected 
+                    ? [BoxShadow(color: Theme.of(context).primaryColor.withAlpha(80), blurRadius: 12, offset: const Offset(0, 4))] 
+                    : [],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    cat['icon'], 
+                    size: 16, 
+                    color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : Colors.black38)
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    cat['name'],
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected ? Colors.white : (isDarkMode ? Colors.white54 : Colors.black54),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -310,35 +355,59 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildFeaturedPromotion(bool isDarkMode) {
+  Widget _buildHeroCard(bool isDarkMode) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 30, 20, 10),
       child: Container(
         height: 200,
+        width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [BoxShadow(color: Colors.black.withAlpha(26), blurRadius: 20, offset: const Offset(0, 10))],
+          borderRadius: BorderRadius.circular(35),
           image: const DecorationImage(
-            image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000"),
+            image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1000"),
             fit: BoxFit.cover,
           ),
         ),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(35),
             gradient: LinearGradient(
-              begin: Alignment.bottomRight,
-              colors: [Colors.black.withAlpha(204), Colors.transparent],
+              begin: Alignment.topRight,
+              end: Alignment.bottomLeft,
+              colors: [
+                Colors.black.withAlpha(150),
+                Colors.transparent,
+                Colors.black.withAlpha(180),
+              ],
             ),
           ),
-          padding: const EdgeInsets.all(25),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.end,
+          padding: const EdgeInsets.all(30),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Text("SEASONAL", style: TextStyle(color: Colors.white60, fontSize: 10, letterSpacing: 3, fontWeight: FontWeight.bold)),
-              SizedBox(height: 5),
-              Text("The Winter\nEdit 2026", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w200, height: 1)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  "NEW SEASON",
+                  style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "Modern\nMinimalism",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w200,
+                  height: 1,
+                  letterSpacing: -1,
+                ),
+              ),
             ],
           ),
         ),
@@ -346,81 +415,124 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildPremiumProductCard(Map<String, dynamic> product, bool isDarkMode, int index) {
+  Widget _buildModernProductCard(Map<String, dynamic> product, bool isDarkMode, int index) {
     bool isTall = index % 3 == 0;
     final String name = product['name']?.toString() ?? 'Unknown';
     final String image = product['image']?.toString() ?? '';
-    final String category = product['category']?.toString().toUpperCase() ?? "";
+    final String category = product['category']?.toString() ?? "";
     final double price = (product['price'] is num) ? (product['price'] as num).toDouble() : 0.0;
 
     return RepaintBoundary(
       child: GestureDetector(
         onTap: () {
-          EloriaCartService.addToCart(product);
-          Fluttertoast.showToast(msg: "Added to your collection");
+          // Future: Navigate to detail
         },
         child: Container(
           decoration: BoxDecoration(
-            color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8)),
+            color: isDarkMode ? Colors.white.withAlpha(13) : Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              if (!isDarkMode)
+                BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 15, offset: const Offset(0, 8)),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // IMAGE SECTION
               Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: CachedNetworkImage(
-                      imageUrl: image,
-                      height: isTall ? 240 : 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: isDarkMode ? Colors.white10 : Colors.black12),
-                      errorWidget: (context, url, error) => Container(color: Colors.grey[300], child: const Icon(Icons.broken_image)),
+                  Hero(
+                    tag: "prod_$index",
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: CachedNetworkImage(
+                        imageUrl: image,
+                        height: isTall ? 220 : 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          height: isTall ? 220 : 180,
+                          color: isDarkMode ? Colors.white10 : Colors.black12,
+                        ),
+                      ),
                     ),
                   ),
-                  Positioned(top: 12, right: 12, child: _buildWishlistButton(product)),
+                  Positioned(top: 15, right: 15, child: _buildWishlistButton(product)),
+                  
+                  // PRICE TAG
                   Positioned(
-                    bottom: 12,
-                    left: 12,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          color: Colors.black.withAlpha(77),
-                          child: Text(
-                            "\$$price",
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                          ),
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(25),
                         ),
+                      ),
+                      child: Text(
+                        "\$${price.toInt()}",
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13),
                       ),
                     ),
                   ),
                 ],
               ),
+              
+              // INFO SECTION
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      category.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 9, 
+                        letterSpacing: 1.5, 
+                        color: isDarkMode ? Colors.white38 : Colors.black38, 
+                        fontWeight: FontWeight.w900
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
                       name,
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: isDarkMode ? Colors.white : Colors.black87,
+                        color: isDarkMode ? Colors.white.withAlpha(220) : Colors.black87,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      category,
-                      style: TextStyle(fontSize: 9, letterSpacing: 1, color: isDarkMode ? Colors.white30 : Colors.black38, fontWeight: FontWeight.w800),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: () {
+                        EloriaCartService.addToCart(product);
+                        Fluttertoast.showToast(msg: "Added to Bag");
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(10)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "ADD TO BAG",
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                              color: isDarkMode ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -440,15 +552,19 @@ class _DashboardTabState extends State<DashboardTab> {
         bool isFav = snapshot.data ?? false;
         return GestureDetector(
           onTap: () => EloriaWishlistService.toggleWishlist(product),
-          child: ClipOval(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 padding: const EdgeInsets.all(8),
-                color: Colors.white.withAlpha(51),
+                decoration: BoxDecoration(
+                  color: isFav ? Colors.redAccent.withAlpha(40) : Colors.white.withAlpha(40),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: Icon(
                   isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  size: 16,
+                  size: 18,
                   color: isFav ? Colors.redAccent : Colors.white,
                 ),
               ),
@@ -474,5 +590,5 @@ class _PillSearchDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get minExtent => 75;
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => true;
 }
