@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).primaryColor;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 360;
 
@@ -42,23 +43,21 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex,
         children: _widgetOptions,
       ),
-
-      // --- UNIQUE FLOATING "BUBBLE" NAVIGATION BAR ---
       bottomNavigationBar: Container(
         height: 70,
         margin: EdgeInsets.fromLTRB(
-          isSmallScreen ? 10 : 20, 
-          0, 
-          isSmallScreen ? 10 : 20, 
-          25
+            isSmallScreen ? 10 : 20,
+            0,
+            isSmallScreen ? 10 : 20,
+            25
         ),
         padding: EdgeInsets.symmetric(horizontal: isSmallScreen ? 5 : 10),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.grey[900] : Colors.white,
+          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(35),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(38),
+              color: Colors.black.withOpacity(isDarkMode ? 0.4 : 0.1),
               blurRadius: 25,
               offset: const Offset(0, 10),
             ),
@@ -68,10 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(_navIcons.length, (index) {
             bool isSelected = _selectedIndex == index;
-            double targetWidth = isSelected 
-              ? (isSmallScreen ? 90 : 110) 
-              : (isSmallScreen ? 50 : 60);
-            
+            double targetWidth = isSelected
+                ? (isSmallScreen ? 90 : 110)
+                : (isSmallScreen ? 50 : 60);
+
             return GestureDetector(
               onTap: () => setState(() => _selectedIndex = index),
               behavior: HitTestBehavior.opaque,
@@ -81,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: targetWidth,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.deepPurple : Colors.transparent,
+                  color: isSelected ? primaryColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(25),
                 ),
                 child: Row(
@@ -89,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Icon(
                       _navIcons[index],
-                      color: isSelected ? Colors.white : Colors.grey,
+                      color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : Colors.grey[600]),
                       size: isSmallScreen ? 22 : 26,
                     ),
                     if (isSelected) ...[
