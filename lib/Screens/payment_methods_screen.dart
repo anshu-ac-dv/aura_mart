@@ -1,4 +1,4 @@
-import 'package:eloria_collection/core_services/payment_service.dart';
+import 'package:aura_mart/core_services/payment_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 

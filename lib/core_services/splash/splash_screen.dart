@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:eloria_collection/screens/home_screen.dart';
-import 'package:eloria_collection/screens/login_screen.dart';
+import 'package:aura_mart/screens/home_screen.dart';
+import 'package:aura_mart/screens/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -110,13 +110,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Main Logo: ELORIA
+                    // Main Logo: AURA
                     Opacity(
                       opacity: _logoFade.value,
                       child: Transform.scale(
                         scale: _logoScale.value,
                         child: Text(
-                          'ELORIA',
+                          'AURA',
                           style: TextStyle(
                             fontSize: 52,
                             fontWeight: FontWeight.w200,
@@ -151,11 +151,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                     
                     const SizedBox(height: 12),
                     
-                    // Subtitle: COLLECTION
+                    // Subtitle: MART
                     Opacity(
                       opacity: _subtitleFade.value,
                       child: Text(
-                        'COLLECTION',
+                        'MART',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w900,

@@ -1,6 +1,6 @@
-import 'package:eloria_collection/screens/forgot_password_screen.dart';
-import 'package:eloria_collection/screens/home_screen.dart';
-import 'package:eloria_collection/screens/register_screen.dart';
+import 'package:aura_mart/screens/forgot_password_screen.dart';
+import 'package:aura_mart/screens/home_screen.dart';
+import 'package:aura_mart/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 50),
                     
-                    // Email Field with Eloria Style
+                    // Email Field with Aura Style
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 20),
                     
-                    // Password Field with Eloria Style
+                    // Password Field with Aura Style
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
