@@ -84,9 +84,15 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                   stream: _paymentMethodsStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                      return const Padding(
-                        padding: EdgeInsets.all(40.0),
-                        child: Center(child: CircularProgressIndicator()),
+                      return Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Center(
+                          child: Lottie.network(
+                            'https://lottie.host/5053b53a-c852-473d-9f79-66c82705b768/0F8C6m2GkM.json',
+                            height: 80,
+                            errorBuilder: (context, error, stackTrace) => const CircularProgressIndicator(),
+                          ),
+                        ),
                       );
                     }
                     
@@ -160,8 +166,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: isSelected 
-              ? Theme.of(context).primaryColor.withOpacity(0.1) 
-              : (isDarkMode ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02)),
+              ? Theme.of(context).primaryColor.withAlpha(26) 
+              : (isDarkMode ? Colors.white.withAlpha(8) : Colors.black.withAlpha(5)),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? Theme.of(context).primaryColor : Colors.transparent,
@@ -264,7 +270,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         stream: _cartStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: Lottie.network(
+                'https://lottie.host/5053b53a-c852-473d-9f79-66c82705b768/0F8C6m2GkM.json',
+                height: 200,
+                errorBuilder: (context, error, stackTrace) => const CircularProgressIndicator(),
+              ),
+            );
           }
 
           final items = snapshot.data ?? [];
@@ -274,8 +286,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             children: [
               // Ambient Glows
               if (isDarkMode) ...[
-                Positioned(left: -100, top: -100, child: _buildGlow(primaryColor.withOpacity(0.1), 400)),
-                Positioned(right: -50, bottom: 200, child: _buildGlow(Colors.blueAccent.withOpacity(0.05), 300)),
+                Positioned(left: -100, top: -100, child: _buildGlow(primaryColor.withAlpha(26), 400)),
+                Positioned(right: -50, bottom: 200, child: _buildGlow(Colors.blueAccent.withAlpha(13), 300)),
               ],
 
               Column(
@@ -339,7 +351,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
               if (_isProcessing) 
                 Container(
                   color: Colors.black54, 
-                  child: Center(child: CircularProgressIndicator(color: primaryColor))
+                  child: Center(
+                    child: Lottie.network(
+                      'https://lottie.host/5053b53a-c852-473d-9f79-66c82705b768/0F8C6m2GkM.json',
+                      height: 150,
+                      errorBuilder: (context, error, stackTrace) => const CircularProgressIndicator(color: Colors.white),
+                    ),
+                  ),
                 ),
               if (_showSuccessAnimation) _buildSuccessOverlay(isDarkMode),
             ],
@@ -377,7 +395,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         padding: const EdgeInsets.only(right: 30),
         margin: const EdgeInsets.only(bottom: 20),
         decoration: BoxDecoration(
-          color: Colors.redAccent.withOpacity(0.1),
+          color: Colors.redAccent.withAlpha(26),
           borderRadius: BorderRadius.circular(30),
         ),
         child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 28),
@@ -386,11 +404,11 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.white,
+          color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.03)),
+          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(8)),
           boxShadow: [
-            if (!isDarkMode) BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 10)),
+            if (!isDarkMode) BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 15, offset: const Offset(0, 10)),
           ],
         ),
         child: Row(
@@ -430,7 +448,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+        color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Row(
@@ -465,7 +483,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
           child: Container(
             padding: const EdgeInsets.all(25),
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.8),
+              color: isDarkMode ? Colors.white.withAlpha(13) : Colors.white.withAlpha(204),
               borderRadius: BorderRadius.circular(35),
               border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black12),
             ),
@@ -526,7 +544,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          color: isDarkMode ? Colors.black.withOpacity(0.8) : Colors.white.withOpacity(0.8),
+          color: isDarkMode ? Colors.black.withAlpha(204) : Colors.white.withAlpha(204),
           child: Center(
             child: ScaleTransition(
               scale: _scaleAnimation,
@@ -534,8 +552,9 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Lottie.network(
-                    'https://lottie.host/8017e887-848e-4903-88da-901d812a67e0/S30043uX9K.json', 
-                    height: 200,
+                    'https://lottie.host/8e202580-0441-4770-9831-77864f1d77a8/0L4BwHqC9M.json', 
+                    height: 180,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.check_circle_outline, size: 100, color: Colors.green),
                   ),
                   const Text("Success", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w100, letterSpacing: 4)),
                   const SizedBox(height: 10),
@@ -561,6 +580,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
               child: Lottie.network(
                 'https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', 
                 height: 180,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.shopping_bag_outlined, size: 80, color: Colors.grey),
               ),
             ),
             const SizedBox(height: 20),

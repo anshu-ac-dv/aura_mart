@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class CategoryBaseScreen extends StatelessWidget {
+class AuraCategoryBaseScreen extends StatelessWidget {
   final String title;
   final Color themeColor;
   final List<Map<String, dynamic>> products;
 
-  const CategoryBaseScreen({
+  const AuraCategoryBaseScreen({
     super.key,
     required this.title,
     required this.themeColor,
