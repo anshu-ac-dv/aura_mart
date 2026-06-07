@@ -140,7 +140,7 @@ class CategoryProductsScreen extends StatelessWidget {
                     top: 10,
                     right: 10,
                     child: StreamBuilder<bool>(
-                      stream: AuraWishlistService.isInWishlistStream(product['name']!),
+                      stream: AuraWishlistService.isInWishlistStream(product),
                       builder: (context, snapshot) {
                         bool isFav = snapshot.data ?? false;
                         return CircleAvatar(

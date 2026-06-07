@@ -131,7 +131,7 @@ class CategoryBaseScreen extends StatelessWidget {
                 Positioned(
                   top: 10, right: 10,
                   child: StreamBuilder<bool>(
-                    stream: AuraWishlistService.isInWishlistStream(name),
+                    stream: AuraWishlistService.isInWishlistStream(product),
                     builder: (context, snapshot) {
                       bool isFav = snapshot.data ?? false;
                       return CircleAvatar(

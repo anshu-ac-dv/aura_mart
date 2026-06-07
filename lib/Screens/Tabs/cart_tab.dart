@@ -318,7 +318,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                             itemCount: items.length + 1, // Add space for sticky panel
                             itemBuilder: (context, i) {
                               if (i == items.length) {
-                                return const SizedBox(height: 200); // Bottom padding for sticky button
+                                return const SizedBox(height: 250); // Bottom padding for sticky button
                               }
                               return _buildModernCartItem(items[i], isDarkMode);
                             },
@@ -362,13 +362,14 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
 
   Widget _buildModernCartItem(Map<String, dynamic> item, bool isDarkMode) {
     final String name = item['name']?.toString() ?? 'Unknown';
+    final String id = item['id']?.toString() ?? name;
     final double price = (item['price'] is num) ? (item['price'] as num).toDouble() : 0.0;
     
     return Dismissible(
-      key: Key(name),
+      key: Key(id),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
-        AuraCartService.removeItem(name);
+        AuraCartService.removeItem(id);
         Fluttertoast.showToast(msg: "$name removed");
       },
       background: Container(
@@ -424,7 +425,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   }
 
   Widget _buildQtyControl(Map<String, dynamic> item, bool isDarkMode) {
-    final String name = item['name']?.toString() ?? '';
+    final String id = item['id']?.toString() ?? '';
     final int qty = ((item['qty'] ?? 1) as num).toInt();
     
     return Container(
@@ -437,13 +438,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         children: [
           IconButton(
             icon: const Icon(Icons.remove, size: 16), 
-            onPressed: () => AuraCartService.decrementQty(name, qty),
+            onPressed: () => AuraCartService.decrementQty(id, qty),
             constraints: const BoxConstraints(minWidth: 35, minHeight: 35),
           ),
           Text('$qty', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
           IconButton(
             icon: const Icon(Icons.add, size: 16), 
-            onPressed: () => AuraCartService.incrementQty(name),
+            onPressed: () => AuraCartService.incrementQty(id),
             constraints: const BoxConstraints(minWidth: 35, minHeight: 35),
           ),
         ],
@@ -452,6 +453,9 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   }
 
   Widget _buildCheckoutPanel(bool isDarkMode, List<Map<String, dynamic>> items, double total) {
+    const double shipping = 10.0;
+    final double grandTotal = total + shipping;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: ClipRRect(
@@ -468,25 +472,32 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _buildPriceRow("Subtotal", "\$${total.toStringAsFixed(2)}", isDarkMode),
+                const SizedBox(height: 8),
+                _buildPriceRow("Delivery", "\$${shipping.toStringAsFixed(2)}", isDarkMode),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  child: Divider(height: 1),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Order Total', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey)),
-                    Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+                    const Text('Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('\$${grandTotal.toStringAsFixed(2)}', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24, color: Theme.of(context).primaryColor)),
                   ],
                 ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  height: 55,
+                  height: 60,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       elevation: 0,
                     ),
-                    onPressed: () => _showPaymentOptions(isDarkMode, items, total),
-                    child: const Text('PROCEED TO CHECKOUT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 11)),
+                    onPressed: () => _showPaymentOptions(isDarkMode, items, grandTotal),
+                    child: const Text('PROCEED TO CHECKOUT', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 12)),
                   ),
                 ),
               ],
@@ -494,6 +505,16 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPriceRow(String label, String value, bool isDarkMode) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white38 : Colors.black38)),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 
@@ -530,21 +551,42 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
 
   Widget _buildEmptyState(bool isDarkMode) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Opacity(
-            opacity: 0.5,
-            child: Lottie.network(
-              'https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', 
-              height: 150,
+      child: Padding(
+        padding: const EdgeInsets.all(40.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Opacity(
+              opacity: 0.5,
+              child: Lottie.network(
+                'https://lottie.host/9e4d5f7b-1a9c-46a4-9e32-f2a8c3d8d672/6zV7Y5WpLp.json', 
+                height: 180,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          const Text('Your bag is empty', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w200, letterSpacing: 2)),
-          const SizedBox(height: 10),
-          Text('Time to start curating.', style: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26, fontSize: 12)),
-        ],
+            const SizedBox(height: 20),
+            const Text('Your bag is empty', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w200, letterSpacing: 2)),
+            const SizedBox(height: 10),
+            Text('Time to start curating your premium collection.', 
+              textAlign: TextAlign.center,
+              style: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26, fontSize: 13)
+            ),
+            const SizedBox(height: 40),
+            SizedBox(
+              width: 200,
+              child: OutlinedButton(
+                onPressed: () {
+                  Fluttertoast.showToast(msg: "Discover items in the Home tab");
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Theme.of(context).primaryColor),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: Text("SHOP NOW", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, letterSpacing: 2)),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -359,7 +359,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildWishlistBtn(Map<String, dynamic> product) {
     return StreamBuilder<bool>(
-      stream: AuraWishlistService.isInWishlistStream(product['name']),
+      stream: AuraWishlistService.isInWishlistStream(product),
       builder: (context, snapshot) {
         final isFav = snapshot.data ?? false;
         return GestureDetector(

@@ -11,16 +11,19 @@ class AuraCartService {
     return _db.collection('users').doc(user.uid).collection('cart');
   }
 
-  // Temporary local list for backward compatibility if needed, 
-  // but we should move to Streams.
-  static final List<Map<String, dynamic>> cartItems = [];
+  /// Unified ID generation to prevent mismatches.
+  /// Prioritizes product ID if available, otherwise generates a safe name-based ID.
+  static String _getDocId(Map<String, dynamic> product) {
+    if (product['id'] != null) return product['id'].toString();
+    final name = product['name']?.toString() ?? 'unknown';
+    return name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+  }
 
   static Future<void> addToCart(Map<String, dynamic> product) async {
     final cart = _userCart;
     if (cart == null) return;
 
-    final name = product['name']?.toString() ?? 'Unknown';
-    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
+    final docId = _getDocId(product);
     final docRef = cart.doc(docId);
 
     final doc = await docRef.get();
@@ -36,7 +39,7 @@ class AuraCartService {
       }
 
       await docRef.set({
-        'name': name,
+        'name': product['name'] ?? 'Unknown',
         'price': price,
         'image': product['image'] ?? '',
         'category': product['category'] ?? '',
@@ -45,17 +48,15 @@ class AuraCartService {
     }
   }
 
-  static Future<void> incrementQty(String name) async {
+  static Future<void> incrementQty(String docId) async {
     final cart = _userCart;
     if (cart == null) return;
-    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
     await cart.doc(docId).update({'qty': FieldValue.increment(1)});
   }
 
-  static Future<void> decrementQty(String name, int currentQty) async {
+  static Future<void> decrementQty(String docId, int currentQty) async {
     final cart = _userCart;
     if (cart == null) return;
-    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
     if (currentQty > 1) {
       await cart.doc(docId).update({'qty': FieldValue.increment(-1)});
     } else {
@@ -63,10 +64,9 @@ class AuraCartService {
     }
   }
 
-  static Future<void> removeItem(String name) async {
+  static Future<void> removeItem(String docId) async {
     final cart = _userCart;
     if (cart == null) return;
-    final docId = name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
     await cart.doc(docId).delete();
   }
 
@@ -84,15 +84,18 @@ class AuraCartService {
   static Stream<List<Map<String, dynamic>>> get cartStream {
     final cart = _userCart;
     if (cart == null) return Stream.value([]);
-    return cart.snapshots().map((s) => s.docs.map((d) => d.data()).toList());
+    return cart.snapshots().map((s) => s.docs.map((d) {
+      final data = d.data();
+      data['id'] = d.id; // Ensure ID is present for UI operations
+      return data;
+    }).toList());
   }
 
   static double calculateTotal(List<Map<String, dynamic>> items) {
-    return items.fold(0, (total, item) => total + ((item['price'] as num) * (item['qty'] as num)));
-  }
-
-  // Legacy support for totalPrice if needed without stream
-  static double get totalPrice {
-    return 0.0; // Should use calculateTotal with stream data
+    return items.fold(0.0, (total, item) {
+      final price = (item['price'] is num) ? (item['price'] as num).toDouble() : 0.0;
+      final qty = (item['qty'] is num) ? (item['qty'] as num).toInt() : 0;
+      return total + (price * qty);
+    });
   }
 }
