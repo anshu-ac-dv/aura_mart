@@ -133,7 +133,7 @@ class _CategoryTabState extends State<CategoryTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "EXPLORE",
+                                "AURA",
                                 style: TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.w200,
@@ -142,7 +142,7 @@ class _CategoryTabState extends State<CategoryTab> {
                                 ),
                               ),
                               Text(
-                                "THE COLLECTION",
+                                "MART",
                                 style: TextStyle(
                                   fontSize: 10,
                                   letterSpacing: 6,

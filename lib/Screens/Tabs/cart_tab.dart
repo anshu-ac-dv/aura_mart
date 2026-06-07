@@ -297,7 +297,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                           ),
                         ),
                         Text(
-                          "YOUR CURATED COLLECTION",
+                          "AURA MART",
                           style: TextStyle(
                             fontSize: 9,
                             letterSpacing: 4,
