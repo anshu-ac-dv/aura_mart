@@ -58,10 +58,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('List New Item', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('List New Item'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(25),

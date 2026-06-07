@@ -14,10 +14,7 @@ class MyOrdersScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('My Orders'),
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: OrderService.ordersStream,

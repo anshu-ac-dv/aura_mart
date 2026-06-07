@@ -23,21 +23,12 @@ class _DashboardTabState extends State<DashboardTab> {
   late Stream<List<Map<String, dynamic>>> _productStream;
 
   final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded},
-    {'name': 'Fashion', 'icon': Icons.checkroom_rounded},
-    {'name': 'Electronics', 'icon': Icons.bolt_rounded},
-    {'name': 'Home', 'icon': Icons.home_filled},
-    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded},
-    {'name': 'Mobiles', 'icon': Icons.smartphone_rounded},
-  ];
-
-  final List<Map<String, dynamic>> _mockProducts = [
-    {'name': 'Aura Buds Pro', 'price': 129.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Urban Sneakers', 'price': 89.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Elite SmartWatch', 'price': 199.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1544117518-30df578096a4?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Artisan Coffee', 'price': 55.0, 'category': 'Home', 'image': 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Pro Gamer Mouse', 'price': 45.0, 'category': 'Electronics', 'image': 'https://images.unsplash.com/photo-1527814050087-37a3d71ae69c?q=80&w=1000&auto=format&fit=crop'},
-    {'name': 'Vogue Leather Bag', 'price': 149.0, 'category': 'Fashion', 'image': 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=1000&auto=format&fit=crop'},
+    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.deepPurple},
+    {'name': 'Fashion', 'icon': Icons.checkroom_rounded, 'color': Colors.pink},
+    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.amber},
+    {'name': 'Home', 'icon': Icons.home_filled, 'color': Colors.green},
+    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded, 'color': Colors.purple},
+    {'name': 'Mobiles', 'icon': Icons.smartphone_rounded, 'color': Colors.blue},
   ];
 
   @override
@@ -59,13 +50,16 @@ class _DashboardTabState extends State<DashboardTab> {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF08080A) : const Color(0xFFFBFBFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // --- DYNAMIC AMBIENT BACKGROUND ---
           if (isDarkMode) ...[
             _buildGlow(primaryColor.withAlpha(20), const Offset(-100, -100), 450),
             _buildGlow(Colors.blueAccent.withAlpha(10), const Offset(200, 200), 350),
+          ] else ...[
+            _buildGlow(primaryColor.withAlpha(15), const Offset(-100, -100), 500),
+            _buildGlow(Colors.blueAccent.withAlpha(10), const Offset(300, 400), 400),
           ],
           
           StreamBuilder<List<Map<String, dynamic>>>(
@@ -190,7 +184,7 @@ class _DashboardTabState extends State<DashboardTab> {
               child: Container(
                 height: 55,
                 decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.02),
+                  color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(5),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black12),
                 ),
@@ -225,6 +219,8 @@ class _DashboardTabState extends State<DashboardTab> {
         itemBuilder: (context, index) {
           final cat = _categories[index];
           bool isSelected = _selectedCategory == cat['name'];
+          final catColor = cat['color'] as Color;
+          
           return GestureDetector(
             onTap: () => setState(() => _selectedCategory = cat['name']),
             child: AnimatedContainer(
@@ -238,15 +234,17 @@ class _DashboardTabState extends State<DashboardTab> {
                     height: isSelected ? 55 : 45,
                     width: isSelected ? 55 : 45,
                     decoration: BoxDecoration(
-                      color: isSelected ? primaryColor : (isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white),
+                      color: isSelected ? catColor : (isDarkMode ? Colors.white.withAlpha(13) : Colors.white),
                       shape: BoxShape.circle,
-                      boxShadow: isSelected ? [BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))] : [],
+                      boxShadow: isSelected 
+                        ? [BoxShadow(color: catColor.withAlpha(77), blurRadius: 10, offset: const Offset(0, 5))] 
+                        : (isDarkMode ? [] : [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5, offset: const Offset(0, 2))]),
                       border: Border.all(color: isSelected ? Colors.transparent : (isDarkMode ? Colors.white10 : Colors.black12)),
                     ),
-                    child: Icon(cat['icon'], size: isSelected ? 22 : 18, color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : Colors.black38)),
+                    child: Icon(cat['icon'], size: isSelected ? 22 : 18, color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : catColor.withAlpha(150))),
                   ),
                   const SizedBox(height: 8),
-                  Text(cat['name'], style: TextStyle(fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? primaryColor : (isDarkMode ? Colors.white38 : Colors.black38))),
+                  Text(cat['name'], style: TextStyle(fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? catColor : (isDarkMode ? Colors.white38 : Colors.black45))),
                 ],
               ),
             ),
@@ -266,7 +264,7 @@ class _DashboardTabState extends State<DashboardTab> {
           image: const DecorationImage(image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1000"), fit: BoxFit.cover),
         ),
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), gradient: LinearGradient(begin: Alignment.bottomRight, colors: [Colors.black.withOpacity(0.7), Colors.transparent])),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), gradient: LinearGradient(begin: Alignment.bottomRight, colors: [Colors.black.withAlpha(178), Colors.transparent])),
           padding: const EdgeInsets.all(30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -286,9 +284,9 @@ class _DashboardTabState extends State<DashboardTab> {
       width: 200,
       margin: const EdgeInsets.only(left: 15, bottom: 20),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.white,
+        color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDarkMode ? 0.2 : 0.05), blurRadius: 15, offset: const Offset(0, 10))],
+        boxShadow: [BoxShadow(color: Colors.black.withAlpha(isDarkMode ? 51 : 13), blurRadius: 15, offset: const Offset(0, 10))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,9 +311,9 @@ class _DashboardTabState extends State<DashboardTab> {
     bool isTall = index % 3 == 0;
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
+        color: isDarkMode ? Colors.white.withAlpha(5) : Colors.white,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.05)),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -337,7 +335,17 @@ class _DashboardTabState extends State<DashboardTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
-                    GestureDetector(onTap: () { AuraCartService.addToCart(product); Fluttertoast.showToast(msg: "Added to Bag"); }, child: Icon(Icons.add_shopping_cart_rounded, size: 18, color: Theme.of(context).primaryColor)),
+                    GestureDetector(
+                      onTap: () async { 
+                        try {
+                          await AuraCartService.addToCart(product); 
+                          Fluttertoast.showToast(msg: "Added to Bag"); 
+                        } catch (e) {
+                          Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
+                        }
+                      }, 
+                      child: Icon(Icons.add_shopping_cart_rounded, size: 18, color: Theme.of(context).primaryColor),
+                    ),
                   ],
                 ),
               ],
@@ -368,7 +376,7 @@ class _DashboardTabState extends State<DashboardTab> {
             borderRadius: BorderRadius.circular(20),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(padding: const EdgeInsets.all(8), color: Colors.white.withOpacity(0.2), child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 16, color: isFav ? Colors.redAccent : Colors.white)),
+              child: Container(padding: const EdgeInsets.all(8), color: Colors.white.withAlpha(51), child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 16, color: isFav ? Colors.redAccent : Colors.white)),
             ),
           ),
         );
@@ -377,7 +385,7 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildLogoutButton(bool isDarkMode) {
-    return Container(decoration: BoxDecoration(color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03), borderRadius: BorderRadius.circular(15)), child: IconButton(onPressed: () async { await FirebaseAuth.instance.signOut(); if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false); }, icon: Icon(Icons.logout_rounded, size: 20, color: isDarkMode ? Colors.white70 : Colors.black87)));
+    return Container(decoration: BoxDecoration(color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8), borderRadius: BorderRadius.circular(15)), child: IconButton(onPressed: () async { await FirebaseAuth.instance.signOut(); if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false); }, icon: Icon(Icons.logout_rounded, size: 20, color: isDarkMode ? Colors.white70 : Colors.black87)));
   }
 }
 

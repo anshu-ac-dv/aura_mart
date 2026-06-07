@@ -17,10 +17,7 @@ class _PaymentMethodsScreenState extends State<PaymentMethodsScreen> {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Payment Methods', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('Payment Methods'),
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: PaymentService.paymentMethodsStream,

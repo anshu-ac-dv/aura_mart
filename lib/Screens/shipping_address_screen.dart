@@ -17,10 +17,7 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('My Addresses', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('My Addresses'),
       ),
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: AddressService.addressesStream,

@@ -89,13 +89,16 @@ class _CategoryTabState extends State<CategoryTab> {
         .toList();
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF08080A) : const Color(0xFFFBFBFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // --- DYNAMIC BACKGROUND GLOW ---
           if (isDarkMode) ...[
-            _buildAmbientGlow(Colors.deepPurple.withOpacity(0.1), const Offset(-100, -100), 400),
-            _buildAmbientGlow(Colors.blue.withOpacity(0.05), const Offset(200, 200), 300),
+            _buildAmbientGlow(Colors.deepPurple.withAlpha(26), const Offset(-100, -100), 400),
+            _buildAmbientGlow(Colors.blue.withAlpha(13), const Offset(200, 200), 300),
+          ] else ...[
+            _buildAmbientGlow(primaryColor.withAlpha(15), const Offset(-100, -100), 500),
+            _buildAmbientGlow(Colors.blueAccent.withAlpha(10), const Offset(300, 400), 400),
           ],
 
           CustomScrollView(
@@ -233,7 +236,7 @@ class _CategoryTabState extends State<CategoryTab> {
           child: Container(
             height: 55,
             decoration: BoxDecoration(
-              color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.02),
+              color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(5),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black12),
             ),
@@ -277,7 +280,7 @@ class _CategoryTabState extends State<CategoryTab> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.1),
+              color: Colors.black.withAlpha(isDarkMode ? 77 : 30),
               blurRadius: 15,
               offset: const Offset(0, 8),
             )
@@ -290,8 +293,8 @@ class _CategoryTabState extends State<CategoryTab> {
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [
-                Colors.black.withOpacity(0.8),
-                Colors.black.withOpacity(0.1),
+                Colors.black.withAlpha(200),
+                Colors.black.withAlpha(20),
               ],
             ),
           ),
@@ -303,7 +306,7 @@ class _CategoryTabState extends State<CategoryTab> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: (cat['color'] as Color).withAlpha(200),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(cat['icon'], size: 20, color: Colors.white),
@@ -322,7 +325,7 @@ class _CategoryTabState extends State<CategoryTab> {
               Text(
                 "DISCOVER",
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withAlpha(150),
                   fontSize: 8,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,

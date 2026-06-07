@@ -1,7 +1,9 @@
+import 'package:aura_mart/screens/help_support_screen.dart';
 import 'package:aura_mart/screens/my_orders_screen.dart';
 import 'package:aura_mart/screens/payment_methods_screen.dart';
 import 'package:aura_mart/screens/products/aura_wishlist_screen.dart';
 import 'package:aura_mart/screens/seller/add_product_screen.dart';
+import 'package:aura_mart/screens/settings_screen.dart';
 import 'package:aura_mart/screens/shipping_address_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +21,16 @@ class ProfileTab extends StatelessWidget {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF08080A) : const Color(0xFFFBFBFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Ambient Background Glows
           if (isDarkMode) ...[
-            Positioned(right: -100, top: -100, child: _buildGlow(primaryColor.withOpacity(0.08), 450)),
-            Positioned(left: -50, bottom: 100, child: _buildGlow(Colors.blueAccent.withOpacity(0.05), 350)),
+            Positioned(right: -100, top: -100, child: _buildGlow(primaryColor.withAlpha(20), 450)),
+            Positioned(left: -50, bottom: 100, child: _buildGlow(Colors.blueAccent.withAlpha(13), 350)),
+          ] else ...[
+            Positioned(right: -100, top: -100, child: _buildGlow(primaryColor.withAlpha(15), 500)),
+            Positioned(left: -50, bottom: 100, child: _buildGlow(Colors.blueAccent.withAlpha(10), 400)),
           ],
 
           Column(
@@ -109,8 +114,12 @@ class ProfileTab extends StatelessWidget {
                       const SizedBox(height: 25),
 
                       _buildMenuSection("SUPPORT", [
-                        _buildMenuOption(context, Icons.help_outline_rounded, 'Help & Support', isDarkMode),
-                        _buildMenuOption(context, Icons.settings_outlined, 'Settings', isDarkMode),
+                        _buildMenuOption(context, Icons.help_outline_rounded, 'Help & Support', isDarkMode, onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
+                        }),
+                        _buildMenuOption(context, Icons.settings_outlined, 'Settings', isDarkMode, onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
+                        }),
                         _buildMenuOption(context, Icons.logout_rounded, 'Logout', isDarkMode, color: Colors.redAccent, onTap: () async {
                           await FirebaseAuth.instance.signOut();
                           Fluttertoast.showToast(msg: "Logged out successfully");
@@ -212,9 +221,12 @@ class ProfileTab extends StatelessWidget {
       width: 100,
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.02) : Colors.white,
+        color: isDarkMode ? Colors.white.withAlpha(5) : Colors.white,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.02)),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(5)),
+        boxShadow: [
+          if (!isDarkMode) BoxShadow(color: primaryColor.withAlpha(13), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
       ),
       child: Column(
         children: [
@@ -250,9 +262,12 @@ class ProfileTab extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.white,
+            color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
             borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.03)),
+            border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(5)),
+            boxShadow: [
+              if (!isDarkMode) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 15, offset: const Offset(0, 5)),
+            ],
           ),
           child: Column(children: options),
         ),

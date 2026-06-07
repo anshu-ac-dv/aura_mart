@@ -1,4 +1,5 @@
 import 'package:aura_mart/core_services/splash/splash_screen.dart';
+import 'package:aura_mart/core_services/theme_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,92 +25,106 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Aura Mart',
-      themeMode: ThemeMode.system, 
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          primary: Colors.deepPurple,
-          secondary: Colors.indigo,
-          brightness: Brightness.light,
-        ),
-        scaffoldBackgroundColor: const Color(0xFFFAFAFA),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 55),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 2,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeService.instance.themeMode,
+      builder: (context, mode, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Aura Mart',
+          themeMode: mode,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              primary: Colors.deepPurple,
+              secondary: Colors.indigo,
+              surface: Colors.white,
+              surfaceVariant: const Color(0xFFF0F2F8), // Subtle secondary background
+              background: const Color(0xFFF8F9FE), // Main background
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF8F9FE),
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+              backgroundColor: Color(0xFFF8F9FE),
+              foregroundColor: Colors.black87,
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.black87),
+              titleTextStyle: TextStyle(
+                color: Colors.black87,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                elevation: 2,
+              ),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+              ),
+              prefixIconColor: Colors.deepPurple,
+              suffixIconColor: Colors.deepPurple,
+              labelStyle: const TextStyle(color: Colors.grey),
+            ),
           ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple,
+              primary: Colors.deepPurple,
+              secondary: Colors.indigo,
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: Colors.black,
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 55),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: Colors.grey[900],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+              ),
+              prefixIconColor: Colors.deepPurple,
+              suffixIconColor: Colors.deepPurple,
+              labelStyle: const TextStyle(color: Colors.grey),
+            ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-          ),
-          prefixIconColor: Colors.deepPurple,
-          suffixIconColor: Colors.deepPurple,
-          labelStyle: const TextStyle(color: Colors.grey),
-        ),
-      ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          primary: Colors.deepPurple,
-          secondary: Colors.indigo,
-          brightness: Brightness.dark,
-        ),
-        scaffoldBackgroundColor: Colors.black,
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 55),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey[900],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
-          ),
-          prefixIconColor: Colors.deepPurple,
-          suffixIconColor: Colors.deepPurple,
-          labelStyle: const TextStyle(color: Colors.grey),
-        ),
-      ),
-      home: const SplashScreen(),
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

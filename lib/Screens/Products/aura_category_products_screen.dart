@@ -189,9 +189,13 @@ class CategoryProductsScreen extends StatelessWidget {
                         ),
                       ),
                       InkWell(
-                        onTap: () {
-                          AuraCartService.addToCart(product);
-                          Fluttertoast.showToast(msg: "Added to cart");
+                        onTap: () async {
+                          try {
+                            await AuraCartService.addToCart(product);
+                            Fluttertoast.showToast(msg: "Added to Bag");
+                          } catch (e) {
+                            Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
+                          }
                         },
                         child: Icon(Icons.add_shopping_cart, color: categoryColor, size: 20),
                       ),

@@ -15,15 +15,27 @@ class OrderService {
   // Logic: Create a new order
   static Future<void> createOrder(List<Map<String, dynamic>> items, double totalAmount, String paymentMethod) async {
     final orders = _userOrders;
-    if (orders == null) throw Exception("User not logged in");
+    if (orders == null) throw Exception("Please login to place an order");
+    if (items.isEmpty) throw Exception("Cannot place an order with an empty cart");
 
-    final orderId = DateTime.now().millisecondsSinceEpoch.toString();
+    final orderId = "ORD-${DateTime.now().millisecondsSinceEpoch}";
     
-    // We'll use a local DateTime as a fallback if the server timestamp hasn't synced yet
-    // because serverTimestamp() only resolves when it hits the server.
+    // Clean items list to ensure no direct FieldValues are passed inside the array
+    // Firestore allows Timestamps, but it's safer to have a clean list.
+    final List<Map<String, dynamic>> cleanItems = items.map((item) {
+      return {
+        'id': item['id']?.toString() ?? '',
+        'name': item['name']?.toString() ?? 'Unknown Item',
+        'price': (item['price'] is num) ? (item['price'] as num).toDouble() : 0.0,
+        'image': item['image']?.toString() ?? '',
+        'qty': (item['qty'] is num) ? (item['qty'] as num).toInt() : 1,
+        'category': item['category']?.toString() ?? '',
+      };
+    }).toList();
+
     await orders.doc(orderId).set({
       'orderId': orderId,
-      'items': items,
+      'items': cleanItems,
       'totalAmount': totalAmount,
       'paymentMethod': paymentMethod,
       'status': 'Processing',

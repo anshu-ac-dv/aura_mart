@@ -265,10 +265,33 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF08080A) : const Color(0xFFFBFBFF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _cartStream,
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 20),
+                  Text("Error loading cart", style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.black87, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Text(snapshot.error.toString(), textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () => setState(() { _cartStream = AuraCartService.cartStream; }),
+                    child: const Text("Retry"),
+                  )
+                ],
+              ),
+            );
+          }
+
           if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
             return Center(
               child: Lottie.network(

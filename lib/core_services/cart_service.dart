@@ -23,35 +23,49 @@ class AuraCartService {
   static Future<void> addToCart(Map<String, dynamic> product) async {
     try {
       final cart = _userCart;
-      if (cart == null) throw Exception("User not logged in");
+      if (cart == null) throw Exception("Please login to add items to cart");
 
       final docId = _getDocId(product);
       final docRef = cart.doc(docId);
 
-      final doc = await docRef.get();
+      // Extract price safely before saving
+      dynamic priceVal = product['price'] ?? 0.0;
+      double price = 0.0;
+      if (priceVal is String) {
+        price = double.tryParse(priceVal.replaceAll('\$', '').replaceAll(',', '').trim()) ?? 0.0;
+      } else if (priceVal is num) {
+        price = priceVal.toDouble();
+      }
+
+      // Use a Get with cache-first strategy for speed and offline support
+      DocumentSnapshot doc;
+      try {
+        doc = await docRef.get(const GetOptions(source: Source.serverAndCache));
+      } catch (e) {
+        doc = await docRef.get(const GetOptions(source: Source.cache));
+      }
+
       if (doc.exists) {
+        // Update existing item
         await docRef.update({
           'qty': FieldValue.increment(1),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
+          'price': price,
         });
       } else {
-        dynamic priceVal = product['price'] ?? 0.0;
-        double price = 0.0;
-        if (priceVal is String) {
-          price = double.tryParse(priceVal.replaceAll('\$', '').replaceAll(',', '')) ?? 0.0;
-        } else if (priceVal is num) {
-          price = priceVal.toDouble();
-        }
-
+        // Add new item
         await docRef.set({
+          'id': docId,
           'name': product['name'] ?? 'Unknown',
           'price': price,
           'image': product['image'] ?? '',
           'category': product['category'] ?? '',
           'qty': 1,
-          'addedAt': FieldValue.serverTimestamp(),
+          'addedAt': DateTime.now().millisecondsSinceEpoch,
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
         });
       }
+      debugPrint("Successfully added $docId to cart");
     } catch (e) {
       debugPrint("Add to Cart Error: $e");
       rethrow;
@@ -116,12 +130,29 @@ class AuraCartService {
   static Stream<List<Map<String, dynamic>>> get cartStream {
     final cart = _userCart;
     if (cart == null) return Stream.value([]);
-    // Order by addedAt to keep the cart organized (newest first)
-    return cart.orderBy('addedAt', descending: true).snapshots().map((s) => s.docs.map((d) {
-      final data = d.data();
-      data['id'] = d.id;
-      return data;
-    }).toList());
+    
+    // Use snapshots() and sort locally if needed, but Firestore orderBy is usually better.
+    // If some docs are missing 'addedAt', they'll be hidden by orderBy.
+    // We'll use a more permissive query and sort in Dart to ensure NO items are missed.
+    return cart.snapshots().map((s) {
+      final items = s.docs.map((d) {
+        final data = d.data();
+        data['id'] = d.id;
+        return data;
+      }).toList();
+      
+      // Sort by addedAt descending, handling potential nulls/mixed types
+      items.sort((a, b) {
+        final aTime = a['addedAt'] ?? 0;
+        final bTime = b['addedAt'] ?? 0;
+        // Handle both int and Timestamp if they exist
+        num aVal = (aTime is Timestamp) ? aTime.millisecondsSinceEpoch : (aTime is num ? aTime : 0);
+        num bVal = (bTime is Timestamp) ? bTime.millisecondsSinceEpoch : (bTime is num ? bTime : 0);
+        return bVal.compareTo(aVal);
+      });
+      
+      return items;
+    });
   }
 
   static double calculateTotal(List<Map<String, dynamic>> items) {

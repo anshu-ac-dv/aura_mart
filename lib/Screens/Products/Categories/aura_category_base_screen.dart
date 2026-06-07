@@ -181,9 +181,13 @@ class AuraCategoryBaseScreen extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {
-                        AuraCartService.addToCart(product);
-                        Fluttertoast.showToast(msg: "Added to Cart");
+                      onTap: () async {
+                        try {
+                          await AuraCartService.addToCart(product);
+                          Fluttertoast.showToast(msg: "Added to Bag");
+                        } catch (e) {
+                          Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
+                        }
                       },
                       child: Container(
                         padding: const EdgeInsets.all(6),
