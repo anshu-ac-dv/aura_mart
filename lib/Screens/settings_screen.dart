@@ -1,6 +1,5 @@
 import 'package:aura_mart/core_services/theme_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -199,7 +198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         trailing: Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: primaryColor,
+          activeThumbColor: primaryColor,
           activeTrackColor: primaryColor.withAlpha(50),
           inactiveTrackColor: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13),
         ),

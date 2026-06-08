@@ -115,7 +115,7 @@ class _CategoryTabState extends State<CategoryTab> {
                   background: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [primaryColor, primaryColor.withOpacity(0.7)],
+                        colors: [primaryColor, primaryColor.withValues(alpha: 0.7)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -127,7 +127,7 @@ class _CategoryTabState extends State<CategoryTab> {
                           top: -50,
                           child: CircleAvatar(
                             radius: 120,
-                            backgroundColor: Colors.white.withOpacity(0.05),
+                            backgroundColor: Colors.white.withValues(alpha: 0.05),
                           ),
                         ),
                         Padding(
@@ -141,7 +141,7 @@ class _CategoryTabState extends State<CategoryTab> {
                                   fontSize: 32,
                                   fontWeight: FontWeight.w200,
                                   letterSpacing: 10,
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                 ),
                               ),
                               Text(
@@ -150,7 +150,7 @@ class _CategoryTabState extends State<CategoryTab> {
                                   fontSize: 10,
                                   letterSpacing: 6,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.white.withOpacity(0.5),
+                                  color: Colors.white.withValues(alpha: 0.5),
                                 ),
                               ),
                             ],
@@ -164,7 +164,8 @@ class _CategoryTabState extends State<CategoryTab> {
                   IconButton(
                     onPressed: () async {
                       await FirebaseAuth.instance.signOut();
-                      if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
+                      if (!context.mounted) return;
+                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
                     },
                     icon: const Icon(Icons.logout_rounded, color: Colors.white70),
                   ),
@@ -347,7 +348,7 @@ class _StickySearchDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     bool isScrolled = shrinkOffset > 20;
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor.withOpacity(isScrolled ? 0.9 : 1.0),
+      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: isScrolled ? 0.9 : 1.0),
       child: child,
     );
   }

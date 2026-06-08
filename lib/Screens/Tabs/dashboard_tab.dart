@@ -394,7 +394,7 @@ class _StickySearchDelegate extends SliverPersistentHeaderDelegate {
   _StickySearchDelegate({required this.child});
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: Theme.of(context).scaffoldBackgroundColor.withOpacity(shrinkOffset > 20 ? 0.9 : 1.0), child: child);
+    return Container(color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: shrinkOffset > 20 ? 0.9 : 1.0), child: child);
   }
   @override
   double get maxExtent => 100;

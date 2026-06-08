@@ -9,7 +9,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:aura_mart/screens/login_screen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'dart:ui';
 
 class ProfileTab extends StatelessWidget {
   const ProfileTab({super.key});
@@ -160,11 +159,11 @@ class ProfileTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withOpacity(0.03) : Colors.white,
+        color: isDarkMode ? Colors.white.withValues(alpha: 0.03) : Colors.white,
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withOpacity(0.03)),
+        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withValues(alpha: 0.03)),
         boxShadow: [
-          if (!isDarkMode) BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 20, offset: const Offset(0, 10)),
+          if (!isDarkMode) BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Row(
@@ -176,7 +175,7 @@ class ProfileTab extends StatelessWidget {
                 padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: primaryColor.withOpacity(0.5), width: 1),
+                  border: Border.all(color: primaryColor.withValues(alpha: 0.5), width: 1),
                 ),
                 child: const CircleAvatar(
                   radius: 35,
@@ -282,7 +281,7 @@ class ProfileTab extends StatelessWidget {
       title: Text(
         title,
         style: TextStyle(
-          color: color ?? (isDarkMode ? Colors.white.withOpacity(0.8) : Colors.black87),
+          color: color ?? (isDarkMode ? Colors.white.withValues(alpha: 0.8) : Colors.black87),
           fontWeight: FontWeight.w500,
           fontSize: 14,
         ),

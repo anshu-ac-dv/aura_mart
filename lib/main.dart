@@ -38,9 +38,8 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.deepPurple,
               primary: Colors.deepPurple,
               secondary: Colors.indigo,
-              surface: Colors.white,
-              surfaceVariant: const Color(0xFFF0F2F8), // Subtle secondary background
-              background: const Color(0xFFF8F9FE), // Main background
+              surface: const Color(0xFFF8F9FE), // Main background
+              surfaceContainerHighest: const Color(0xFFF0F2F8), // Subtle secondary background
               brightness: Brightness.light,
             ),
             scaffoldBackgroundColor: const Color(0xFFF8F9FE),

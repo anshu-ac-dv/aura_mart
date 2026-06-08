@@ -139,9 +139,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              primaryColor.withOpacity(0.5),
+                              primaryColor.withValues(alpha: 0.5),
                               primaryColor,
-                              primaryColor.withOpacity(0.5),
+                              primaryColor.withValues(alpha: 0.5),
                               Colors.transparent,
                             ],
                           ),
@@ -199,7 +199,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             width: 120 * _mainController.value,
                             height: 2,
                             decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.6),
+                              color: primaryColor.withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),
@@ -227,7 +227,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           shape: BoxShape.circle,
           gradient: RadialGradient(
             colors: [
-              Colors.deepPurple.withOpacity(isDarkMode ? 0.15 : 0.08),
+              Colors.deepPurple.withValues(alpha: (isDarkMode ? 0.15 : 0.08) * _glowOpacity.value),
               Colors.transparent,
             ],
           ),
