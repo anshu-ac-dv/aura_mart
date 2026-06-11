@@ -11,6 +11,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
+  // Initialize persistent theme
+  await ThemeService.instance.init();
+  
   // Enable offline persistence for Firestore with platform-specific handling
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,

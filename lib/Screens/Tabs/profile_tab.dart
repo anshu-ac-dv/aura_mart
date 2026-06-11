@@ -1,3 +1,5 @@
+import 'package:aura_mart/core_services/order_service.dart';
+import 'package:aura_mart/core_services/wishlist_service.dart';
 import 'package:aura_mart/screens/help_support_screen.dart';
 import 'package:aura_mart/screens/my_orders_screen.dart';
 import 'package:aura_mart/screens/payment_methods_screen.dart';
@@ -10,12 +12,57 @@ import 'package:flutter/material.dart';
 import 'package:aura_mart/screens/login_screen.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class ProfileTab extends StatelessWidget {
+class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
 
   @override
+  State<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends State<ProfileTab> {
+  final _auth = FirebaseAuth.instance;
+
+  void _showEditProfileDialog(User? user, bool isDarkMode) {
+    final nameController = TextEditingController(text: user?.displayName);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        title: const Text("Edit Profile", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: "Full Name",
+            hintText: "Enter your name",
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL")),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                await user?.updateDisplayName(nameController.text.trim());
+                if (mounted) {
+                  Navigator.pop(context);
+                  setState(() {}); // Refresh UI
+                  Fluttertoast.showToast(msg: "Profile updated");
+                }
+              } catch (e) {
+                Fluttertoast.showToast(msg: "Update failed: $e");
+              }
+            },
+            child: const Text("SAVE"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = _auth.currentUser;
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
@@ -78,8 +125,20 @@ class ProfileTab extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildStatCard("12", "ORDERS", isDarkMode, primaryColor),
-                          _buildStatCard("5", "WISHLIST", isDarkMode, primaryColor),
+                          StreamBuilder<List<Map<String, dynamic>>>(
+                            stream: OrderService.ordersStream,
+                            builder: (context, snapshot) {
+                              final count = snapshot.data?.length ?? 0;
+                              return _buildStatCard(count.toString(), "ORDERS", isDarkMode, primaryColor);
+                            }
+                          ),
+                          StreamBuilder<List<Map<String, dynamic>>>(
+                            stream: AuraWishlistService.wishlistStream,
+                            builder: (context, snapshot) {
+                              final count = snapshot.data?.length ?? 0;
+                              return _buildStatCard(count.toString(), "WISHLIST", isDarkMode, primaryColor);
+                            }
+                          ),
                           _buildStatCard("2", "OFFERS", isDarkMode, primaryColor),
                         ],
                       ),
@@ -207,7 +266,7 @@ class ProfileTab extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () => _showEditProfileDialog(user, isDarkMode),
             icon: Icon(Icons.edit_outlined, size: 18, color: primaryColor),
           ),
         ],
@@ -290,3 +349,4 @@ class ProfileTab extends StatelessWidget {
     );
   }
 }
+

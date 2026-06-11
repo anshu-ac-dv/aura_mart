@@ -118,6 +118,22 @@ class MyOrdersScreen extends StatelessWidget {
           ),
           children: [
             const Divider(indent: 20, endIndent: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildStatusStep("Ordered", true, isDarkMode),
+                  _buildStatusLine(true),
+                  _buildStatusStep("Packed", false, isDarkMode),
+                  _buildStatusLine(false),
+                  _buildStatusStep("Shipped", false, isDarkMode),
+                  _buildStatusLine(false),
+                  _buildStatusStep("Delivered", false, isDarkMode),
+                ],
+              ),
+            ),
+            const Divider(indent: 20, endIndent: 20),
             ...(order['items'] as List? ?? []).map((item) {
               return ListTile(
                 leading: Container(
@@ -146,6 +162,34 @@ class MyOrdersScreen extends StatelessWidget {
             const SizedBox(height: 10),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatusStep(String label, bool isComplete, bool isDarkMode) {
+    return Column(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: isComplete ? Colors.green : (isDarkMode ? Colors.white10 : Colors.black12),
+            shape: BoxShape.circle,
+            border: isComplete ? null : Border.all(color: Colors.grey.withAlpha(50)),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: TextStyle(fontSize: 8, color: isComplete ? (isDarkMode ? Colors.white70 : Colors.black87) : Colors.grey, fontWeight: isComplete ? FontWeight.bold : FontWeight.normal)),
+      ],
+    );
+  }
+
+  Widget _buildStatusLine(bool isComplete) {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.only(bottom: 12),
+        color: isComplete ? Colors.green : Colors.grey.withAlpha(50),
       ),
     );
   }

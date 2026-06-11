@@ -21,7 +21,22 @@ class ProductService {
   }
 
   static Stream<List<Map<String, dynamic>>> get productsStream {
-    return _products.orderBy('createdAt', descending: true).snapshots().map((snapshot) {
+    return _products.orderBy('createdAt', descending: true).limit(50).snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    });
+  }
+
+  static Stream<List<Map<String, dynamic>>> getProductsByCategoryStream(String category) {
+    return _products
+        .where('category', isEqualTo: category)
+        .orderBy('createdAt', descending: true)
+        .limit(20)
+        .snapshots()
+        .map((snapshot) {
       return snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;

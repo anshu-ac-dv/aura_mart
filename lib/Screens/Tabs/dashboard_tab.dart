@@ -2,6 +2,8 @@ import 'package:aura_mart/screens/login_screen.dart';
 import 'package:aura_mart/core_services/cart_service.dart';
 import 'package:aura_mart/core_services/product_service.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
+import 'package:aura_mart/screens/products/product_details_screen.dart';
+import 'package:aura_mart/widgets/aura_skeletons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -76,6 +78,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
+                cacheExtent: 1000, // Optimization: Pre-render content for smooth scrolling
                 slivers: [
                   // --- CINEMATIC BRAND HEADER ---
                   SliverAppBar(
@@ -138,7 +141,21 @@ class _DashboardTabState extends State<DashboardTab> {
                   // --- MARKETPLACE MASONRY ---
                   _buildSectionHeaderSliver(_searchQuery.isEmpty ? "Discovery" : "Search Results", isDarkMode),
                   if (isWaiting)
-                    const SliverToBoxAdapter(child: Center(child: Padding(padding: EdgeInsets.all(50), child: CircularProgressIndicator())))
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      sliver: SliverGrid(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 20,
+                          crossAxisSpacing: 20,
+                          childAspectRatio: 0.7,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => const ProductSkeleton(),
+                          childCount: 4,
+                        ),
+                      ),
+                    )
                   else if (filteredMarketplace.isEmpty)
                     const SliverToBoxAdapter(child: Center(child: Padding(padding: EdgeInsets.all(80), child: Text("No items found.", style: TextStyle(color: Colors.grey)))))
                   else
@@ -148,7 +165,9 @@ class _DashboardTabState extends State<DashboardTab> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 20,
                         crossAxisSpacing: 20,
-                        itemBuilder: (context, index) => _buildUniqueProductCard(filteredMarketplace[index], isDarkMode, index),
+                        itemBuilder: (context, index) => RepaintBoundary(
+                          child: _buildUniqueProductCard(filteredMarketplace[index], isDarkMode, index)
+                        ),
                         childCount: filteredMarketplace.length,
                       ),
                     ),
@@ -280,81 +299,141 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildModernHorizontalCard(Map<String, dynamic> product, bool isDarkMode, int index) {
-    return Container(
-      width: 200,
-      margin: const EdgeInsets.only(left: 15, bottom: 20),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(isDarkMode ? 51 : 13), blurRadius: 15, offset: const Offset(0, 10))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: ClipRRect(borderRadius: const BorderRadius.vertical(top: Radius.circular(25)), child: CachedNetworkImage(imageUrl: product['image'] ?? '', fit: BoxFit.cover, width: double.infinity))),
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
-              ],
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
+      child: Container(
+        width: 200,
+        margin: const EdgeInsets.only(left: 15, bottom: 20),
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [BoxShadow(color: Colors.black.withAlpha(isDarkMode ? 51 : 13), blurRadius: 15, offset: const Offset(0, 10))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(25)), 
+                child: Hero(
+                  tag: 'prod_${product['id']}_horiz',
+                  child: CachedNetworkImage(
+                    imageUrl: product['image'] ?? '', 
+                    fit: BoxFit.cover, 
+                    width: double.infinity,
+                    memCacheWidth: 400, // Optimization: Reduce memory usage
+                  )
+                )
+              )
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Row(
+                        children: [
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          Text(" 4.5", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white70 : Colors.black87)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildUniqueProductCard(Map<String, dynamic> product, bool isDarkMode, int index) {
     bool isTall = index % 3 == 0;
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.white.withAlpha(5) : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(borderRadius: BorderRadius.circular(25), child: CachedNetworkImage(imageUrl: product['image'] ?? '', fit: BoxFit.cover, width: double.infinity, height: isTall ? 240 : 180)),
-              Positioned(top: 10, right: 10, child: _buildWishlistBtn(product)),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDarkMode ? Colors.white.withAlpha(5) : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
-                    GestureDetector(
-                      onTap: () async { 
-                        try {
-                          await AuraCartService.addToCart(product); 
-                          Fluttertoast.showToast(msg: "Added to Bag"); 
-                        } catch (e) {
-                          Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
-                        }
-                      }, 
-                      child: Icon(Icons.add_shopping_cart_rounded, size: 18, color: Theme.of(context).primaryColor),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(25), 
+                  child: Hero(
+                    tag: 'prod_${product['id']}',
+                    child: CachedNetworkImage(
+                      imageUrl: product['image'] ?? '', 
+                      fit: BoxFit.cover, 
+                      width: double.infinity, 
+                      height: isTall ? 240 : 180,
+                      memCacheHeight: isTall ? 600 : 400, // Optimization: Memory efficiency
+                    )
+                  )
+                ),
+                Positioned(top: 10, right: 10, child: _buildWishlistBtn(product)),
+                Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(150),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
+                    child: const Row(
+                      children: [
+                        Icon(Icons.star_rounded, color: Colors.amber, size: 12),
+                        Text(" 4.8", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
+                      GestureDetector(
+                        onTap: () async { 
+                          try {
+                            await AuraCartService.addToCart(product); 
+                            Fluttertoast.showToast(msg: "Added to Bag"); 
+                          } catch (e) {
+                            Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
+                          }
+                        }, 
+                        child: Icon(Icons.add_shopping_cart_rounded, size: 18, color: Theme.of(context).primaryColor),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildSectionHeaderSliver(String title, bool isDarkMode) {
     return SliverToBoxAdapter(

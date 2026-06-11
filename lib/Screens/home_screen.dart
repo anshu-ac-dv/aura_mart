@@ -1,3 +1,4 @@
+import 'package:aura_mart/core_services/cart_service.dart';
 import 'package:aura_mart/screens/tabs/cart_tab.dart';
 import 'package:aura_mart/screens/tabs/category_tab.dart';
 import 'package:aura_mart/screens/tabs/dashboard_tab.dart';
@@ -86,13 +87,43 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      _navIcons[index],
-                      color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : Colors.grey[600]),
-                      size: isSmallScreen ? 22 : 26,
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(
+                          _navIcons[index],
+                          color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : Colors.grey[600]),
+                          size: isSmallScreen ? 22 : 26,
+                        ),
+                        if (index == 2) // Cart Index
+                          StreamBuilder<List<Map<String, dynamic>>>(
+                            stream: AuraCartService.cartStream,
+                            builder: (context, snapshot) {
+                              final count = snapshot.data?.length ?? 0;
+                              if (count == 0) return const SizedBox.shrink();
+                              return Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.redAccent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                                  child: Text(
+                                    '$count',
+                                    style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              );
+                            }
+                          ),
+                      ],
                     ),
                     if (isSelected) ...[
-                      SizedBox(width: isSmallScreen ? 4 : 8),
+                      const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           _navLabels[index],
