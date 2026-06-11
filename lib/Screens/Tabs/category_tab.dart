@@ -92,112 +92,94 @@ class _CategoryTabState extends State<CategoryTab> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // --- DYNAMIC BACKGROUND GLOW ---
-          if (isDarkMode) ...[
-            _buildAmbientGlow(Colors.deepPurple.withAlpha(26), const Offset(-100, -100), 400),
-            _buildAmbientGlow(Colors.blue.withAlpha(13), const Offset(200, 200), 300),
-          ] else ...[
-            _buildAmbientGlow(primaryColor.withAlpha(15), const Offset(-100, -100), 500),
-            _buildAmbientGlow(Colors.blueAccent.withAlpha(10), const Offset(300, 400), 400),
-          ],
+          // --- AMBIENT GLOW ---
+          Positioned(
+            right: -100,
+            top: -100,
+            child: CircleAvatar(radius: 200, backgroundColor: primaryColor.withAlpha(isDarkMode ? 20 : 10)),
+          ),
 
           CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              // --- CINEMATIC HEADER ---
+              // --- MATCHING BRAND HEADER ---
               SliverAppBar(
-                expandedHeight: 180,
-                collapsedHeight: 80,
+                expandedHeight: 120,
+                collapsedHeight: 70,
                 pinned: true,
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [primaryColor, primaryColor.withValues(alpha: 0.7)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Stack(
+                    padding: const EdgeInsets.fromLTRB(25, 50, 25, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Positioned(
-                          right: -50,
-                          top: -50,
-                          child: CircleAvatar(
-                            radius: 120,
-                            backgroundColor: Colors.white.withValues(alpha: 0.05),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(25, 80, 25, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "AURA",
-                                style: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w200,
-                                  letterSpacing: 10,
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                ),
-                              ),
-                              Text(
-                                "MART",
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  letterSpacing: 6,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white.withValues(alpha: 0.5),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        Text("EXPLORE", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w200, letterSpacing: 6, color: isDarkMode ? Colors.white : Colors.black)),
+                        Text("COLLECTIONS", style: TextStyle(fontSize: 7, letterSpacing: 4, fontWeight: FontWeight.w900, color: primaryColor.withAlpha(180))),
                       ],
                     ),
                   ),
                 ),
                 actions: [
-                  IconButton(
-                    onPressed: () async {
-                      await FirebaseAuth.instance.signOut();
-                      if (!context.mounted) return;
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
-                    },
-                    icon: const Icon(Icons.logout_rounded, color: Colors.white70),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 15, top: 10),
+                    child: IconButton(
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        if (!context.mounted) return;
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
+                      },
+                      icon: Icon(Icons.logout_rounded, color: isDarkMode ? Colors.white38 : Colors.black38, size: 20),
+                    ),
                   ),
                 ],
               ),
 
-              // --- STICKY SEARCH BAR ---
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickySearchDelegate(
-                  child: _buildSearchSection(isDarkMode, primaryColor),
+              // --- SEARCH SECTION ---
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(25, 10, 25, 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: isDarkMode ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(10)),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (v) => setState(() => _searchQuery = v),
+                          decoration: InputDecoration(
+                            hintText: "Search categories...",
+                            hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26, fontSize: 14),
+                            prefixIcon: Icon(Icons.search_rounded, color: primaryColor, size: 20),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
 
-              // --- CATEGORY GRID ---
+              // --- CATEGORY LIST/GRID ---
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 150),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                 sliver: filteredCategories.isEmpty
-                    ? const SliverToBoxAdapter(
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 100),
-                            child: Text("No categories found.", style: TextStyle(color: Colors.grey)),
-                          ),
-                        ),
-                      )
+                    ? const SliverToBoxAdapter(child: Center(child: Padding(padding: EdgeInsets.only(top: 100), child: Text("No categories found.", style: TextStyle(color: Colors.grey)))))
                     : SliverGrid(
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          mainAxisSpacing: 20,
-                          crossAxisSpacing: 20,
-                          childAspectRatio: 1.1,
+                          mainAxisSpacing: 15,
+                          crossAxisSpacing: 15,
+                          childAspectRatio: 0.85,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) => _buildModernCategoryCard(filteredCategories[index], isDarkMode, primaryColor),
@@ -208,53 +190,6 @@ class _CategoryTabState extends State<CategoryTab> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildAmbientGlow(Color color, Offset offset, double size) {
-    return Positioned(
-      left: offset.dx,
-      top: offset.dy,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(colors: [color, Colors.transparent]),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchSection(bool isDarkMode, Color primaryColor) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            height: 55,
-            decoration: BoxDecoration(
-              color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(5),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black12),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (v) => setState(() => _searchQuery = v),
-              style: const TextStyle(fontSize: 15),
-              decoration: InputDecoration(
-                hintText: "Search categories...",
-                hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
-                prefixIcon: Icon(Icons.search_rounded, color: primaryColor, size: 22),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 15),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -274,63 +209,43 @@ class _CategoryTabState extends State<CategoryTab> {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(24),
           image: DecorationImage(
             image: CachedNetworkImageProvider(cat['image']),
             fit: BoxFit.cover,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(isDarkMode ? 77 : 30),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            )
-          ],
         ),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(24),
             gradient: LinearGradient(
               begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
+              end: Alignment.center,
               colors: [
-                Colors.black.withAlpha(200),
-                Colors.black.withAlpha(20),
+                Colors.black.withAlpha(180),
+                Colors.transparent,
               ],
             ),
           ),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(15),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: (cat['color'] as Color).withAlpha(200),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(cat['icon'], size: 20, color: Colors.white),
-              ),
-              const SizedBox(height: 10),
               Text(
-                cat['name'],
+                cat['name'].toString().toUpperCase(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                "DISCOVER",
-                style: TextStyle(
-                  color: Colors.white.withAlpha(150),
-                  fontSize: 8,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w200,
                   letterSpacing: 2,
                 ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: 20,
+                height: 2,
+                color: cat['color'] as Color,
               ),
             ],
           ),
@@ -338,25 +253,4 @@ class _CategoryTabState extends State<CategoryTab> {
       ),
     );
   }
-}
-
-class _StickySearchDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  _StickySearchDelegate({required this.child});
-
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    bool isScrolled = shrinkOffset > 20;
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: isScrolled ? 0.9 : 1.0),
-      child: child,
-    );
-  }
-
-  @override
-  double get maxExtent => 75;
-  @override
-  double get minExtent => 75;
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => true;
 }

@@ -25,12 +25,12 @@ class _DashboardTabState extends State<DashboardTab> {
   late Stream<List<Map<String, dynamic>>> _productStream;
 
   final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.deepPurple},
-    {'name': 'Fashion', 'icon': Icons.checkroom_rounded, 'color': Colors.pink},
-    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.amber},
-    {'name': 'Home', 'icon': Icons.home_filled, 'color': Colors.green},
-    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded, 'color': Colors.purple},
-    {'name': 'Mobiles', 'icon': Icons.smartphone_rounded, 'color': Colors.blue},
+    {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.indigo},
+    {'name': 'Fashion', 'icon': Icons.checkroom_rounded, 'color': Colors.pinkAccent},
+    {'name': 'Electronics', 'icon': Icons.bolt_rounded, 'color': Colors.orangeAccent},
+    {'name': 'Home', 'icon': Icons.home_filled, 'color': Colors.teal},
+    {'name': 'Beauty', 'icon': Icons.auto_awesome_rounded, 'color': Colors.purpleAccent},
+    {'name': 'Mobiles', 'icon': Icons.smartphone_rounded, 'color': Colors.blueAccent},
   ];
 
   @override
@@ -47,22 +47,29 @@ class _DashboardTabState extends State<DashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color primaryColor = Theme.of(context).colorScheme.primary;
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
-          // --- DYNAMIC AMBIENT BACKGROUND ---
-          if (isDarkMode) ...[
-            _buildGlow(primaryColor.withAlpha(20), const Offset(-100, -100), 450),
-            _buildGlow(Colors.blueAccent.withAlpha(10), const Offset(200, 200), 350),
-          ] else ...[
-            _buildGlow(primaryColor.withAlpha(15), const Offset(-100, -100), 500),
-            _buildGlow(Colors.blueAccent.withAlpha(10), const Offset(300, 400), 400),
-          ],
+          // --- AMBIENT MESH BACKGROUND ---
+          Positioned.fill(
+            child: AnimatedContainer(
+              duration: const Duration(seconds: 2),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.topLeft,
+                  radius: 1.5,
+                  colors: isDarkMode 
+                    ? [primaryColor.withAlpha(40), Colors.transparent] 
+                    : [primaryColor.withAlpha(20), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
           
           StreamBuilder<List<Map<String, dynamic>>>(
             stream: _productStream,
@@ -78,58 +85,66 @@ class _DashboardTabState extends State<DashboardTab> {
 
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
-                cacheExtent: 1000, // Optimization: Pre-render content for smooth scrolling
                 slivers: [
-                  // --- CINEMATIC BRAND HEADER ---
+                  // --- PREMIUM BRAND HEADER ---
                   SliverAppBar(
-                    expandedHeight: 140,
-                    collapsedHeight: 80,
+                    expandedHeight: 120,
+                    collapsedHeight: 70,
                     pinned: true,
                     backgroundColor: Colors.transparent,
                     elevation: 0,
                     flexibleSpace: FlexibleSpaceBar(
                       background: Container(
-                        padding: const EdgeInsets.fromLTRB(25, 60, 25, 0),
+                        padding: const EdgeInsets.fromLTRB(25, 50, 25, 0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("AURA", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w200, letterSpacing: 8, color: isDarkMode ? Colors.white : Colors.black)),
-                                Text("MART", style: TextStyle(fontSize: 8, letterSpacing: 10, fontWeight: FontWeight.w900, color: primaryColor)),
+                                Row(
+                                  children: [
+                                    Text("AURA", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w200, letterSpacing: 6, color: isDarkMode ? Colors.white : Colors.black)),
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(4)),
+                                      child: const Text("PRO", style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                    )
+                                  ],
+                                ),
+                                Text("LUXURY MARKETPLACE", style: TextStyle(fontSize: 7, letterSpacing: 4, fontWeight: FontWeight.w900, color: primaryColor.withAlpha(180))),
                               ],
                             ),
-                            _buildLogoutButton(isDarkMode),
+                            _buildTopActions(isDarkMode),
                           ],
                         ),
                       ),
                     ),
                   ),
 
-                  // --- GREETING & STICKY GLASS SEARCH ---
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _StickySearchDelegate(
-                      child: _buildSearchSection(isDarkMode, primaryColor, user),
-                    ),
+                  // --- SEARCH BAR SECTION ---
+                  SliverToBoxAdapter(
+                    child: _buildSearchSection(isDarkMode, primaryColor, user),
                   ),
 
-                  // --- CATEGORY ORBS ---
+                  // --- CATEGORY CHIPS ---
                   SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode, primaryColor)),
 
-                  // --- HERO GLASS CARD ---
+                  // --- PROMO HERO ---
                   if (_searchQuery.isEmpty)
                     SliverToBoxAdapter(child: _buildHeroSection(primaryColor)),
 
-                  // --- SECTION: NEW ARRIVALS ---
+                  // --- HORIZONTAL DISCOVERY ---
                   if (allProducts.isNotEmpty && _searchQuery.isEmpty) ...[
-                    _buildSectionHeaderSliver("New Arrivals", isDarkMode),
+                    _buildSectionHeaderSliver("New In", isDarkMode),
                     SliverToBoxAdapter(
                       child: SizedBox(
-                        height: 280,
+                        height: 260,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           itemCount: allProducts.length > 5 ? 5 : allProducts.length,
                           itemBuilder: (context, index) => _buildModernHorizontalCard(allProducts[index], isDarkMode, index),
@@ -138,8 +153,8 @@ class _DashboardTabState extends State<DashboardTab> {
                     ),
                   ],
 
-                  // --- MARKETPLACE MASONRY ---
-                  _buildSectionHeaderSliver(_searchQuery.isEmpty ? "Discovery" : "Search Results", isDarkMode),
+                  // --- MASONRY GRID ---
+                  _buildSectionHeaderSliver(_searchQuery.isEmpty ? "Curated for you" : "Results for \"$_searchQuery\"", isDarkMode),
                   if (isWaiting)
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -157,22 +172,20 @@ class _DashboardTabState extends State<DashboardTab> {
                       ),
                     )
                   else if (filteredMarketplace.isEmpty)
-                    const SliverToBoxAdapter(child: Center(child: Padding(padding: EdgeInsets.all(80), child: Text("No items found.", style: TextStyle(color: Colors.grey)))))
+                    const SliverToBoxAdapter(child: Center(child: Padding(padding: EdgeInsets.all(80), child: Text("Nothing matches your search.", style: TextStyle(color: Colors.grey)))))
                   else
                     SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       sliver: SliverMasonryGrid.count(
                         crossAxisCount: 2,
                         mainAxisSpacing: 20,
                         crossAxisSpacing: 20,
-                        itemBuilder: (context, index) => RepaintBoundary(
-                          child: _buildUniqueProductCard(filteredMarketplace[index], isDarkMode, index)
-                        ),
+                        itemBuilder: (context, index) => _buildUniqueProductCard(filteredMarketplace[index], isDarkMode, index),
                         childCount: filteredMarketplace.length,
                       ),
                     ),
 
-                  const SliverToBoxAdapter(child: SizedBox(height: 150)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
                 ],
               );
             },
@@ -182,37 +195,70 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildGlow(Color color, Offset offset, double size) {
-    return Positioned(left: offset.dx, top: offset.dy, child: Container(width: size, height: size, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RadialGradient(colors: [color, Colors.transparent]))));
+  Widget _buildTopActions(bool isDarkMode) {
+    return Row(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.white.withAlpha(15) : Colors.black.withAlpha(5),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.notifications_none_rounded, size: 22, color: isDarkMode ? Colors.white70 : Colors.black87),
+          ),
+        ),
+        const SizedBox(width: 10),
+        GestureDetector(
+          onTap: () async {
+            await FirebaseAuth.instance.signOut();
+            if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
+          },
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: Colors.grey.withAlpha(50),
+            child: const Icon(Icons.person_outline_rounded, size: 20, color: Colors.grey),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildSearchSection(bool isDarkMode, Color primaryColor, User? user) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+      padding: const EdgeInsets.fromLTRB(25, 10, 25, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (_searchQuery.isEmpty) ...[
-            Text("Hello, ${user?.displayName?.split(' ').first ?? 'Friend'}", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white38 : Colors.black38)),
-            const SizedBox(height: 2),
+            RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 20, color: isDarkMode ? Colors.white : Colors.black, fontWeight: FontWeight.w300),
+                children: [
+                  const TextSpan(text: "Welcome back, "),
+                  TextSpan(text: user?.displayName?.split(' ').first ?? 'Guest', style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 15),
           ],
           ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
               child: Container(
                 height: 55,
                 decoration: BoxDecoration(
-                  color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(5),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black12),
+                  color: isDarkMode ? Colors.white.withAlpha(10) : Colors.black.withAlpha(5),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(10)),
                 ),
                 child: TextField(
                   controller: _searchController,
                   onChanged: (v) => setState(() => _searchQuery = v),
                   style: const TextStyle(fontSize: 15),
                   decoration: InputDecoration(
-                    hintText: "Search your style...",
+                    hintText: "Search collections...",
                     hintStyle: TextStyle(color: isDarkMode ? Colors.white24 : Colors.black26),
                     prefixIcon: Icon(Icons.search_rounded, color: primaryColor, size: 22),
                     border: InputBorder.none,
@@ -228,42 +274,41 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildCategoryStrip(bool isDarkMode, Color primaryColor) {
-    return Container(
-      height: 100,
-      margin: const EdgeInsets.only(top: 10),
+    return SizedBox(
+      height: 50,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        physics: const BouncingScrollPhysics(),
         itemCount: _categories.length,
         itemBuilder: (context, index) {
           final cat = _categories[index];
           bool isSelected = _selectedCategory == cat['name'];
-          final catColor = cat['color'] as Color;
           
           return GestureDetector(
             onTap: () => setState(() => _selectedCategory = cat['name']),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: isSelected ? (isDarkMode ? Colors.white : Colors.black) : Colors.transparent,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: isSelected ? Colors.transparent : (isDarkMode ? Colors.white10 : Colors.black12)),
+              ),
+              alignment: Alignment.center,
+              child: Row(
                 children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    height: isSelected ? 55 : 45,
-                    width: isSelected ? 55 : 45,
-                    decoration: BoxDecoration(
-                      color: isSelected ? catColor : (isDarkMode ? Colors.white.withAlpha(13) : Colors.white),
-                      shape: BoxShape.circle,
-                      boxShadow: isSelected 
-                        ? [BoxShadow(color: catColor.withAlpha(77), blurRadius: 10, offset: const Offset(0, 5))] 
-                        : (isDarkMode ? [] : [BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 5, offset: const Offset(0, 2))]),
-                      border: Border.all(color: isSelected ? Colors.transparent : (isDarkMode ? Colors.white10 : Colors.black12)),
+                  Icon(cat['icon'], size: 16, color: isSelected ? (isDarkMode ? Colors.black : Colors.white) : (isDarkMode ? Colors.white38 : Colors.black38)),
+                  const SizedBox(width: 8),
+                  Text(
+                    cat['name'],
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      color: isSelected ? (isDarkMode ? Colors.black : Colors.white) : (isDarkMode ? Colors.white38 : Colors.black45)
                     ),
-                    child: Icon(cat['icon'], size: isSelected ? 22 : 18, color: isSelected ? Colors.white : (isDarkMode ? Colors.white38 : catColor.withAlpha(150))),
                   ),
-                  const SizedBox(height: 8),
-                  Text(cat['name'], style: TextStyle(fontSize: 10, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500, color: isSelected ? catColor : (isDarkMode ? Colors.white38 : Colors.black45))),
                 ],
               ),
             ),
@@ -275,22 +320,37 @@ class _DashboardTabState extends State<DashboardTab> {
 
   Widget _buildHeroSection(Color primaryColor) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 25, 20, 10),
       child: Container(
-        height: 200,
+        height: 180,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          image: const DecorationImage(image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1000"), fit: BoxFit.cover),
+          borderRadius: BorderRadius.circular(25),
+          image: const DecorationImage(
+            image: CachedNetworkImageProvider("https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000"),
+            fit: BoxFit.cover,
+          ),
         ),
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), gradient: LinearGradient(begin: Alignment.bottomRight, colors: [Colors.black.withAlpha(178), Colors.transparent])),
-          padding: const EdgeInsets.all(30),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            gradient: LinearGradient(
+              begin: Alignment.bottomLeft,
+              colors: [Colors.black.withAlpha(200), Colors.transparent],
+            ),
+          ),
+          padding: const EdgeInsets.all(25),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("SEASONAL", style: TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 4)),
-              const Text("The Art of\nMinimalism", style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w100, height: 1)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+                child: const Text("LIMITED", style: TextStyle(color: Colors.black, fontSize: 8, fontWeight: FontWeight.w900)),
+              ),
+              const SizedBox(height: 8),
+              const Text("Elevated Basics", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w200, letterSpacing: 2)),
+              Text("Up to 40% OFF", style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -302,48 +362,33 @@ class _DashboardTabState extends State<DashboardTab> {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
       child: Container(
-        width: 200,
+        width: 180,
         margin: const EdgeInsets.only(left: 15, bottom: 20),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withAlpha(8) : Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [BoxShadow(color: Colors.black.withAlpha(isDarkMode ? 51 : 13), blurRadius: 15, offset: const Offset(0, 10))],
+          color: isDarkMode ? Colors.white.withAlpha(5) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isDarkMode ? [] : [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 5))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(25)), 
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), 
                 child: Hero(
                   tag: 'prod_${product['id']}_horiz',
-                  child: CachedNetworkImage(
-                    imageUrl: product['image'] ?? '', 
-                    fit: BoxFit.cover, 
-                    width: double.infinity,
-                    memCacheWidth: 400, // Optimization: Reduce memory usage
-                  )
+                  child: CachedNetworkImage(imageUrl: product['image'] ?? '', fit: BoxFit.cover, width: double.infinity)
                 )
               )
             ),
             Padding(
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
-                          Text(" 4.5", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white70 : Colors.black87)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
+                  Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1),
+                  const SizedBox(height: 4),
+                  Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900, fontSize: 14)),
                 ],
               ),
             ),
@@ -354,92 +399,73 @@ class _DashboardTabState extends State<DashboardTab> {
   }
 
   Widget _buildUniqueProductCard(Map<String, dynamic> product, bool isDarkMode, int index) {
-    bool isTall = index % 3 == 0;
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withAlpha(5) : Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: isDarkMode ? Colors.white10 : Colors.black.withAlpha(13)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(25), 
-                  child: Hero(
-                    tag: 'prod_${product['id']}',
-                    child: CachedNetworkImage(
-                      imageUrl: product['image'] ?? '', 
-                      fit: BoxFit.cover, 
-                      width: double.infinity, 
-                      height: isTall ? 240 : 180,
-                      memCacheHeight: isTall ? 600 : 400, // Optimization: Memory efficiency
-                    )
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20), 
+                child: Hero(
+                  tag: 'prod_${product['id']}',
+                  child: CachedNetworkImage(
+                    imageUrl: product['image'] ?? '', 
+                    fit: BoxFit.cover, 
+                    width: double.infinity, 
+                    height: index % 3 == 0 ? 250 : 200,
                   )
-                ),
-                Positioned(top: 10, right: 10, child: _buildWishlistBtn(product)),
-                Positioned(
-                  bottom: 10,
-                  left: 10,
+                )
+              ),
+              Positioned(top: 10, right: 10, child: _buildWishlistBtn(product)),
+              Positioned(
+                bottom: 10, 
+                right: 10, 
+                child: GestureDetector(
+                  onTap: () async {
+                    try {
+                      await AuraCartService.addToCart(product);
+                      Fluttertoast.showToast(msg: "Added to Bag");
+                    } catch (e) {
+                      Fluttertoast.showToast(msg: e.toString());
+                    }
+                  },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(150),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.star_rounded, color: Colors.amber, size: 12),
-                        Text(" 4.8", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)]),
+                    child: Icon(Icons.add_shopping_cart_rounded, size: 16, color: Theme.of(context).primaryColor),
                   ),
-                ),
+                )
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(5, 10, 5, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13), maxLines: 1),
+                Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor.withAlpha(200), fontWeight: FontWeight.w800, fontSize: 14)),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(15),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
-                      GestureDetector(
-                        onTap: () async { 
-                          try {
-                            await AuraCartService.addToCart(product); 
-                            Fluttertoast.showToast(msg: "Added to Bag"); 
-                          } catch (e) {
-                            Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
-                          }
-                        }, 
-                        child: Icon(Icons.add_shopping_cart_rounded, size: 18, color: Theme.of(context).primaryColor),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-
   Widget _buildSectionHeaderSliver(String title, bool isDarkMode) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(25, 40, 25, 15),
-        child: Row(children: [Text(title.toUpperCase(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 4, color: isDarkMode ? Colors.white24 : Colors.black26)), const SizedBox(width: 10), Expanded(child: Divider(color: isDarkMode ? Colors.white10 : Colors.black12))]),
+        padding: const EdgeInsets.fromLTRB(25, 30, 25, 15),
+        child: Row(
+          children: [
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Spacer(),
+            Icon(Icons.arrow_forward_rounded, size: 16, color: isDarkMode ? Colors.white24 : Colors.black26),
+          ],
+        ),
       ),
     );
   }
@@ -451,34 +477,13 @@ class _DashboardTabState extends State<DashboardTab> {
         final isFav = snapshot.data ?? false;
         return GestureDetector(
           onTap: () => AuraWishlistService.toggleWishlist(product),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(padding: const EdgeInsets.all(8), color: Colors.white.withAlpha(51), child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 16, color: isFav ? Colors.redAccent : Colors.white)),
-            ),
+          child: Container(
+            padding: const EdgeInsets.all(8), 
+            decoration: BoxDecoration(color: Colors.white.withAlpha(180), shape: BoxShape.circle),
+            child: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, size: 16, color: isFav ? Colors.redAccent : Colors.black54)
           ),
         );
       },
     );
   }
-
-  Widget _buildLogoutButton(bool isDarkMode) {
-    return Container(decoration: BoxDecoration(color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8), borderRadius: BorderRadius.circular(15)), child: IconButton(onPressed: () async { await FirebaseAuth.instance.signOut(); if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false); }, icon: Icon(Icons.logout_rounded, size: 20, color: isDarkMode ? Colors.white70 : Colors.black87)));
-  }
-}
-
-class _StickySearchDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
-  _StickySearchDelegate({required this.child});
-  @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: shrinkOffset > 20 ? 0.9 : 1.0), child: child);
-  }
-  @override
-  double get maxExtent => 100;
-  @override
-  double get minExtent => 100;
-  @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => true;
 }
