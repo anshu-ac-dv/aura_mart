@@ -20,7 +20,7 @@ class AuraCartService {
     return name.trim().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_');
   }
 
-  static Future<void> addToCart(Map<String, dynamic> product) async {
+  static Future<void> addToCart(Map<String, dynamic> product, {int quantity = 1}) async {
     try {
       final cart = _userCart;
       if (cart == null) throw Exception("Please login to add items to cart");
@@ -37,18 +37,26 @@ class AuraCartService {
         price = priceVal.toDouble();
       }
 
-      // Use a Get with cache-first strategy for speed and offline support
+      // Check existence robustly but efficiently
       DocumentSnapshot doc;
       try {
-        doc = await docRef.get(const GetOptions(source: Source.serverAndCache));
-      } catch (e) {
         doc = await docRef.get(const GetOptions(source: Source.cache));
+      } catch (e) {
+        // If not in cache, it might still exist on server
+        try {
+          doc = await docRef.get();
+        } catch (e2) {
+          // If still fails, we'll assume it's new and handle it in the set block
+          // We can't easily 'throw' because it might be just offline
+          // So we use a dummy snapshot that doesn't exist
+          doc = await docRef.get(const GetOptions(source: Source.cache)).catchError((_) => doc);
+        }
       }
 
       if (doc.exists) {
         // Update existing item
         await docRef.update({
-          'qty': FieldValue.increment(1),
+          'qty': FieldValue.increment(quantity),
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
           'price': price,
         });
@@ -60,12 +68,12 @@ class AuraCartService {
           'price': price,
           'image': product['image'] ?? '',
           'category': product['category'] ?? '',
-          'qty': 1,
+          'qty': quantity,
           'addedAt': DateTime.now().millisecondsSinceEpoch,
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
         });
       }
-      debugPrint("Successfully added $docId to cart");
+      debugPrint("Successfully added $docId to cart (x$quantity)");
     } catch (e) {
       debugPrint("Add to Cart Error: $e");
       rethrow;
@@ -78,7 +86,7 @@ class AuraCartService {
       if (cart == null) return;
       await cart.doc(docId).update({
         'qty': FieldValue.increment(1),
-        'updatedAt': FieldValue.serverTimestamp(),
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {
       debugPrint("Increment Qty Error: $e");
@@ -92,7 +100,7 @@ class AuraCartService {
       if (currentQty > 1) {
         await cart.doc(docId).update({
           'qty': FieldValue.increment(-1),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
         });
       } else {
         await cart.doc(docId).delete();

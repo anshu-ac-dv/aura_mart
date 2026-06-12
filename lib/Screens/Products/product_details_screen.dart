@@ -151,9 +151,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: ElevatedButton(
                 onPressed: () async {
                   try {
-                    for(int i=0; i<_quantity; i++) {
-                      await AuraCartService.addToCart(product);
-                    }
+                    await AuraCartService.addToCart(product, quantity: _quantity);
                     Fluttertoast.showToast(msg: "Added to Bag");
                   } catch (e) {
                     Fluttertoast.showToast(msg: "Failed to add to cart");
