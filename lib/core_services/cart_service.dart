@@ -37,23 +37,18 @@ class AuraCartService {
         price = priceVal.toDouble();
       }
 
-      // Check existence robustly but efficiently
-      DocumentSnapshot doc;
+      // Check existence using a fast cache-first approach
+      bool exists = false;
       try {
-        doc = await docRef.get(const GetOptions(source: Source.cache));
+        final doc = await docRef.get(const GetOptions(source: Source.cache));
+        exists = doc.exists;
       } catch (e) {
-        // If not in cache, it might still exist on server
-        try {
-          doc = await docRef.get();
-        } catch (e2) {
-          // If still fails, we'll assume it's new and handle it in the set block
-          // We can't easily 'throw' because it might be just offline
-          // So we use a dummy snapshot that doesn't exist
-          doc = await docRef.get(const GetOptions(source: Source.cache)).catchError((_) => doc);
-        }
+        // Fallback to server if not in cache or other error
+        final doc = await docRef.get();
+        exists = doc.exists;
       }
 
-      if (doc.exists) {
+      if (exists) {
         // Update existing item
         await docRef.update({
           'qty': FieldValue.increment(quantity),
@@ -76,6 +71,49 @@ class AuraCartService {
       debugPrint("Successfully added $docId to cart (x$quantity)");
     } catch (e) {
       debugPrint("Add to Cart Error: $e");
+      rethrow;
+    }
+  }
+
+  static Future<void> addAllToCart(List<Map<String, dynamic>> items) async {
+    try {
+      final cart = _userCart;
+      if (cart == null) return;
+
+      final batch = _db.batch();
+      for (var item in items) {
+        final docId = _getDocId(item);
+        final docRef = cart.doc(docId);
+        
+        // Note: For batch, we can't easily check existence first without awaiting.
+        // So we use set with merge: true for simplicity in bulk operations.
+        dynamic priceVal = item['price'] ?? 0.0;
+        double price = 0.0;
+        if (priceVal is String) {
+          price = double.tryParse(priceVal.replaceAll('\$', '').replaceAll(',', '').trim()) ?? 0.0;
+        } else if (priceVal is num) {
+          price = priceVal.toDouble();
+        }
+
+        batch.set(docRef, {
+          'id': docId,
+          'name': item['name'] ?? 'Unknown',
+          'price': price,
+          'image': item['image'] ?? '',
+          'category': item['category'] ?? '',
+          'qty': FieldValue.increment(item['qty'] ?? 1),
+          'updatedAt': DateTime.now().millisecondsSinceEpoch,
+          // addedAt is only set if it doesn't exist yet by using set with merge
+        }, SetOptions(merge: true));
+        
+        // To ensure 'addedAt' exists if it's new
+        batch.set(docRef, {
+          'addedAt': FieldValue.serverTimestamp(), 
+        }, SetOptions(merge: true));
+      }
+      await batch.commit();
+    } catch (e) {
+      debugPrint("Add All to Cart Error: $e");
       rethrow;
     }
   }

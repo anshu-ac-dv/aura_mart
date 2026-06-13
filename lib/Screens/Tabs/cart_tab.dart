@@ -188,13 +188,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   }
 
   void _onOrderSuccess() {
+    if (!mounted) return;
     setState(() {
       _isProcessing = false;
       _showSuccessAnimation = true;
       _selectedPaymentMethodId = null;
       _selectedPaymentMethodValue = null;
     });
-    AuraCartService.clearCart();
     _successController.forward();
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted && _showSuccessAnimation) {
@@ -216,6 +216,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     setState(() => _isProcessing = true);
     try {
       await OrderService.createOrder(items, total, _selectedPaymentMethodValue!);
+      await AuraCartService.clearCart();
       _onOrderSuccess();
     } catch (e) {
       setState(() => _isProcessing = false);
@@ -245,6 +246,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 setState(() => _isProcessing = true);
                 try {
                   await OrderService.createOrder(items, total, "Cash on Delivery");
+                  await AuraCartService.clearCart();
                   _onOrderSuccess();
                 } catch (e) {
                   setState(() => _isProcessing = false);

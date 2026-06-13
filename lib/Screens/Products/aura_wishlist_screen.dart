@@ -88,23 +88,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500),
                     ),
                     ElevatedButton.icon(
-                      onPressed: () async {
-                        if (items.isEmpty) return;
-                        
-                        try {
-                          // Add all to cart sequentially to ensure consistency
-                          for (var item in items) {
-                            await AuraCartService.addToCart(item);
-                          }
-                          
-                          // Clear wishlist from Firestore
-                          await AuraWishlistService.clearWishlist();
-
-                          Fluttertoast.showToast(msg: "All items moved to cart!");
-                        } catch (e) {
-                          Fluttertoast.showToast(msg: "Failed to move some items: $e");
-                        }
-                      },
+                    onPressed: () async {
+                      if (items.isEmpty) return;
+                      
+                      try {
+                        await AuraCartService.addAllToCart(items);
+                        await AuraWishlistService.clearWishlist();
+                        Fluttertoast.showToast(msg: "All items moved to cart!");
+                      } catch (e) {
+                        Fluttertoast.showToast(msg: "Failed to move items: $e");
+                      }
+                    },
                       icon: const Icon(Icons.shopping_cart_outlined, size: 18),
                       label: const Text("MOVE ALL"),
                       style: ElevatedButton.styleFrom(
