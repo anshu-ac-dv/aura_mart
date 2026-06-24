@@ -1,8 +1,12 @@
+import 'package:aura_mart/features/cart/domain/entities/cart_item.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_state.dart';
 import 'package:aura_mart/screens/my_orders_screen.dart';
-import 'package:aura_mart/core_services/cart_service.dart';
 import 'package:aura_mart/core_services/order_service.dart';
 import 'package:aura_mart/core_services/payment_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lottie/lottie.dart';
@@ -21,7 +25,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   String? _selectedPaymentMethodId;
   String? _selectedPaymentMethodValue;
 
-  late Stream<List<Map<String, dynamic>>> _cartStream;
   late Stream<List<Map<String, dynamic>>> _paymentMethodsStream;
   late AnimationController _successController;
   late Animation<double> _scaleAnimation;
@@ -30,7 +33,6 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _cartStream = AuraCartService.cartStream;
     _paymentMethodsStream = PaymentService.paymentMethodsStream;
     
     _successController = AnimationController(
@@ -53,7 +55,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _showPaymentOptions(bool isDarkMode, List<Map<String, dynamic>> items, double total) {
+  void _showPaymentOptions(bool isDarkMode, List<CartItem> items, double total) {
     if (items.isEmpty) {
       Fluttertoast.showToast(msg: "Your cart is empty!");
       return;
@@ -63,8 +65,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (sheetContext, setModalState) => Container(
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (modalContext, setModalState) => Container(
           decoration: BoxDecoration(
             color: isDarkMode ? const Color(0xFF121212) : Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
@@ -143,7 +145,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                     elevation: 0,
                   ),
                   onPressed: _selectedPaymentMethodId == null ? null : () {
-                    Navigator.pop(sheetContext);
+                    Navigator.pop(modalContext);
                     _processCheckout(items, total);
                   },
                   child: const Text("PLACE ORDER", style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 2, fontSize: 12)),
@@ -207,7 +209,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     });
   }
 
-  void _processCheckout(List<Map<String, dynamic>> items, double total) async {
+  void _processCheckout(List<CartItem> items, double total) async {
     if (_selectedPaymentMethodValue == null) return;
     if (_selectedPaymentMethodId == 'cod') {
       _showCODAlert(items, total);
@@ -215,8 +217,18 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     }
     setState(() => _isProcessing = true);
     try {
-      await OrderService.createOrder(items, total, _selectedPaymentMethodValue!);
-      await AuraCartService.clearCart();
+      final List<Map<String, dynamic>> itemsMap = items.map((e) => {
+        'id': e.id,
+        'name': e.name,
+        'price': e.price,
+        'qty': e.qty,
+        'image': e.image,
+        'category': e.category,
+      }).toList();
+      
+      await OrderService.createOrder(itemsMap, total, _selectedPaymentMethodValue!);
+      if (!mounted) return;
+      context.read<CartBloc>().add(CartCleared());
       _onOrderSuccess();
     } catch (e) {
       setState(() => _isProcessing = false);
@@ -224,7 +236,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     }
   }
 
-  void _showCODAlert(List<Map<String, dynamic>> items, double total) {
+  void _showCODAlert(List<CartItem> items, double total) {
     showDialog(
       context: context,
       builder: (context) => BackdropFilter(
@@ -245,8 +257,18 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                 Navigator.pop(context);
                 setState(() => _isProcessing = true);
                 try {
-                  await OrderService.createOrder(items, total, "Cash on Delivery");
-                  await AuraCartService.clearCart();
+                  final List<Map<String, dynamic>> itemsMap = items.map((e) => {
+                    'id': e.id,
+                    'name': e.name,
+                    'price': e.price,
+                    'qty': e.qty,
+                    'image': e.image,
+                    'category': e.category,
+                  }).toList();
+                  
+                  await OrderService.createOrder(itemsMap, total, "Cash on Delivery");
+                  if (!mounted) return;
+                  context.read<CartBloc>().add(CartCleared());
                   _onOrderSuccess();
                 } catch (e) {
                   setState(() => _isProcessing = false);
@@ -268,10 +290,9 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _cartStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
+      body: BlocBuilder<CartBloc, CartState>(
+        builder: (context, state) {
+          if (state is CartError) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -282,11 +303,11 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: Text(snapshot.error.toString(), textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    child: Text(state.message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed: () => setState(() { _cartStream = AuraCartService.cartStream; }),
+                    onPressed: () => context.read<CartBloc>().add(CartStarted()),
                     child: const Text("Retry"),
                   )
                 ],
@@ -294,7 +315,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             );
           }
 
-          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+          if (state is CartLoading) {
             return Center(
               child: Lottie.network(
                 'https://lottie.host/5053b53a-c852-473d-9f79-66c82705b768/0F8C6m2GkM.json',
@@ -304,8 +325,8 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             );
           }
 
-          final items = snapshot.data ?? [];
-          final total = AuraCartService.calculateTotal(items);
+          final List<CartItem> items = state is CartLoaded ? state.items : [];
+          final double total = state is CartLoaded ? state.total : 0.0;
 
           return Stack(
             children: [
@@ -403,17 +424,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildModernCartItem(Map<String, dynamic> item, bool isDarkMode) {
-    final String name = item['name']?.toString() ?? 'Unknown';
-    final String id = item['id']?.toString() ?? name;
-    final double price = (item['price'] is num) ? (item['price'] as num).toDouble() : 0.0;
-    
+  Widget _buildModernCartItem(CartItem item, bool isDarkMode) {
     return Dismissible(
-      key: Key(id),
+      key: Key(item.id),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
-        AuraCartService.removeItem(id);
-        Fluttertoast.showToast(msg: "$name removed");
+        context.read<CartBloc>().add(CartItemRemoved(item.id));
+        Fluttertoast.showToast(msg: "${item.name} removed");
       },
       background: Container(
         alignment: Alignment.centerRight,
@@ -441,7 +458,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: CachedNetworkImage(
-                imageUrl: item['image'] ?? '', 
+                imageUrl: item.image, 
                 height: 90, 
                 width: 90, 
                 fit: BoxFit.cover,
@@ -453,9 +470,9 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.5), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 5),
-                  Text('\$${price.toStringAsFixed(2)}', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
+                  Text('\$${item.price.toStringAsFixed(2)}', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 10),
                   _buildQtyControl(item, isDarkMode),
                 ],
@@ -467,10 +484,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildQtyControl(Map<String, dynamic> item, bool isDarkMode) {
-    final String id = item['id']?.toString() ?? '';
-    final int qty = ((item['qty'] ?? 1) as num).toInt();
-    
+  Widget _buildQtyControl(CartItem item, bool isDarkMode) {
     return Container(
       decoration: BoxDecoration(
         color: isDarkMode ? Colors.white.withAlpha(13) : Colors.black.withAlpha(8),
@@ -481,13 +495,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
         children: [
           IconButton(
             icon: const Icon(Icons.remove, size: 16), 
-            onPressed: () => AuraCartService.decrementQty(id, qty),
+            onPressed: () => context.read<CartBloc>().add(CartQtyDecremented(item.id, item.qty)),
             constraints: const BoxConstraints(minWidth: 35, minHeight: 35),
           ),
-          Text('$qty', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
+          Text('${item.qty}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
           IconButton(
             icon: const Icon(Icons.add, size: 16), 
-            onPressed: () => AuraCartService.incrementQty(id),
+            onPressed: () => context.read<CartBloc>().add(CartQtyIncremented(item.id)),
             constraints: const BoxConstraints(minWidth: 35, minHeight: 35),
           ),
         ],
@@ -495,7 +509,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCheckoutPanel(bool isDarkMode, List<Map<String, dynamic>> items, double total) {
+  Widget _buildCheckoutPanel(bool isDarkMode, List<CartItem> items, double total) {
     const double shipping = 10.0;
     final double grandTotal = total + shipping;
 

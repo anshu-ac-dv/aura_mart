@@ -1,11 +1,17 @@
+import 'package:aura_mart/features/products/domain/entities/product_entity.dart';
+import 'package:aura_mart/features/products/presentation/bloc/product_bloc.dart';
+import 'package:aura_mart/features/products/presentation/bloc/product_event.dart';
+import 'package:aura_mart/features/products/presentation/bloc/product_state.dart';
 import 'package:aura_mart/screens/login_screen.dart';
-import 'package:aura_mart/core_services/cart_service.dart';
-import 'package:aura_mart/core_services/product_service.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
 import 'package:aura_mart/screens/products/product_details_screen.dart';
+import 'package:aura_mart/widgets/aura_animations.dart';
 import 'package:aura_mart/widgets/aura_skeletons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -22,7 +28,6 @@ class _DashboardTabState extends State<DashboardTab> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
   String _selectedCategory = "All";
-  late Stream<List<Map<String, dynamic>>> _productStream;
 
   final List<Map<String, dynamic>> _categories = [
     {'name': 'All', 'icon': Icons.grid_view_rounded, 'color': Colors.indigo},
@@ -36,7 +41,7 @@ class _DashboardTabState extends State<DashboardTab> {
   @override
   void initState() {
     super.initState();
-    _productStream = ProductService.productsStream;
+    context.read<ProductBloc>().add(ProductsFetched());
   }
 
   @override
@@ -71,17 +76,16 @@ class _DashboardTabState extends State<DashboardTab> {
             ),
           ),
           
-          StreamBuilder<List<Map<String, dynamic>>>(
-            stream: _productStream,
-            builder: (context, snapshot) {
-              final allProducts = snapshot.data ?? [];
+          BlocBuilder<ProductBloc, ProductState>(
+            builder: (context, state) {
+              final allProducts = state is ProductLoaded ? state.products : [];
               final filteredMarketplace = allProducts.where((p) {
-                final matchesSearch = p['name']?.toString().toLowerCase().contains(_searchQuery.toLowerCase()) ?? false;
-                final matchesCategory = _selectedCategory == "All" || p['category'] == _selectedCategory;
+                final matchesSearch = p.name.toLowerCase().contains(_searchQuery.toLowerCase());
+                final matchesCategory = _selectedCategory == "All" || p.category == _selectedCategory;
                 return matchesSearch && matchesCategory;
               }).toList();
 
-              final isWaiting = snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData;
+              final isWaiting = state is ProductLoading;
 
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -130,11 +134,21 @@ class _DashboardTabState extends State<DashboardTab> {
                   ),
 
                   // --- CATEGORY CHIPS ---
-                  SliverToBoxAdapter(child: _buildCategoryStrip(isDarkMode, primaryColor)),
+                  SliverToBoxAdapter(
+                    child: FadeInAnimation(
+                      delay: 100,
+                      child: _buildCategoryStrip(isDarkMode, primaryColor),
+                    ),
+                  ),
 
                   // --- PROMO HERO ---
                   if (_searchQuery.isEmpty)
-                    SliverToBoxAdapter(child: _buildHeroSection(primaryColor)),
+                    SliverToBoxAdapter(
+                      child: FadeInAnimation(
+                        delay: 200,
+                        child: _buildHeroSection(primaryColor),
+                      ),
+                    ),
 
                   // --- HORIZONTAL DISCOVERY ---
                   if (allProducts.isNotEmpty && _searchQuery.isEmpty) ...[
@@ -147,7 +161,10 @@ class _DashboardTabState extends State<DashboardTab> {
                           physics: const BouncingScrollPhysics(),
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           itemCount: allProducts.length > 5 ? 5 : allProducts.length,
-                          itemBuilder: (context, index) => _buildModernHorizontalCard(allProducts[index], isDarkMode, index),
+                          itemBuilder: (context, index) => FadeInAnimation(
+                            delay: 300 + (index * 100),
+                            child: _buildModernHorizontalCard(allProducts[index], isDarkMode, index),
+                          ),
                         ),
                       ),
                     ),
@@ -180,7 +197,10 @@ class _DashboardTabState extends State<DashboardTab> {
                         crossAxisCount: 2,
                         mainAxisSpacing: 20,
                         crossAxisSpacing: 20,
-                        itemBuilder: (context, index) => _buildUniqueProductCard(filteredMarketplace[index], isDarkMode, index),
+                        itemBuilder: (context, index) => FadeInAnimation(
+                          delay: 100 + (index * 50),
+                          child: _buildUniqueProductCard(filteredMarketplace[index], isDarkMode, index),
+                        ),
                         childCount: filteredMarketplace.length,
                       ),
                     ),
@@ -210,9 +230,10 @@ class _DashboardTabState extends State<DashboardTab> {
         ),
         const SizedBox(width: 10),
         GestureDetector(
-          onTap: () async {
-            await FirebaseAuth.instance.signOut();
-            if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
+          onTap: () {
+            // Logout logic via BLoC if needed, but simple signOut works too
+            FirebaseAuth.instance.signOut();
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
           },
           child: CircleAvatar(
             radius: 20,
@@ -358,9 +379,9 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildModernHorizontalCard(Map<String, dynamic> product, bool isDarkMode, int index) {
+  Widget _buildModernHorizontalCard(ProductEntity product, bool isDarkMode, int index) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: _entityToMap(product)))),
       child: Container(
         width: 180,
         margin: const EdgeInsets.only(left: 15, bottom: 20),
@@ -376,8 +397,8 @@ class _DashboardTabState extends State<DashboardTab> {
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)), 
                 child: Hero(
-                  tag: 'prod_${product['id']}_horiz',
-                  child: CachedNetworkImage(imageUrl: product['image'] ?? '', fit: BoxFit.cover, width: double.infinity)
+                  tag: 'prod_${product.id}_horiz',
+                  child: CachedNetworkImage(imageUrl: product.image, fit: BoxFit.cover, width: double.infinity)
                 )
               )
             ),
@@ -386,9 +407,9 @@ class _DashboardTabState extends State<DashboardTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1),
+                  Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12), maxLines: 1),
                   const SizedBox(height: 4),
-                  Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900, fontSize: 14)),
+                  Text("\$${product.price}", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w900, fontSize: 14)),
                 ],
               ),
             ),
@@ -398,9 +419,9 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildUniqueProductCard(Map<String, dynamic> product, bool isDarkMode, int index) {
+  Widget _buildUniqueProductCard(ProductEntity product, bool isDarkMode, int index) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: _entityToMap(product)))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -409,9 +430,9 @@ class _DashboardTabState extends State<DashboardTab> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(20), 
                 child: Hero(
-                  tag: 'prod_${product['id']}',
+                  tag: 'prod_${product.id}',
                   child: CachedNetworkImage(
-                    imageUrl: product['image'] ?? '', 
+                    imageUrl: product.image, 
                     fit: BoxFit.cover, 
                     width: double.infinity, 
                     height: index % 3 == 0 ? 250 : 200,
@@ -423,13 +444,9 @@ class _DashboardTabState extends State<DashboardTab> {
                 bottom: 10, 
                 right: 10, 
                 child: GestureDetector(
-                  onTap: () async {
-                    try {
-                      await AuraCartService.addToCart(product);
-                      Fluttertoast.showToast(msg: "Added to Bag");
-                    } catch (e) {
-                      Fluttertoast.showToast(msg: e.toString());
-                    }
+                  onTap: () {
+                    context.read<CartBloc>().add(CartItemAdded(_entityToMap(product)));
+                    Fluttertoast.showToast(msg: "Added to Bag");
                   },
                   child: Container(
                     padding: const EdgeInsets.all(8),
@@ -445,14 +462,27 @@ class _DashboardTabState extends State<DashboardTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(product['name'] ?? 'Item', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13), maxLines: 1),
-                Text("\$${product['price']}", style: TextStyle(color: Theme.of(context).primaryColor.withAlpha(200), fontWeight: FontWeight.w800, fontSize: 14)),
+                Text(product.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13), maxLines: 1),
+                Text("\$${product.price}", style: TextStyle(color: Theme.of(context).primaryColor.withAlpha(200), fontWeight: FontWeight.w800, fontSize: 14)),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Map<String, dynamic> _entityToMap(ProductEntity p) {
+    return {
+      'id': p.id,
+      'name': p.name,
+      'price': p.price,
+      'image': p.image,
+      'category': p.category,
+      'description': p.description,
+      'sellerId': p.sellerId,
+      'sellerName': p.sellerName,
+    };
   }
 
   Widget _buildSectionHeaderSliver(String title, bool isDarkMode) {
@@ -470,13 +500,14 @@ class _DashboardTabState extends State<DashboardTab> {
     );
   }
 
-  Widget _buildWishlistBtn(Map<String, dynamic> product) {
+  Widget _buildWishlistBtn(ProductEntity product) {
+    final pMap = _entityToMap(product);
     return StreamBuilder<bool>(
-      stream: AuraWishlistService.isInWishlistStream(product),
+      stream: AuraWishlistService.isInWishlistStream(pMap),
       builder: (context, snapshot) {
         final isFav = snapshot.data ?? false;
         return GestureDetector(
-          onTap: () => AuraWishlistService.toggleWishlist(product),
+          onTap: () => AuraWishlistService.toggleWishlist(pMap),
           child: Container(
             padding: const EdgeInsets.all(8), 
             decoration: BoxDecoration(color: Colors.white.withAlpha(180), shape: BoxShape.circle),

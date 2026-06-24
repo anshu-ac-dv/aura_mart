@@ -1,12 +1,17 @@
-import 'package:aura_mart/core_services/cart_service.dart';
-import 'package:aura_mart/core_services/product_service.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';
+import 'package:aura_mart/features/products/domain/entities/product_entity.dart';
+import 'package:aura_mart/features/products/presentation/bloc/product_bloc.dart';
+import 'package:aura_mart/features/products/presentation/bloc/product_event.dart';
+import 'package:aura_mart/features/products/presentation/bloc/product_state.dart';
 import 'package:aura_mart/screens/products/product_details_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class CategoryProductsScreen extends StatelessWidget {
+class CategoryProductsScreen extends StatefulWidget {
   final String categoryName;
   final Color categoryColor;
 
@@ -17,14 +22,25 @@ class CategoryProductsScreen extends StatelessWidget {
   });
 
   @override
+  State<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
+}
+
+class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ProductBloc>().add(ProductsByCategoryRequested(widget.categoryName));
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.grey[50],
       appBar: AppBar(
-        title: Text(categoryName, style: const TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: categoryColor,
+        title: Text(widget.categoryName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: widget.categoryColor,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -35,7 +51,7 @@ class CategoryProductsScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(25),
             decoration: BoxDecoration(
-              color: categoryColor,
+              color: widget.categoryColor,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(40),
                 bottomRight: Radius.circular(40),
@@ -45,7 +61,7 @@ class CategoryProductsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Best of $categoryName',
+                  'Best of ${widget.categoryName}',
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 5),
@@ -59,14 +75,13 @@ class CategoryProductsScreen extends StatelessWidget {
 
           // Products Grid
           Expanded(
-            child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: ProductService.getProductsByCategoryStream(categoryName),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                if (state is ProductLoading) {
                   return const Center(child: CircularProgressIndicator(color: Colors.deepPurple));
                 }
 
-                final products = snapshot.data ?? [];
+                final products = state is ProductLoaded ? state.products : [];
 
                 if (products.isEmpty) {
                   return Center(
@@ -104,9 +119,20 @@ class CategoryProductsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(BuildContext context, Map<String, dynamic> product, bool isDarkMode) {
+  Widget _buildProductCard(BuildContext context, ProductEntity product, bool isDarkMode) {
+    final pMap = {
+      'id': product.id,
+      'name': product.name,
+      'price': product.price,
+      'image': product.image,
+      'category': product.category,
+      'description': product.description,
+      'sellerId': product.sellerId,
+      'sellerName': product.sellerName,
+    };
+
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product))),
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: pMap))),
       child: Container(
         decoration: BoxDecoration(
           color: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -128,9 +154,9 @@ class CategoryProductsScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
                     child: Hero(
-                      tag: 'prod_${product['id']}',
+                      tag: 'prod_${product.id}',
                       child: CachedNetworkImage(
-                        imageUrl: product['image']!.toString(),
+                        imageUrl: product.image,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: double.infinity,
@@ -143,7 +169,7 @@ class CategoryProductsScreen extends StatelessWidget {
                     top: 10,
                     right: 10,
                     child: StreamBuilder<bool>(
-                      stream: AuraWishlistService.isInWishlistStream(product),
+                      stream: AuraWishlistService.isInWishlistStream(pMap),
                       builder: (context, snapshot) {
                         bool isFav = snapshot.data ?? false;
                         return CircleAvatar(
@@ -153,7 +179,7 @@ class CategoryProductsScreen extends StatelessWidget {
                             padding: EdgeInsets.zero,
                             icon: Icon(isFav ? Icons.favorite : Icons.favorite_border, size: 18, color: Colors.red),
                             onPressed: () async {
-                              await AuraWishlistService.toggleWishlist(product);
+                              await AuraWishlistService.toggleWishlist(pMap);
                               Fluttertoast.showToast(msg: isFav ? "Removed from Wishlist" : "Added to Wishlist");
                             },
                           ),
@@ -170,7 +196,7 @@ class CategoryProductsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product['name']!,
+                    product.name,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -184,23 +210,19 @@ class CategoryProductsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "\$${product['price']!}",
+                        "\$${product.price}",
                         style: TextStyle(
-                          color: categoryColor,
+                          color: widget.categoryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       InkWell(
-                        onTap: () async {
-                          try {
-                            await AuraCartService.addToCart(product);
-                            Fluttertoast.showToast(msg: "Added to Bag");
-                          } catch (e) {
-                            Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
-                          }
+                        onTap: () {
+                          context.read<CartBloc>().add(CartItemAdded(pMap));
+                          Fluttertoast.showToast(msg: "Added to Bag");
                         },
-                        child: Icon(Icons.add_shopping_cart, color: categoryColor, size: 20),
+                        child: Icon(Icons.add_shopping_cart, color: widget.categoryColor, size: 20),
                       ),
                     ],
                   ),

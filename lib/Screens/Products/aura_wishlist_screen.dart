@@ -1,7 +1,10 @@
 import 'package:aura_mart/core_services/cart_service.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';
 // Using relative imports for reliability
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:lottie/lottie.dart';
@@ -92,7 +95,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       if (items.isEmpty) return;
                       
                       try {
-                        await AuraCartService.addAllToCart(items);
+                        // Move each item to cart via bloc
+                        for (var item in items) {
+                          context.read<CartBloc>().add(CartItemAdded(item));
+                        }
                         await AuraWishlistService.clearWishlist();
                         Fluttertoast.showToast(msg: "All items moved to cart!");
                       } catch (e) {
@@ -219,13 +225,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   width: double.infinity,
                   height: 35,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        await AuraCartService.addToCart(product);
-                        Fluttertoast.showToast(msg: "Added to Bag");
-                      } catch (e) {
-                        Fluttertoast.showToast(msg: e.toString().replaceAll("Exception: ", ""));
-                      }
+                    onPressed: () {
+                      context.read<CartBloc>().add(CartItemAdded(product));
+                      Fluttertoast.showToast(msg: "Added to Bag");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple,

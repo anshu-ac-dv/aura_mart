@@ -1,11 +1,26 @@
-import 'package:aura_mart/core_services/order_service.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:aura_mart/features/orders/domain/entities/order_entity.dart';
+import 'package:aura_mart/features/orders/presentation/bloc/order_bloc.dart';
+import 'package:aura_mart/features/orders/presentation/bloc/order_event.dart';
+import 'package:aura_mart/features/orders/presentation/bloc/order_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-class MyOrdersScreen extends StatelessWidget {
+class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
+
+  @override
+  State<MyOrdersScreen> createState() => _MyOrdersScreenState();
+}
+
+class _MyOrdersScreenState extends State<MyOrdersScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<OrderBloc>().add(OrderStarted());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +31,17 @@ class MyOrdersScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Orders'),
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: OrderService.ordersStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: BlocBuilder<OrderBloc, OrderState>(
+        builder: (context, state) {
+          if (state is OrderLoading) {
             return const Center(child: CircularProgressIndicator(color: Colors.deepPurple));
           }
 
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}", style: const TextStyle(color: Colors.red)));
+          if (state is OrderError) {
+            return Center(child: Text("Error: ${state.message}", style: const TextStyle(color: Colors.red)));
           }
 
-          final orders = snapshot.data ?? [];
+          final orders = state is OrderLoaded ? state.orders : [];
 
           if (orders.isEmpty) {
             return _buildEmptyState(isDarkMode);
@@ -47,18 +61,14 @@ class MyOrdersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderCard(BuildContext context, Map<String, dynamic> order, bool isDarkMode) {
-    // Safely handling the date conversion from Firestore Timestamp
+  Widget _buildOrderCard(BuildContext context, OrderEntity order, bool isDarkMode) {
     DateTime date = DateTime.now();
-    if (order['orderDate'] != null) {
-      if (order['orderDate'] is Timestamp) {
-        date = (order['orderDate'] as Timestamp).toDate();
-      } else if (order['orderDate'] is DateTime) {
-        date = order['orderDate'];
+    if (order.orderDate != null) {
+      if (order.orderDate is Timestamp) {
+        date = (order.orderDate as Timestamp).toDate();
+      } else if (order.orderDate is DateTime) {
+        date = order.orderDate;
       }
-    } else if (order['localTimestamp'] != null) {
-      // Fallback to local timestamp if serverTimestamp hasn't resolved yet
-      date = DateTime.tryParse(order['localTimestamp']) ?? DateTime.now();
     }
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(date);
 
@@ -82,7 +92,7 @@ class MyOrdersScreen extends StatelessWidget {
           iconColor: Colors.deepPurple,
           collapsedIconColor: Colors.grey,
           title: Text(
-            "Order #${order['orderId']}",
+            "Order #${order.orderId}",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: isDarkMode ? Colors.white : Colors.black,
@@ -103,13 +113,13 @@ class MyOrdersScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      order['status'] ?? 'Processing',
+                      order.status,
                       style: const TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ),
                   const Spacer(),
                   Text(
-                    "\$${order['totalAmount']}",
+                    "\$${order.totalAmount}",
                     style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ],
@@ -134,7 +144,7 @@ class MyOrdersScreen extends StatelessWidget {
               ),
             ),
             const Divider(indent: 20, endIndent: 20),
-            ...(order['items'] as List? ?? []).map((item) {
+            ...order.items.map((item) {
               return ListTile(
                 leading: Container(
                   width: 40,
@@ -145,9 +155,9 @@ class MyOrdersScreen extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: item['image'] != null && item['image'] != ''
+                    child: item.image != ''
                         ? CachedNetworkImage(
-                            imageUrl: item['image'],
+                            imageUrl: item.image,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
                             errorWidget: (context, url, error) => const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
@@ -155,8 +165,8 @@ class MyOrdersScreen extends StatelessWidget {
                         : const Icon(Icons.shopping_bag, color: Colors.deepPurple, size: 20),
                   ),
                 ),
-                title: Text(item['name'] ?? 'Unknown Item', style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white : Colors.black)),
-                trailing: Text("x${item['qty'] ?? 1}", style: const TextStyle(color: Colors.grey)),
+                title: Text(item.name, style: TextStyle(fontSize: 14, color: isDarkMode ? Colors.white : Colors.black)),
+                trailing: Text("x${item.qty}", style: const TextStyle(color: Colors.grey)),
               );
             }),
             const SizedBox(height: 10),

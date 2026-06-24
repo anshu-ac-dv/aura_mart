@@ -1,6 +1,10 @@
 import 'package:aura_mart/core_services/cart_service.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';
+import 'package:aura_mart/widgets/aura_animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:ui';
@@ -98,36 +102,48 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     Center(child: Container(width: 40, height: 5, decoration: BoxDecoration(color: Colors.grey.withAlpha(100), borderRadius: BorderRadius.circular(10)))),
                     const SizedBox(height: 25),
                     
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("\$${product['price']}", style: TextStyle(color: primaryColor, fontSize: 28, fontWeight: FontWeight.w900)),
-                        Row(
-                          children: [
-                            const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                            const SizedBox(width: 5),
-                            Text("4.8 (120 reviews)", style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white70 : Colors.black87, fontSize: 12)),
-                          ],
-                        ),
-                      ],
+                    FadeInAnimation(
+                      delay: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("\$${product['price']}", style: TextStyle(color: primaryColor, fontSize: 28, fontWeight: FontWeight.w900)),
+                          Row(
+                            children: [
+                              const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
+                              const SizedBox(width: 5),
+                              Text("4.8 (120 reviews)", style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white70 : Colors.black87, fontSize: 12)),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 15),
-                    Text(product['name'] ?? 'Premium Product', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    FadeInAnimation(
+                      delay: 200,
+                      child: Text(product['name'] ?? 'Premium Product', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    ),
                     const SizedBox(height: 10),
-                    Text(
-                      product['description'] ?? "Experience premium quality with this carefully curated selection from Aura Mart. Designed for those who appreciate fine craftsmanship and modern aesthetics.", 
-                      style: TextStyle(color: isDarkMode ? Colors.white60 : Colors.grey[600], height: 1.6, fontSize: 14),
+                    FadeInAnimation(
+                      delay: 300,
+                      child: Text(
+                        product['description'] ?? "Experience premium quality with this carefully curated selection from Aura Mart. Designed for those who appreciate fine craftsmanship and modern aesthetics.", 
+                        style: TextStyle(color: isDarkMode ? Colors.white60 : Colors.grey[600], height: 1.6, fontSize: 14),
+                      ),
                     ),
                     
                     const SizedBox(height: 30),
-                    Row(
-                      children: [
-                        const Text("Quantity", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        const Spacer(),
-                        _buildQtyBtn(Icons.remove, () { if (_quantity > 1) setState(() => _quantity--); }, isDarkMode),
-                        Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text("$_quantity", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
-                        _buildQtyBtn(Icons.add, () { setState(() => _quantity++); }, isDarkMode),
-                      ],
+                    FadeInAnimation(
+                      delay: 400,
+                      child: Row(
+                        children: [
+                          const Text("Quantity", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          const Spacer(),
+                          _buildQtyBtn(Icons.remove, () { if (_quantity > 1) setState(() => _quantity--); }, isDarkMode),
+                          Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text("$_quantity", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+                          _buildQtyBtn(Icons.add, () { setState(() => _quantity++); }, isDarkMode),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 150),
                   ],
@@ -139,29 +155,28 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           // Bottom Navigation
           Positioned(
             bottom: 0, left: 0, right: 0,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(30, 20, 30, 40),
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor, 
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 20, offset: const Offset(0, -5))
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await AuraCartService.addToCart(product, quantity: _quantity);
-                    Fluttertoast.showToast(msg: "Added to Bag");
-                  } catch (e) {
-                    Fluttertoast.showToast(msg: "Failed to add to cart");
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 60),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: ScaleInAnimation(
+              delay: 500,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(30, 20, 30, 40),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor, 
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 20, offset: const Offset(0, -5))
+                  ],
                 ),
-                child: const Text("ADD TO BAG", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.read<CartBloc>().add(CartItemAdded(product, quantity: _quantity));
+                    Fluttertoast.showToast(msg: "Added to Bag");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                  child: const Text("ADD TO BAG", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                ),
               ),
             ),
           ),

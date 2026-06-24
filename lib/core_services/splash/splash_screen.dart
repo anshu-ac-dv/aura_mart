@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:aura_mart/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:aura_mart/features/auth/presentation/bloc/auth_state.dart';
 import 'package:aura_mart/screens/home_screen.dart';
 import 'package:aura_mart/screens/login_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -63,18 +65,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     );
 
     _mainController.forward();
-    _checkUserStatus();
+    _navigateToNext();
   }
 
-  void _checkUserStatus() {
-    final user = FirebaseAuth.instance.currentUser;
+  void _navigateToNext() {
     Timer(const Duration(milliseconds: 4500), () {
       if (mounted) {
+        final authState = context.read<AuthBloc>().state;
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 1500),
-            pageBuilder: (context, a1, a2) => user != null ? const HomeScreen() : const LoginScreen(),
+            pageBuilder: (context, a1, a2) => authState is Authenticated ? const HomeScreen() : const LoginScreen(),
             transitionsBuilder: (context, a1, a2, child) => FadeTransition(opacity: a1, child: child),
           ),
         );
@@ -139,9 +141,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              primaryColor.withValues(alpha: 0.5),
+                              primaryColor.withAlpha(128),
                               primaryColor,
-                              primaryColor.withValues(alpha: 0.5),
+                              primaryColor.withAlpha(128),
                               Colors.transparent,
                             ],
                           ),
@@ -199,7 +201,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                             width: 120 * _mainController.value,
                             height: 2,
                             decoration: BoxDecoration(
-                              color: primaryColor.withValues(alpha: 0.6),
+                              color: primaryColor.withAlpha(153),
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),
@@ -227,7 +229,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           shape: BoxShape.circle,
           gradient: RadialGradient(
             colors: [
-              Colors.deepPurple.withValues(alpha: (isDarkMode ? 0.15 : 0.08) * _glowOpacity.value),
+              Colors.deepPurple.withAlpha(( (isDarkMode ? 0.15 : 0.08) * _glowOpacity.value * 255).toInt()),
               Colors.transparent,
             ],
           ),
