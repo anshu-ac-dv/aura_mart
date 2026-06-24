@@ -1,4 +1,3 @@
-import 'package:aura_mart/core_services/cart_service.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
 import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';

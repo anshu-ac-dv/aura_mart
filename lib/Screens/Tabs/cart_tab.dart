@@ -227,7 +227,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       }).toList();
       
       await OrderService.createOrder(itemsMap, total, _selectedPaymentMethodValue!);
-      if (!mounted) return;
+      if (!context.mounted) return;
       context.read<CartBloc>().add(CartCleared());
       _onOrderSuccess();
     } catch (e) {
@@ -267,7 +267,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                   }).toList();
                   
                   await OrderService.createOrder(itemsMap, total, "Cash on Delivery");
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   context.read<CartBloc>().add(CartCleared());
                   _onOrderSuccess();
                 } catch (e) {

@@ -1,5 +1,4 @@
 import 'package:aura_mart/features/cart/domain/entities/cart_item.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CartItemModel extends CartItem {
   const CartItemModel({

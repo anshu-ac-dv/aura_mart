@@ -48,7 +48,7 @@ class _ProfileTabState extends State<ProfileTab> {
             onPressed: () async {
               try {
                 await user?.updateDisplayName(nameController.text.trim());
-                if (mounted) {
+                if (context.mounted) {
                   Navigator.pop(context);
                   setState(() {}); // Refresh UI
                   Fluttertoast.showToast(msg: "Profile updated");
