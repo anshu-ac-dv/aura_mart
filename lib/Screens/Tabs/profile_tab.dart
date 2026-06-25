@@ -1,4 +1,5 @@
 import 'package:aura_mart/core_services/order_service.dart';
+import 'package:aura_mart/core_services/product_service.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
 import 'package:aura_mart/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:aura_mart/features/auth/presentation/bloc/auth_event.dart';
@@ -154,7 +155,13 @@ class _ProfileTabState extends State<ProfileTab> {
                                 return _buildStatCard(count.toString(), "WISHLIST", isDarkMode, primaryColor);
                               }
                             ),
-                            _buildStatCard("2", "OFFERS", isDarkMode, primaryColor),
+                            StreamBuilder<List<Map<String, dynamic>>>(
+                              stream: ProductService.sellerProductsStream,
+                              builder: (context, snapshot) {
+                                final count = snapshot.data?.length ?? 0;
+                                return _buildStatCard(count.toString(), "LISTINGS", isDarkMode, primaryColor);
+                              }
+                            ),
                           ],
                         ),
                         
@@ -174,6 +181,7 @@ class _ProfileTabState extends State<ProfileTab> {
                           _buildMenuOption(context, Icons.payment_outlined, 'Payment Methods', isDarkMode, onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodsScreen()));
                           }),
+                          _buildMenuOption(context, Icons.rate_review_outlined, 'Product Reviews', isDarkMode, onTap: () {}),
                         ], isDarkMode),
 
                         const SizedBox(height: 25),
@@ -181,6 +189,27 @@ class _ProfileTabState extends State<ProfileTab> {
                         _buildMenuSection("SELLER CENTER", [
                           _buildMenuOption(context, Icons.storefront_outlined, 'Seller Hub - List Items', isDarkMode, color: Colors.blueAccent, onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const AddProductScreen()));
+                          }),
+                          _buildMenuOption(context, Icons.list_alt_rounded, 'Manage My Listings', isDarkMode, onTap: () {}),
+                          _buildMenuOption(context, Icons.science_outlined, 'Seed Sample Data (Dev)', isDarkMode, color: Colors.amber, onTap: () async {
+                            try {
+                              await ProductService.seedSampleProducts();
+                              await OrderService.seedSampleOrders();
+                              
+                              // Seed a wishlist item
+                              await AuraWishlistService.toggleWishlist({
+                                'id': 'seed_headphones',
+                                'name': 'Aura Studio Headphones',
+                                'price': 299.0,
+                                'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=500',
+                                'category': 'Electronics',
+                                'description': 'High-fidelity audio with active noise cancellation.',
+                              });
+                              
+                              Fluttertoast.showToast(msg: "Sample products, orders, and wishlist seeded!");
+                            } catch (e) {
+                              Fluttertoast.showToast(msg: "Seeding failed: $e");
+                            }
                           }),
                         ], isDarkMode),
 

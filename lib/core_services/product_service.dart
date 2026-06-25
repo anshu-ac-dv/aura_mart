@@ -65,4 +65,41 @@ class ProductService {
   static Future<void> deleteProduct(String productId) async {
     await _products.doc(productId).delete();
   }
+
+  static Future<void> seedSampleProducts() async {
+    final samples = [
+      {
+        'name': 'Aura Studio Headphones',
+        'price': 299.0,
+        'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=500',
+        'description': 'High-fidelity audio with active noise cancellation and premium comfort.',
+        'category': 'Electronics',
+      },
+      {
+        'name': 'Midnight Running Shoes',
+        'price': 120.0,
+        'image': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=500',
+        'description': 'Engineered for speed and comfort with advanced cushioning technology.',
+        'category': 'Fashion',
+      },
+      {
+        'name': 'Minimalist Oak Desk',
+        'price': 450.0,
+        'image': 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?q=80&w=500',
+        'description': 'Handcrafted solid oak desk with a sleek design for modern workspaces.',
+        'category': 'Home',
+      },
+      {
+        'name': 'Silk Glow Face Serum',
+        'price': 55.0,
+        'image': 'https://images.unsplash.com/photo-1594465919760-441fe5908ab0?q=80&w=500',
+        'description': 'Revitalize your skin with our organic botanical serum for a natural glow.',
+        'category': 'Beauty',
+      },
+    ];
+
+    for (var product in samples) {
+      await addProduct(product);
+    }
+  }
 }

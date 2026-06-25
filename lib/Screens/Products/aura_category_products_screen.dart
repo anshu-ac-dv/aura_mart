@@ -222,7 +222,14 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                           context.read<CartBloc>().add(CartItemAdded(pMap));
                           Fluttertoast.showToast(msg: "Added to Bag");
                         },
-                        child: Icon(Icons.add_shopping_cart, color: widget.categoryColor, size: 20),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: widget.categoryColor.withAlpha(20),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.add_shopping_cart, color: widget.categoryColor, size: 22),
+                        ),
                       ),
                     ],
                   ),

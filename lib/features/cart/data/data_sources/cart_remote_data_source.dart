@@ -36,14 +36,9 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
 
     final model = CartItemModel.fromJson(product, docId);
 
-    bool exists = false;
-    try {
-      final doc = await docRef.get(const GetOptions(source: Source.cache));
-      exists = doc.exists;
-    } catch (e) {
-      final doc = await docRef.get();
-      exists = doc.exists;
-    }
+    // Optimized check: Use default get() which handles cache/server automatically
+    final doc = await docRef.get();
+    final exists = doc.exists;
 
     if (exists) {
       await docRef.update({

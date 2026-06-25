@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is Authenticated) {
+          if (state is Authenticated || state is Unauthenticated) {
             context.read<CartBloc>().add(CartStarted());
           }
         },

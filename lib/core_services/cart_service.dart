@@ -1,15 +1,12 @@
-import 'package:aura_mart/features/cart/data/data_sources/cart_remote_data_source.dart';
-import 'package:aura_mart/features/cart/data/repositories/cart_repository_impl.dart';
 import 'package:aura_mart/features/cart/domain/entities/cart_item.dart';
 import 'package:aura_mart/features/cart/domain/repositories/cart_repository.dart';
+import 'package:aura_mart/injection_container.dart' as di;
 import 'package:flutter/foundation.dart';
 
 /// AuraCartService now acts as a Service Locator / Bridge to the Clean Architecture implementation.
 /// This maintains backward compatibility with the existing UI calls.
 class AuraCartService {
-  static final CartRepository _repository = CartRepositoryImpl(
-    remoteDataSource: CartRemoteDataSourceImpl(),
-  );
+  static CartRepository get _repository => di.sl<CartRepository>();
 
   static Future<void> addToCart(Map<String, dynamic> product, {int quantity = 1}) async {
     try {

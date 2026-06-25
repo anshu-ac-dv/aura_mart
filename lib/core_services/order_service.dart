@@ -44,6 +44,20 @@ class OrderService {
     });
   }
 
+  static Future<void> seedSampleOrders() async {
+    final List<Map<String, dynamic>> items = [
+      {
+        'id': 'sample_1',
+        'name': 'Aura Studio Headphones',
+        'price': 299.0,
+        'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=500',
+        'qty': 1,
+        'category': 'Electronics',
+      }
+    ];
+    await createOrder(items, 299.0, "Sample Payment");
+  }
+
   // Stream of all orders for real-time UI
   static Stream<List<Map<String, dynamic>>> get ordersStream {
     final orders = _userOrders;

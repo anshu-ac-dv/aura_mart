@@ -1,9 +1,11 @@
-import 'package:aura_mart/core_services/cart_service.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
+import 'package:aura_mart/features/cart/presentation/bloc/cart_state.dart';
 import 'package:aura_mart/screens/tabs/cart_tab.dart';
 import 'package:aura_mart/screens/tabs/category_tab.dart';
 import 'package:aura_mart/screens/tabs/dashboard_tab.dart';
 import 'package:aura_mart/screens/tabs/profile_tab.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -96,10 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           size: isSmallScreen ? 22 : 26,
                         ),
                         if (index == 2) // Cart Index
-                          StreamBuilder<List<Map<String, dynamic>>>(
-                            stream: AuraCartService.cartStream,
-                            builder: (context, snapshot) {
-                              final count = snapshot.data?.length ?? 0;
+                          BlocBuilder<CartBloc, CartState>(
+                            builder: (context, state) {
+                              final count = state is CartLoaded ? state.items.length : 0;
                               if (count == 0) return const SizedBox.shrink();
                               return Positioned(
                                 right: -4,
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               );
-                            }
+                            },
                           ),
                       ],
                     ),

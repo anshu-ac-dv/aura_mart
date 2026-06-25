@@ -449,9 +449,13 @@ class _DashboardTabState extends State<DashboardTab> {
                     Fluttertoast.showToast(msg: "Added to Bag");
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)]),
-                    child: Icon(Icons.add_shopping_cart_rounded, size: 16, color: Theme.of(context).primaryColor),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white, 
+                      shape: BoxShape.circle, 
+                      boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, 2))]
+                    ),
+                    child: Icon(Icons.add_shopping_cart_rounded, size: 20, color: Theme.of(context).primaryColor),
                   ),
                 )
               ),
