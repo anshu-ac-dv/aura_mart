@@ -31,6 +31,18 @@
 - 📉 **Offline Resilience**: Instant launch and data access via optimized Firestore persistence.
 
 ---
+---
+
+## 📥 Download & Demo
+<p align="center">
+  <a href="https://github.com/anshu-ac-dv/aura_mart/releases/latest">
+    <img src="https://img.shields.io/badge/Download-APK-0078D4?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
+  </a>
+</p>
+
+> **Note for HR:** The latest production-ready APK is available for download via the link above to facilitate application verification and manual testing on physical devices.
+
+---
 
 ## 🗺️ Optimized User Journey
 
