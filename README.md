@@ -31,7 +31,6 @@
 - 📉 **Offline Resilience**: Instant launch and data access via optimized Firestore persistence.
 
 ---
----
 
 ## 📥 Download & Demo
 <p align="center">
@@ -40,7 +39,7 @@
   </a>
 </p>
 
-> **Note for HR:** The latest production-ready APK is available for download via the link above to facilitate application verification and manual testing on physical devices.
+> **Note :** The latest production-ready APK is available for download via the link above to facilitate application verification and manual testing on physical devices.
 
 ---
 
