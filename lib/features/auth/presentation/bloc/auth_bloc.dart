@@ -16,9 +16,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     _userSubscription = authRepository.userStream.listen((user) {
       if (user != null) {
-        add(AuthCheckRequested()); // Re-check or just emit Authenticated
+        if (state is! Authenticated) {
+          add(AuthCheckRequested());
+        }
       } else {
-        add(SignOutRequested());
+        if (state is! Unauthenticated && state is! AuthInitial) {
+          add(SignOutRequested());
+        }
       }
     });
   }

@@ -32,6 +32,32 @@
 
 ---
 
+## 🛠️ Technical Excellence
+
+- **State Management**: Orchestrated by **BLoC (Business Logic Component)** for a predictable, unidirectional data flow and testable architecture.
+- **Dependency Injection**: Powered by **GetIt**, ensuring a decoupled and maintainable codebase through a robust service locator pattern.
+- **Clean Architecture**: Follows Domain-Driven Design (DDD) principles with clear separation between Data, Domain, and Presentation layers.
+- **Performance Optimized**: 
+  - Implementation of `RepaintBoundary` to isolate widget repaints and optimize the GPU rendering pipeline.
+  - Efficient image caching via `CachedNetworkImage` to reduce network overhead.
+  - Staggered animations using custom `AnimationControllers` for a premium feel without dropping frames.
+
+## 📂 Project Structure
+
+```text
+lib/
+├── core_services/    # Cross-cutting concerns (Theme, Splash, Common Logic)
+├── features/         # Modular feature sets (Auth, Cart, Orders, Products)
+│   ├── data/         # Repositories & Data Sources implementation
+│   ├── domain/       # Business entities & Repository interfaces
+│   └── presentation/ # BLoC, Widgets, and Feature-specific screens
+├── screens/          # Primary UI entry points and Hubs
+├── widgets/          # Reusable Aura UI components
+└── main.dart         # App entry point & Provider configuration
+```
+
+---
+
 ## 📥 Download & Demo
 <p align="center">
   <a href="https://github.com/anshu-ac-dv/aura_mart/releases/latest">
