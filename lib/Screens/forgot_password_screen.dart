@@ -1,7 +1,7 @@
+import 'package:aura_mart/widgets/aura_animations.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:lottie/lottie.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -42,57 +42,109 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Reset Password'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(30.0),
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            Lottie.network(
-              'https://lottie.host/825f3c1b-254c-4293-9c86-163e7c88b0f9/H5Tz89Z2fA.json', // Modern Security
-              height: 200,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.lock_reset_rounded, size: 100, color: Colors.deepPurple),
+            // --- VIBRANT HEADER ---
+            Stack(
+              children: [
+                Container(
+                  height: size.height * 0.25,
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(50),
+                      bottomRight: Radius.circular(50),
+                    ),
+                  ),
+                ),
+                Positioned.fill(
+                  child: FadeInAnimation(
+                    delay: 200,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.lock_reset_rounded,
+                          size: 60,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Reset Password',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 30),
-            Text(
-              'Recover Account',
-              style: TextStyle(
-                fontSize: 28, 
-                fontWeight: FontWeight.w900, 
-                color: isDarkMode ? Colors.white : Colors.deepPurple.shade800
+
+            // --- OVERLAPPING CARD ---
+            Transform.translate(
+              offset: const Offset(0, -30),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: FadeInAnimation(
+                  delay: 400,
+                  child: Container(
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: isDarkMode ? Colors.grey.shade900 : Colors.white,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(isDarkMode ? 50 : 20),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          'Enter your email to receive a password reset link.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                        const SizedBox(height: 30),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            labelText: 'Email Address',
+                            prefixIcon: Icon(Icons.email_outlined),
+                          ),
+                        ),
+                        const SizedBox(height: 35),
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : _resetPassword,
+                          child: _isLoading
+                              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Text('SEND RESET LINK'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Enter your registered email below to receive a secure password reset link.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: isDarkMode ? Colors.white70 : Colors.grey.shade600, fontSize: 16),
-            ),
-            const SizedBox(height: 50),
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-              decoration: const InputDecoration(
-                labelText: 'Email Address',
-                prefixIcon: Icon(Icons.email_outlined),
-              ),
-            ),
-            const SizedBox(height: 40),
-            ElevatedButton(
-              onPressed: _isLoading ? null : _resetPassword,
-              child: _isLoading
-                  ? const SizedBox(height: 25, width: 25, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                  : const Text('SEND RESET LINK', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
             ),
           ],
         ),

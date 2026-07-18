@@ -3,6 +3,7 @@ import 'package:aura_mart/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:aura_mart/features/auth/presentation/bloc/auth_state.dart';
 import 'package:aura_mart/screens/home_screen.dart';
 import 'package:aura_mart/screens/login_screen.dart';
+import 'package:aura_mart/widgets/aura_animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,71 +14,21 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
-  late AnimationController _mainController;
-  late AnimationController _pulseController;
-  
-  late Animation<double> _logoFade;
-  late Animation<double> _logoScale;
-  late Animation<double> _letterSpacing;
-  late Animation<double> _subtitleFade;
-  late Animation<double> _linePadding;
-  late Animation<double> _glowOpacity;
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    
-    // Main entrance sequence
-    _mainController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2500),
-    );
-
-    // Continuous pulse for background
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
-
-    _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _mainController, curve: const Interval(0.0, 0.4, curve: Curves.easeIn)),
-    );
-
-    _logoScale = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _mainController, curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack)),
-    );
-
-    _letterSpacing = Tween<double>(begin: 40.0, end: 20.0).animate(
-      CurvedAnimation(parent: _mainController, curve: const Interval(0.2, 0.7, curve: Curves.easeOutQuart)),
-    );
-
-    _subtitleFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _mainController, curve: const Interval(0.6, 0.9, curve: Curves.easeIn)),
-    );
-
-    _linePadding = Tween<double>(begin: 100.0, end: 0.0).animate(
-      CurvedAnimation(parent: _mainController, curve: const Interval(0.4, 0.8, curve: Curves.easeInOut)),
-    );
-
-    _glowOpacity = Tween<double>(begin: 0.2, end: 0.6).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
-    _mainController.forward();
     _navigateToNext();
   }
 
   void _navigateToNext() {
-    Timer(const Duration(milliseconds: 4500), () {
+    Timer(const Duration(seconds: 3), () {
       if (mounted) {
         final authState = context.read<AuthBloc>().state;
         Navigator.pushReplacement(
           context,
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 1500),
-            pageBuilder: (context, a1, a2) => authState is Authenticated ? const HomeScreen() : const LoginScreen(),
-            transitionsBuilder: (context, a1, a2, child) => FadeTransition(opacity: a1, child: child),
+          MaterialPageRoute(
+            builder: (context) => authState is Authenticated ? const HomeScreen() : const LoginScreen(),
           ),
         );
       }
@@ -85,152 +36,51 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   @override
-  void dispose() {
-    _mainController.dispose();
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDarkMode ? Colors.deepPurpleAccent : Colors.deepPurple;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF08080A) : const Color(0xFFFBFBFF),
-      body: AnimatedBuilder(
-        animation: Listenable.merge([_mainController, _pulseController]),
-        builder: (context, child) {
-          return Stack(
-            alignment: Alignment.center,
+      backgroundColor: theme.primaryColor,
+      body: Center(
+        child: FadeInAnimation(
+          delay: 300,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Dynamic Background Glows
-              _buildAmbientGlow(isDarkMode, -150, -100, 400 * _pulseController.value),
-              _buildAmbientGlow(isDarkMode, 150, 200, 300 * (1 - _pulseController.value)),
-              
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Main Logo: AURA
-                    Opacity(
-                      opacity: _logoFade.value,
-                      child: Transform.scale(
-                        scale: _logoScale.value,
-                        child: Text(
-                          'AURA',
-                          style: TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.w200,
-                            letterSpacing: _letterSpacing.value,
-                            color: isDarkMode ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Animated Decorative Line
-                    Container(
-                      width: 240,
-                      height: 1.5,
-                      padding: EdgeInsets.symmetric(horizontal: _linePadding.value),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              primaryColor.withAlpha(128),
-                              primaryColor,
-                              primaryColor.withAlpha(128),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 12),
-                    
-                    // Subtitle: MART
-                    Opacity(
-                      opacity: _subtitleFade.value,
-                      child: Text(
-                        'MART',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 12,
-                          color: primaryColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Bottom Slogan
-              Positioned(
-                bottom: 80,
-                child: Opacity(
-                  opacity: _subtitleFade.value * 0.5,
-                  child: Column(
-                    children: [
-                      Text(
-                        'REDEFINING COMMERCE',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 4,
-                          color: isDarkMode ? Colors.white38 : Colors.black38,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      // Subtle Loading Bar
-                      Container(
-                        width: 120,
-                        height: 2,
-                        decoration: BoxDecoration(
-                          color: isDarkMode ? Colors.white10 : Colors.black12,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: 120 * _mainController.value,
-                            height: 2,
-                            decoration: BoxDecoration(
-                              color: primaryColor.withAlpha(153),
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+              ScaleInAnimation(
+                delay: 500,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.shopping_bag_rounded,
+                    size: 60,
+                    color: theme.primaryColor,
                   ),
                 ),
               ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildAmbientGlow(bool isDarkMode, double x, double y, double size) {
-    return Positioned(
-      left: x + (MediaQuery.of(context).size.width / 2) - (size / 2),
-      top: y + (MediaQuery.of(context).size.height / 2) - (size / 2),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              Colors.deepPurple.withAlpha(( (isDarkMode ? 0.15 : 0.08) * _glowOpacity.value * 255).toInt()),
-              Colors.transparent,
+              const SizedBox(height: 25),
+              const Text(
+                'Aura Mart',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Quality at your doorstep',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white.withAlpha(200),
+                  letterSpacing: 1.2,
+                ),
+              ),
             ],
           ),
         ),

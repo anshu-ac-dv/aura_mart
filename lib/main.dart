@@ -17,16 +17,14 @@ import 'injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   // Initialize dependency injection
   await di.init();
-  
+
   // Initialize persistent theme
   await ThemeService.instance.init();
-  
+
   // Enable offline persistence for Firestore with platform-specific handling
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
@@ -52,9 +50,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<ProductBloc>(
           create: (context) => di.sl<ProductBloc>()..add(ProductsFetched()),
         ),
-        BlocProvider<OrderBloc>(
-          create: (context) => di.sl<OrderBloc>(),
-        ),
+        BlocProvider<OrderBloc>(create: (context) => di.sl<OrderBloc>()),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
@@ -72,96 +68,80 @@ class MyApp extends StatelessWidget {
               theme: ThemeData(
                 useMaterial3: true,
                 colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.deepPurple,
-                  primary: Colors.deepPurple,
-                  secondary: Colors.indigo,
-                  surface: const Color(0xFFF8F9FE), // Main background
-                  surfaceContainerHighest: const Color(0xFFF0F2F8), // Subtle secondary background
+                  seedColor: Colors.indigo,
+                  primary: Colors.indigo,
+                  secondary: Colors.blueGrey,
                   brightness: Brightness.light,
                 ),
                 pageTransitionsTheme: const PageTransitionsTheme(
                   builders: {
-                    TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                    TargetPlatform.android: ZoomPageTransitionsBuilder(),
                     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
                   },
                 ),
-                scaffoldBackgroundColor: const Color(0xFFF8F9FE),
+                scaffoldBackgroundColor: Colors.white,
                 appBarTheme: const AppBarTheme(
                   centerTitle: true,
-                  backgroundColor: Color(0xFFF8F9FE),
-                  foregroundColor: Colors.black87,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
                   elevation: 0,
-                  iconTheme: IconThemeData(color: Colors.black87),
-                  titleTextStyle: TextStyle(
-                    color: Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  iconTheme: IconThemeData(color: Colors.black),
                 ),
                 elevatedButtonTheme: ElevatedButtonThemeData(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: Colors.indigo,
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 55),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    elevation: 2,
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
                 inputDecorationTheme: InputDecorationTheme(
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Colors.grey.shade100,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.indigo, width: 1.5),
                   ),
-                  prefixIconColor: Colors.deepPurple,
-                  suffixIconColor: Colors.deepPurple,
-                  labelStyle: const TextStyle(color: Colors.grey),
                 ),
               ),
               darkTheme: ThemeData(
                 useMaterial3: true,
                 colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.deepPurple,
-                  primary: Colors.deepPurple,
-                  secondary: Colors.indigo,
+                  seedColor: Colors.indigo,
+                  primary: Colors.indigo,
                   brightness: Brightness.dark,
                 ),
-                scaffoldBackgroundColor: Colors.black,
                 elevatedButtonTheme: ElevatedButtonThemeData(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: Colors.indigo,
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 55),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    minimumSize: const Size(double.infinity, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
                 inputDecorationTheme: InputDecorationTheme(
                   filled: true,
-                  fillColor: Colors.grey[900],
+                  fillColor: Colors.white10,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.indigo, width: 1.5),
                   ),
-                  prefixIconColor: Colors.deepPurple,
-                  suffixIconColor: Colors.deepPurple,
-                  labelStyle: const TextStyle(color: Colors.grey),
                 ),
               ),
               home: const SplashScreen(),
