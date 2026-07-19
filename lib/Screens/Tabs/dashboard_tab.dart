@@ -3,7 +3,6 @@ import 'package:aura_mart/features/products/domain/entities/product_entity.dart'
 import 'package:aura_mart/features/products/presentation/bloc/product_bloc.dart';
 import 'package:aura_mart/features/products/presentation/bloc/product_event.dart';
 import 'package:aura_mart/features/products/presentation/bloc/product_state.dart';
-import 'package:aura_mart/screens/login_screen.dart';
 import 'package:aura_mart/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:aura_mart/features/cart/presentation/bloc/cart_event.dart';
 import 'package:aura_mart/core_services/wishlist_service.dart';
@@ -72,24 +71,26 @@ class _DashboardTabState extends State<DashboardTab> {
             slivers: [
               // --- VIBRANT APP BAR & HEADER ---
               SliverAppBar(
-                expandedHeight: 180,
+                expandedHeight: 160,
                 pinned: true,
                 backgroundColor: theme.primaryColor,
                 elevation: 0,
                 iconTheme: const IconThemeData(color: Colors.white),
-                title: _selectedIndex == 0 // Since it's a tab, we use a simple text or nothing when expanded
-                    ? null 
-                    : const Text("Aura Mart", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                title: _searchQuery.isNotEmpty 
+                    ? const Text("Aura Mart", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+                    : null,
                 flexibleSpace: FlexibleSpaceBar(
+                  expandedTitleScale: 1.0,
+                  titlePadding: EdgeInsets.zero,
                   background: Container(
                     decoration: BoxDecoration(
                       color: theme.primaryColor,
                       borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(40),
-                        bottomRight: Radius.circular(40),
+                        bottomLeft: Radius.circular(50),
+                        bottomRight: Radius.circular(50),
                       ),
                     ),
-                    padding: const EdgeInsets.fromLTRB(25, 60, 25, 0),
+                    padding: const EdgeInsets.fromLTRB(25, 55, 25, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -100,64 +101,89 @@ class _DashboardTabState extends State<DashboardTab> {
                               "Aura Mart",
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 28,
+                                fontSize: 32,
                                 fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
+                                letterSpacing: 0.5,
                               ),
                             ),
                             _buildThemeToggle(isDarkMode),
                           ],
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 5),
                         Text(
                           "Welcome, ${user?.displayName?.split(' ').first ?? 'Guest'}",
                           style: TextStyle(
-                            color: Colors.white.withAlpha(200),
+                            color: Colors.white.withAlpha(180),
                             fontSize: 16,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                actions: [
-                  if (_searchQuery.isNotEmpty) _buildThemeToggle(isDarkMode),
-                  const SizedBox(width: 10),
-                ],
               ),
 
               // --- SEARCH SECTION (OVERLAPPING) ---
               SliverToBoxAdapter(
                 child: Transform.translate(
-                  offset: const Offset(0, -30),
+                  offset: const Offset(0, -32),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 25),
                     child: FadeInAnimation(
                       delay: 200,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        height: 60,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         decoration: BoxDecoration(
                           color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                            width: 1,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withAlpha(isDarkMode ? 50 : 10),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withAlpha(isDarkMode ? 80 : 12),
+                              blurRadius: 25,
+                              offset: const Offset(0, 10),
                             ),
                           ],
                         ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (v) => setState(() => _searchQuery = v),
-                          decoration: InputDecoration(
-                            hintText: "Search products...",
-                            prefixIcon: Icon(Icons.search, color: theme.primaryColor),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            fillColor: Colors.transparent,
-                          ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search, color: theme.primaryColor, size: 24),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (v) => setState(() => _searchQuery = v),
+                                style: const TextStyle(fontSize: 16),
+                                decoration: InputDecoration(
+                                  hintText: "Search premium products...",
+                                  hintStyle: TextStyle(
+                                    color: isDarkMode ? Colors.white30 : Colors.black38,
+                                    fontSize: 15,
+                                  ),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              height: 35,
+                              width: 1,
+                              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+                              margin: const EdgeInsets.symmetric(horizontal: 10),
+                            ),
+                            Icon(
+                              Icons.tune_rounded,
+                              color: theme.primaryColor,
+                              size: 22,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -390,133 +416,6 @@ class _DashboardTabState extends State<DashboardTab> {
               isFav ? Icons.favorite : Icons.favorite_border,
               size: 16,
               color: isFav ? Colors.redAccent : Colors.black54,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Map<String, dynamic> _entityToMap(ProductEntity p) {
-    return {
-      'id': p.id,
-      'name': p.name,
-      'price': p.price,
-      'image': p.image,
-      'category': p.category,
-      'description': p.description,
-      'sellerId': p.sellerId,
-      'sellerName': p.sellerName,
-    };
-  }
-}
-
-  Widget _buildSimpleProductCard(ProductEntity product) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final pMap = _entityToMap(product);
-
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProductDetailsScreen(product: pMap),
-        ),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDarkMode ? Colors.white.withAlpha(10) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                    child: Hero(
-                      tag: 'prod_${product.id}',
-                      child: CachedNetworkImage(
-                        imageUrl: product.image,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: _buildWishlistBtn(pMap),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "\$${product.price}",
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          context.read<CartBloc>().add(CartItemAdded(pMap));
-                          Fluttertoast.showToast(msg: "Added to Bag");
-                        },
-                        child: Icon(
-                          Icons.add_circle_outline,
-                          color: Theme.of(context).primaryColor,
-                          size: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWishlistBtn(Map<String, dynamic> pMap) {
-    return StreamBuilder<bool>(
-      stream: AuraWishlistService.isInWishlistStream(pMap),
-      builder: (context, snapshot) {
-        final isFav = snapshot.data ?? false;
-        return GestureDetector(
-          onTap: () => AuraWishlistService.toggleWishlist(pMap),
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.black.withAlpha(50),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isFav ? Icons.favorite : Icons.favorite_border,
-              size: 16,
-              color: isFav ? Colors.redAccent : Colors.white,
             ),
           ),
         );
