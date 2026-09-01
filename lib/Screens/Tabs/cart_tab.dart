@@ -227,7 +227,7 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
       }).toList();
       
       await OrderService.createOrder(itemsMap, total, _selectedPaymentMethodValue!);
-      if (!context.mounted) return;
+      if (!mounted) return;
       context.read<CartBloc>().add(CartCleared());
       _onOrderSuccess();
     } catch (e) {
@@ -239,22 +239,23 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
   void _showCODAlert(List<CartItem> items, double total) {
     showDialog(
       context: context,
-      builder: (context) => BackdropFilter(
+      builder: (dialogContext) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: AlertDialog(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: Theme.of(dialogContext).scaffoldBackgroundColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           title: const Text("Confirm Order", style: TextStyle(fontWeight: FontWeight.w200, letterSpacing: 1)),
           content: const Text("Place order with Cash on Delivery?", style: TextStyle(fontSize: 14, color: Colors.grey)),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text("CANCEL", style: TextStyle(color: Colors.grey))),
+            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text("CANCEL", style: TextStyle(color: Colors.grey))),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
+                backgroundColor: Theme.of(dialogContext).primaryColor,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
               onPressed: () async {
-                Navigator.pop(context);
+                final cartBloc = context.read<CartBloc>();
+                Navigator.pop(dialogContext);
                 setState(() => _isProcessing = true);
                 try {
                   final List<Map<String, dynamic>> itemsMap = items.map((e) => {
@@ -267,11 +268,13 @@ class _CartTabState extends State<CartTab> with TickerProviderStateMixin {
                   }).toList();
                   
                   await OrderService.createOrder(itemsMap, total, "Cash on Delivery");
-                  if (!context.mounted) return;
-                  context.read<CartBloc>().add(CartCleared());
+                  if (!mounted) return;
+                  cartBloc.add(CartCleared());
                   _onOrderSuccess();
                 } catch (e) {
-                  setState(() => _isProcessing = false);
+                  if (mounted) {
+                    setState(() => _isProcessing = false);
+                  }
                   Fluttertoast.showToast(msg: "Order failed: $e");
                 }
               },

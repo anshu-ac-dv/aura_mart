@@ -127,9 +127,10 @@ class _CategoryTabState extends State<CategoryTab> {
                     padding: const EdgeInsets.only(right: 15, top: 10),
                     child: IconButton(
                       onPressed: () async {
+                        final navigator = Navigator.of(context);
                         await FirebaseAuth.instance.signOut();
-                        if (!context.mounted) return;
-                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
+                        if (!mounted) return;
+                        navigator.pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginScreen()), (r) => false);
                       },
                       icon: Icon(Icons.logout_rounded, color: isDarkMode ? Colors.white38 : Colors.black38, size: 20),
                     ),

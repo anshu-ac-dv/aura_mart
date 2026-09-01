@@ -59,7 +59,7 @@ class AuraCartService {
     }
   }
 
-  /// Original cartStream returning List<Map<String, dynamic>> for backward compatibility
+  /// Original cartStream returning `List<Map<String, dynamic>>` for backward compatibility
   static Stream<List<Map<String, dynamic>>> get cartStream {
     return _repository.getCartStream().map((items) {
       return items.map((item) => {
